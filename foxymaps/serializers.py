@@ -7,8 +7,8 @@ class LocationSerializer(serializers.ModelSerializer):
         model = Location
         fields = ('__all__')
 
-class BoundingBoxSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Location
-        fields = ('id', 'name', 'lon', 'lat', 'lon_lat', 'size_in_hectares')
+# class BoundingBoxSerializer(serializers.ModelSerializer):
+#
+#     class Meta:
+#         model = Location
+#         fields = ('id', 'name', 'lon', 'lat', 'lon_lat', 'size_in_hectares')
