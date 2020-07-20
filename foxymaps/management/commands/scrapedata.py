@@ -7,14 +7,8 @@ from foxymaps.models import Location
 class Command(BaseCommand):
 
     def scrape_location(self, url):
-        x = urllib.request.urlopen(f'https://londongardenstrust.org/conservation/inventory/site-record/?{url}')
-
-        # x = urllib.request.urlopen(f'https://londongardenstrust.org/conservation/inventory/site-record/?ID=BAD001')
-
-        # x = urllib.request.urlopen('http://www.londongardensonline.org.uk/search-advanced-results.php?borough=%25&type=%25&keyword=&Submit=Search')
-        # print(x.read())
+        x = urllib.request.urlopen(f'https://londongardenstrust.org/conservation/inventory/{url}')
         soup = BeautifulSoup(x, 'html.parser')
-        # print(soup.prettify())
 
         citymapper_href = soup.find(href=re.compile("citymapper")).get('href')
         citymapper_href_edit1 = citymapper_href.replace('https://citymapper.com/directions?endcoord=', '').split('&', 1)[0].split(',')
@@ -23,24 +17,37 @@ class Command(BaseCommand):
         citymapper_lon = citymapper_href_edit2[0]
         citymapper_lat = citymapper_href_edit2[1]
         citymapper_lon_lat = f'{citymapper_lon},{citymapper_lat}'
-        #
+
         if soup.find(id='photos') == None:
             image_formatted = 'https://londongardenstrust.org/inventory/images/sitepics/THM033-site.jpg'
         else:
             image = ([str(soup.find(id='photos').img)].pop().split('src="', 1)[1]).replace('" style="image-orientation: none;display:inline"/>', '')
             image_formatted = ''.join(['https://londongardenstrust.org/', image])
 
-        if soup.find("dt", string="Previous / Other name:") == None:
+        previous_name_raw = soup.find("dt", string="Previous / Other name:")
+        if previous_name_raw is None:
             previous_name = None
         else:
-            previous_name = soup.find("dt", string="Previous / Other name:").find_next("dd").string
+            previous_name = previous_name_raw.find_next("dd").string
+
+        size_in_hectares_raw = soup.find("dt", string="Size in hectares:").find_next("dd").string
+        if size_in_hectares_raw is None:
+            size_in_hectares = None
+        else:
+            size_in_hectares_formatted_one = re.sub(r'(c\.|c)', '', size_in_hectares_raw)
+            size_in_hectares_formatted_two = re.sub(r'[^\d.]+', '', size_in_hectares_formatted)
+            size_in_hectares_regex = str(size_in_hectares_formatted_two)
+            try:
+                size_in_hectares = float((size_in_hectares_formatted_two).split()[0])
+            except (TypeError, ValueError):
+                size_in_hectares = 0.0
+                size_in_hectares_error = 'yes'
 
         name = soup.find('title').find_next('title').string
         summary = soup.find(id='summary').p.string
         site_location = soup.find("dt", string="Site location:").find_next("dd").string
         postcode = soup.find("dt", string="Postcode:").find_next("dd").string
         type_of_site = soup.find("dt", string="Type of site: ").find_next("dd").string
-        date = soup.find("dt", string="Date(s):").find_next("dd").string
         designer = soup.find("dt", string="Designer(s):").find_next("dd").string
         listed_structures = soup.find("dt", string="Listed structures:").find_next("dd").string
         borough = soup.find("dt", string="Borough:").find_next("dd").string
@@ -50,13 +57,17 @@ class Command(BaseCommand):
         opening_times = str(soup.find("dt", string="Opening times:").find_next("dd")).split('<b')[0].lstrip('<dd>').lstrip().split('</dd>')[0]
         special_conditions = soup.find("dt", string="Special conditions:").find_next("dd").string
         facilities = soup.find("dt", string="Facilities:").find_next("dd").string
-        public_transportation = soup.find("dt", string="Public transport:").find_next("dd").string
         grid_reference = soup.find("dt", string="Grid ref: ").find_next("dd").string
-        size_in_hectares = soup.find("dt", string="Size in hectares:").find_next("dd").string
-        fuller_information = soup.find(id='fuller').p.get_text()
-        sources_consulted = soup.find("h4", string="Sources consulted:").find_next("p").string
-
-
+        on_eh_national_register = soup.find("dt", string="On EH National Register :").find_next("dd").string
+        eh_grade = soup.find("dt", string="EH grade:").find_next("dd").string
+        on_local_list = soup.find("dt", string="On Local List:").find_next("dd").string
+        in_conservation_area = soup.find("dt", string="In Conservation Area: ").find_next("dd").string
+        tree_preservation_order = soup.find("dt", string="Tree Preservation Order: ").find_next("dd").string
+        nature_conservation_area = soup.find("dt", string="Nature Conservation Area: ").find_next("dd").string.split()[0]
+        green_belt = soup.find("dt", string="Green Belt: ").find_next("dd").string
+        metropolitan_open_land = soup.find("dt", string="Metropolitan Open Land: ").find_next("dd").string
+        special_policy_area = soup.find("dt", string="Special Policy Area: ").find_next("dd").string
+        other_la_designation = soup.find("dt", string="Other LA designation: ").find_next("dd").string
 
         data = {
             'name': name,
@@ -65,7 +76,6 @@ class Command(BaseCommand):
             'site_location': site_location,
             'postcode': postcode,
             'type_of_site': type_of_site,
-            'date': date,
             'designer': designer,
             'listed_structures': listed_structures,
             'borough': borough,
@@ -75,29 +85,40 @@ class Command(BaseCommand):
             'opening_times': opening_times,
             'special_conditions': special_conditions,
             'facilities': facilities,
-            'public_transportation': public_transportation,
             'lon_lat': citymapper_lon_lat,
             'lon': citymapper_lon,
             'lat': citymapper_lat,
             'grid_reference': grid_reference,
             'size_in_hectares': size_in_hectares,
+            'size_in_hectares_raw': size_in_hectares_raw,
+            'size_in_hectares_regex': size_in_hectares_regex,
+            'size_in_hectares_error': size_in_hectares_error,
+            'on_eh_national_register': on_eh_national_register,
+            'eh_grade': eh_grade,
+            'on_local_list': on_local_list,
+            'in_conservation_area': in_conservation_area,
+            'tree_preservation_order': tree_preservation_order,
+            'nature_conservation_area': nature_conservation_area,
+            'green_belt': green_belt,
+            'metropolitan_open_land': metropolitan_open_land,
+            'special_policy_area': special_policy_area,
+            'other_la_designation': other_la_designation,
             'image': image_formatted,
-            'fuller_information': fuller_information,
-            'sources_consulted': sources_consulted,
         }
 
         data_formatted = {k:(v.rstrip() if isinstance(v, str) else v) for (k,v) in data.items()}
-        # print(data_formatted)
+        print(data_formatted)
         location = Location(**data_formatted)
         location.save()
 
 
     def handle(self, *_args, **_options):
-        x = urllib.request.urlopen('http://www.londongardensonline.org.uk/search-advanced-results.php?type=%25&keyword=&borough=%25&offset=0')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Barking+%26+Dagenham&type=%25&keyword=&Submit=Search')
+        x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Barnet&type=%25&keyword=&Submit=Search')
         soup = BeautifulSoup(x, 'html.parser')
 
-        for link in soup.nav.find_all('a'):
+        # for link in soup.nav.find_all('a'):
+        for link in soup.find(class_="lgt-nav").find_all('a'):
             href = link.get('href')
             print(href)
-            href_formatted = href.replace('gardens-online-record.php?','')
-            self.scrape_location(href_formatted)
+            self.scrape_location(href)
