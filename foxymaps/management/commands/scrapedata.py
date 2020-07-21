@@ -8,6 +8,7 @@ class Command(BaseCommand):
 
     def scrape_location(self, url):
         x = urllib.request.urlopen(f'https://londongardenstrust.org/conservation/inventory/{url}')
+        href = url
         soup = BeautifulSoup(x, 'html.parser')
 
         citymapper_href = soup.find(href=re.compile("citymapper")).get('href')
@@ -31,17 +32,19 @@ class Command(BaseCommand):
             previous_name = previous_name_raw.find_next("dd").string
 
         size_in_hectares_raw = soup.find("dt", string="Size in hectares:").find_next("dd").string
+        size_in_hectares_regex = None
+        size_in_hectares_error = False
         if size_in_hectares_raw is None:
             size_in_hectares = None
         else:
             size_in_hectares_formatted_one = re.sub(r'(c\.|c)', '', size_in_hectares_raw)
-            size_in_hectares_formatted_two = re.sub(r'[^\d.]+', '', size_in_hectares_formatted)
+            size_in_hectares_formatted_two = re.sub(r'[^\d.]+', '', size_in_hectares_formatted_one)
             size_in_hectares_regex = str(size_in_hectares_formatted_two)
             try:
                 size_in_hectares = float((size_in_hectares_formatted_two).split()[0])
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, IndexError):
                 size_in_hectares = 0.0
-                size_in_hectares_error = 'yes'
+                size_in_hectares_error = True
 
         name = soup.find('title').find_next('title').string
         summary = soup.find(id='summary').p.string
@@ -63,14 +66,20 @@ class Command(BaseCommand):
         on_local_list = soup.find("dt", string="On Local List:").find_next("dd").string
         in_conservation_area = soup.find("dt", string="In Conservation Area: ").find_next("dd").string
         tree_preservation_order = soup.find("dt", string="Tree Preservation Order: ").find_next("dd").string
-        nature_conservation_area = soup.find("dt", string="Nature Conservation Area: ").find_next("dd").string.split()[0]
         green_belt = soup.find("dt", string="Green Belt: ").find_next("dd").string
         metropolitan_open_land = soup.find("dt", string="Metropolitan Open Land: ").find_next("dd").string
         special_policy_area = soup.find("dt", string="Special Policy Area: ").find_next("dd").string
         other_la_designation = soup.find("dt", string="Other LA designation: ").find_next("dd").string
 
+        nature_conservation_area_pre = soup.find("dt", string="Nature Conservation Area: ").find_next("dd").string
+        if nature_conservation_area_pre is None:
+            nature_conservation_area = None
+        else:
+            nature_conservation_area = nature_conservation_area_pre.split()[0]
+
         data = {
             'name': name,
+            'href': href,
             'summary': summary,
             'previous_name': previous_name,
             'site_location': site_location,
@@ -106,19 +115,47 @@ class Command(BaseCommand):
             'image': image_formatted,
         }
 
-        data_formatted = {k:(v.rstrip() if isinstance(v, str) else v) for (k,v) in data.items()}
-        print(data_formatted)
+        data_formatted = {k:(v.rstrip() if isinstance(v, str) else v) for (k, v) in data.items()}
+        print(size_in_hectares_error)
+        print(size_in_hectares_raw)
+        print(size_in_hectares_regex)
         location = Location(**data_formatted)
         location.save()
 
 
     def handle(self, *_args, **_options):
         # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Barking+%26+Dagenham&type=%25&keyword=&Submit=Search')
-        x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Barnet&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Barnet&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Bexley&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Brent&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Bromley&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Camden&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=City+of+London&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Croydon&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Ealing&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Enfield&type=%25&keyword=&Submit=Search')
+        x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Greenwich&type=%25&keyword=&Submit=Search')
         soup = BeautifulSoup(x, 'html.parser')
-
-        # for link in soup.nav.find_all('a'):
-        for link in soup.find(class_="lgt-nav").find_all('a'):
+        links = soup.find(class_="lgt-nav").find_all('a')
+        # print(links)
+        for link in links:
             href = link.get('href')
             print(href)
-            self.scrape_location(href)
+            # self.scrape_location(href)
+
+#         links = ['site-record?ID=BEX048&sitename=St+John+the+Evangelist+Churchyard', 'site-record?ID=BEX049&sitename=St+Mary%27s+Churchyard+and+Burial+Ground'
+# , 'site-record?ID=BEX050&sitename=St+Paulinus+Churchyard+%26+Burial+Ground%2C+and+St+Paulinus+Gardens'
+# , 'site-record?ID=BEX055&sitename=Stevens+Park'
+# , 'site-record?ID=BEX056&sitename=Styleman+Almshouses'
+# , 'site-record?ID=BEX011&sitename=The+Crescent%2C+Sidcup'
+# , 'site-record?ID=BEX020&sitename=The+Green%2C+Sidcup'
+# , 'site-record?ID=BEX024&sitename=The+Hollies'
+# , 'site-record?ID=BEX042&sitename=The+Oval'
+# , 'site-record?ID=BEX057&sitename=Vale+Mascal+and+Gothic+Bath+House'
+# , 'site-record?ID=BEX058&sitename=Victoria+Homes'
+# , 'site-record?ID=BEX059&sitename=Waring+Park'
+# , 'site-record?ID=BEX060&sitename=Willersley+Park'
+# ]
+#         for href in links:
+#             print(href)
+#             self.scrape_location(href)
