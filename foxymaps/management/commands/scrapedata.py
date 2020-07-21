@@ -134,28 +134,40 @@ class Command(BaseCommand):
         # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Croydon&type=%25&keyword=&Submit=Search')
         # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Ealing&type=%25&keyword=&Submit=Search')
         # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Enfield&type=%25&keyword=&Submit=Search')
-        x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Greenwich&type=%25&keyword=&Submit=Search')
+#checked
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Greenwich&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Hackney&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Hammersmith+%26+Fulham&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Haringey&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Harrow&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Havering&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Hillingdon&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Hounslow&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Islington&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Kensington+%26+Chelsea&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Kingston&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Lambeth&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Lewisham&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Merton&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Newham&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Redbridge&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Richmond&type=%25&keyword=&Submit=Search')
+        x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Southwark&type=%25&keyword=&Submit=Search')
+
         soup = BeautifulSoup(x, 'html.parser')
         links = soup.find(class_="lgt-nav").find_all('a')
-        # print(links)
         for link in links:
             href = link.get('href')
             print(href)
-            # self.scrape_location(href)
+            self.scrape_location(href)
+        #
+        # links = ['site-record?ID=RED047&sitename=Woodford+Green']
+        # for href in links:
+        #     print(href)
+        #     self.scrape_location(href)
 
-#         links = ['site-record?ID=BEX048&sitename=St+John+the+Evangelist+Churchyard', 'site-record?ID=BEX049&sitename=St+Mary%27s+Churchyard+and+Burial+Ground'
-# , 'site-record?ID=BEX050&sitename=St+Paulinus+Churchyard+%26+Burial+Ground%2C+and+St+Paulinus+Gardens'
-# , 'site-record?ID=BEX055&sitename=Stevens+Park'
-# , 'site-record?ID=BEX056&sitename=Styleman+Almshouses'
-# , 'site-record?ID=BEX011&sitename=The+Crescent%2C+Sidcup'
-# , 'site-record?ID=BEX020&sitename=The+Green%2C+Sidcup'
-# , 'site-record?ID=BEX024&sitename=The+Hollies'
-# , 'site-record?ID=BEX042&sitename=The+Oval'
-# , 'site-record?ID=BEX057&sitename=Vale+Mascal+and+Gothic+Bath+House'
-# , 'site-record?ID=BEX058&sitename=Victoria+Homes'
-# , 'site-record?ID=BEX059&sitename=Waring+Park'
-# , 'site-record?ID=BEX060&sitename=Willersley+Park'
-# ]
-#         for href in links:
-#             print(href)
-#             self.scrape_location(href)
+
+
+
+        # b = Location.objects.get(id=)
+        # b.delete()
