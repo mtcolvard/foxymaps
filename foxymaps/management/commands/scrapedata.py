@@ -152,22 +152,30 @@ class Command(BaseCommand):
         # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Newham&type=%25&keyword=&Submit=Search')
         # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Redbridge&type=%25&keyword=&Submit=Search')
         # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Richmond&type=%25&keyword=&Submit=Search')
-        x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Southwark&type=%25&keyword=&Submit=Search')
-
-        soup = BeautifulSoup(x, 'html.parser')
-        links = soup.find(class_="lgt-nav").find_all('a')
-        for link in links:
-            href = link.get('href')
-            print(href)
-            self.scrape_location(href)
-        #
-        # links = ['site-record?ID=RED047&sitename=Woodford+Green']
-        # for href in links:
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Southwark&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Sutton&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Tower+Hamlets&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Waltham+Forest&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Wandsworth&type=%25&keyword=&Submit=Search')
+        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Westminster&type=%25&keyword=&Submit=Search')
+        # #
+        # soup = BeautifulSoup(x, 'html.parser')
+        # links = soup.find(class_="lgt-nav").find_all('a')
+        # for link in links:
+        #     href = link.get('href')
         #     print(href)
         #     self.scrape_location(href)
+        #
+        links =  [ 'site-record?ID=WST145&sitename=Westminster+Abbey+Precincts+-+The+College+Garden', 'site-record?ID=WST142&sitename=Westminster+Abbey+Precincts+%2F+Westminster+School+-+Dean%27s+Yard', 'site-record?ID=WST146&sitename=Westminster+Cathedral+Piazza', 'site-record?ID=WST147&sitename=Wilton+Crescent+Garden+%2A', 'site-record?ID=WST148&sitename=Wool+House+Garden', 'site-record?ID=WST149&sitename=York+Terrace+West'
+
+
+]
+        for href in links:
+            print(href)
+            self.scrape_location(href)
 
 
 
 
-        # b = Location.objects.get(id=)
+        # b = Location.objects.get(id=2489)
         # b.delete()
