@@ -1,9 +1,10 @@
 from django.urls import path
-from .views import LocationList, LocationDetail
+from .views import LocationList, LocationDetail, LocationHectareList
 # , BoundingBox, MapMatrixView, MapDirectionsView, MapGeocoderView, RouteThenBoundingBox
 
 urlpatterns = [
     path('locations/', LocationList.as_view()),
+    path('locationshectare/', LocationHectareList.as_view()),
     path('locations/<int:pk>', LocationDetail.as_view()),
     # path('routethenboundingbox/<currentWaypoint>/<destination>/<ramblingTolerance>', RouteThenBoundingBox.as_view()),
     # path('boundingbox/<currentWaypoint>/<destination>/<ramblingTolerance>', BoundingBox.as_view()),
