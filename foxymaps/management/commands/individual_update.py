@@ -13,7 +13,7 @@ class Command(BaseCommand):
         location_object = Location.objects.get(id=location_id)
         print(location_to_update)
         print(location_object)
-        
+
         location_object.size_in_hectares = correct_number
         location_object.save()
         location_object = Location.objects.get(id=location_id)

@@ -17,7 +17,25 @@ class LocationSpeedSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Location
-        fields = ('id', 'name',   'href',  'previous_name', 'site_location', 'postcode',    'type_of_site',)
+        fields = ('id',
+        'name',
+        'type_of_site',
+        'listed_structures',
+        'open_to_public',
+        'opening_times',
+        'facilities',
+        'lon_lat',
+        'lon',
+        'lat',
+        'on_eh_national_register',
+        'eh_grade',
+        'in_conservation_area',
+        'tree_preservation_order',
+        'nature_conservation_area',
+        'green_belt',
+        'metropolitan_open_land',
+        'size_in_hectares',
+        )
 
 
 # class BoundingBoxSerializer(serializers.ModelSerializer):

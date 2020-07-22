@@ -124,41 +124,8 @@ class Command(BaseCommand):
 
 
     def handle(self, *_args, **_options):
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Barking+%26+Dagenham&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Barnet&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Bexley&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Brent&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Bromley&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Camden&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=City+of+London&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Croydon&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Ealing&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Enfield&type=%25&keyword=&Submit=Search')
-#checked
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Greenwich&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Hackney&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Hammersmith+%26+Fulham&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Haringey&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Harrow&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Havering&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Hillingdon&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Hounslow&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Islington&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Kensington+%26+Chelsea&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Kingston&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Lambeth&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Lewisham&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Merton&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Newham&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Redbridge&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Richmond&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Southwark&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Sutton&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Tower+Hamlets&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Waltham+Forest&type=%25&keyword=&Submit=Search')
-        # x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Wandsworth&type=%25&keyword=&Submit=Search')
         x = urllib.request.urlopen('https://londongardenstrust.org/conservation/inventory/sitelist/?sitename=&borough=Westminster&type=%25&keyword=&Submit=Search')
-        # #
+
         soup = BeautifulSoup(x, 'html.parser')
         links = soup.find(class_="lgt-nav").find_all('a')
         for link in links:

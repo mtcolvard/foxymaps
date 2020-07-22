@@ -5,10 +5,11 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 from .models import Location
 from .serializers import LocationSerializer, LocationUpdateSerializer, LocationSpeedSerializer
 
-# def handle(self, *_args, **_options):
-#     LocationHectareList.get(self, *_args, **_options)
-
 class LocationList(ListCreateAPIView):
+    queryset = Location.objects.all()
+    serializer_class = LocationSerializer
+
+class LocationDetail(RetrieveUpdateDestroyAPIView):
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
 
@@ -20,7 +21,3 @@ class LocationFilterList(ListCreateAPIView):
     """ Filter by the field needed.  Currently set to size_in_hectares_error """
     queryset = Location.objects.all().filter(size_in_hectares_error=True)
     serializer_class = LocationUpdateSerializer
-
-class LocationDetail(RetrieveUpdateDestroyAPIView):
-    queryset = Location.objects.all()
-    serializer_class = LocationSerializer
