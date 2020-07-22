@@ -1,11 +1,12 @@
 from django.urls import path
-from .views import LocationList, LocationDetail, LocationHectareList
+from .views import LocationList, LocationDetail, LocationFilterList, LocationSpeedList
 # , BoundingBox, MapMatrixView, MapDirectionsView, MapGeocoderView, RouteThenBoundingBox
 
 urlpatterns = [
     path('locations/', LocationList.as_view()),
-    path('locationshectare/', LocationHectareList.as_view()),
+    path('locationsfilter/', LocationFilterList.as_view()),
     path('locations/<int:pk>', LocationDetail.as_view()),
+    path('locationsspeed/', LocationSpeedList.as_view()),
     # path('routethenboundingbox/<currentWaypoint>/<destination>/<ramblingTolerance>', RouteThenBoundingBox.as_view()),
     # path('boundingbox/<currentWaypoint>/<destination>/<ramblingTolerance>', BoundingBox.as_view()),
     # path('mapbox/matrix/<coords>', MapMatrixView.as_view()),

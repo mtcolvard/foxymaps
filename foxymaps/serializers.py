@@ -13,6 +13,13 @@ class LocationUpdateSerializer(serializers.ModelSerializer):
         model = Location
         fields = ('id', 'name', 'href', 'size_in_hectares_error', 'size_in_hectares_raw', 'size_in_hectares_regex', 'size_in_hectares')
 
+class LocationSpeedSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Location
+        fields = ('id', 'name',   'href',  'previous_name', 'site_location', 'postcode',    'type_of_site',)
+
+
 # class BoundingBoxSerializer(serializers.ModelSerializer):
 #
 #     class Meta:
