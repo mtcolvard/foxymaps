@@ -13,9 +13,9 @@ class LocationDetail(RetrieveUpdateDestroyAPIView):
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
 
-class LocationSpeedList(ListCreateAPIView):
-    queryset = Location.objects.all()
-    serializer_class = LocationSpeedSerializer
+# class LocationSpeedList(ListCreateAPIView):
+#     queryset = Location.objects.all()
+#     serializer_class = LocationSpeedSerializer
 
 class LocationFilterList(ListCreateAPIView):
     """ Filter by the field needed.  Currently set to size_in_hectares_error """
