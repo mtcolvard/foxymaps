@@ -19,14 +19,9 @@ class LocationSpeedSerializer(serializers.ModelSerializer):
         model = Location
         fields = ('id',
         'name',
+        'borough',
         'type_of_site',
         'listed_structures',
-        'open_to_public',
-        'opening_times',
-        'facilities',
-        'lon_lat',
-        'lon',
-        'lat',
         'on_eh_national_register',
         'eh_grade',
         'in_conservation_area',
@@ -34,12 +29,17 @@ class LocationSpeedSerializer(serializers.ModelSerializer):
         'nature_conservation_area',
         'green_belt',
         'metropolitan_open_land',
+        'open_to_public',
+        'opening_times',
+        'facilities',
+        'lon_lat',
+        'lon',
+        'lat',
         'size_in_hectares',
         )
 
+class BoundingBoxSerializer(serializers.ModelSerializer):
 
-# class BoundingBoxSerializer(serializers.ModelSerializer):
-#
-#     class Meta:
-#         model = Location
-#         fields = ('id', 'name', 'lon', 'lat', 'lon_lat', 'size_in_hectares')
+    class Meta:
+        model = Location
+        fields = ('id', 'name', 'lon', 'lat', 'lon_lat', 'size_in_hectares')
