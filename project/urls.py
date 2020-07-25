@@ -19,5 +19,6 @@ from django.urls import path, include
 urlpatterns = [
     path('django-admin/', admin.site.urls),
     path('admin/', include('rest_framework.urls')),
-    path('', include('foxymaps.urls'))
+    path('api/', include('foxymaps.urls')),
+    path('', include('frontend.urls'))
 ]
