@@ -20,7 +20,7 @@ def run_homing_algo(all_waypoints):
     # Run filtering algorithm
     waypoint_route_order = filter_graph_by_angle_then_distance(waypoints_graph)
     print('waypoint_route_order', waypoint_route_order)
-    return waypoint_route_order 
+    return waypoint_route_order
 
 def filter_graph_by_angle_then_distance(waypoints_graph):
     route_order = ['origin']

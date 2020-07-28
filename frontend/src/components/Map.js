@@ -118,6 +118,18 @@ class Map extends React.Component {
   }
 
   handleClear(name) {
+    const checkName = [name]
+    const check = checkName.includes('origin')
+    if(check == true) {
+      this.setState({
+        originLonLat: ''
+      })
+    }
+    else {
+      this.setState({
+        destinationLonLat: ''
+      })
+    }
     this.setState({
       [name]: '',
       searchResponseData: '',
@@ -168,7 +180,9 @@ class Map extends React.Component {
       displayDestinationSearchBar: true,
       displayOriginSearchBar: false,
       displayOriginSearchDropdown: false,
-      displayBottomDestinationData: false
+      displayBottomDestinationData: false,
+      originLonLat: '',
+      destinationLonLat: ''
     })
   }
 
@@ -296,7 +310,7 @@ class Map extends React.Component {
           }
           <div className="bodyContainer">
             <div>
-              <h1 className="title">Foxy Maps</h1>
+              <h1 className="title">FoxyMaps</h1>
             </div>
             {displaySearchBarDirections &&
               <SearchBarDirections

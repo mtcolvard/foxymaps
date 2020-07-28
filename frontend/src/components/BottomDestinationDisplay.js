@@ -35,12 +35,14 @@ export default class BottomDestinationDisplay extends React.Component {
           </div>
           <div className="content">
             {isRouteSelected ? <p>via {routeLargestPark}</p> : <p>{placeAddress}</p>}
+            {isRouteSelected ? <div></div> :
             <button className="button is-info" onClick={this.handleClick} >
               <span className="icon">
                 <FontAwesomeIcon icon="directions"/>
               </span>
               <span>Directions</span>
             </button>
+          }
           </div>
         </div>
       </div>

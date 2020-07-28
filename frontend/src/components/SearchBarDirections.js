@@ -26,7 +26,7 @@ export default class SearchBarDirections extends React.Component {
     const destination = this.props.destination
     const origin = this.props.origin
     return (
-      <div className="box funbox is-marginless is-radiusless">
+      <div className="box funbox">
         <div className="columns is-mobile is-vcentered">
           <div className="column funcolumn is-narrow">
             <a className="button iconbutton" onClick={this.handleArrowLeftClick}>
