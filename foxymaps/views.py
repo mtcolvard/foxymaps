@@ -11,9 +11,9 @@ from .models import Location
 from .serializers import LocationSerializer, LocationUpdateSerializer, LocationSpeedSerializer, BoundingBoxSerializer
 
 from mapbox import Geocoder
-from .mapboxDirectionsAPI import DirectionsCalculations
-from .distanceAndBearingCalcs import DistanceAndBearing
-from .homingAlgo import run_homing_algo
+from .route_calculations.mapbox_directions_API import DirectionsCalculations
+from .route_calculations.distance_and_bearing import DistanceAndBearing
+from .route_calculations.homing_algo import run_homing_algo
 
 class LocationList(ListCreateAPIView):
     queryset = Location.objects.all()
@@ -24,18 +24,16 @@ class LocationDetail(RetrieveUpdateDestroyAPIView):
     serializer_class = LocationSerializer
 
 class LocationSpeedList(ListCreateAPIView):
-    queryset = Location.objects.filter(size_in_hectares__gte=1).filter(open_to_public="Yes").exclude(green_belt="Yes")
-    # query = Location.objects.exclude(size_in_hectares='Partially')
-    # queryset = query.exclude(size_in_hectares='Yes')
-    print(len(queryset))
+    # queryset = Location.objects.filter(size_in_hectares__gte=1).filter(open_to_public="Yes").exclude(green_belt="Yes")
+    queryset = Location.objects.filter(open_to_public="Yes")
+    # queryset = Location.objects.get(id=1327)
+    # print(queryset)
     serializer_class = LocationSpeedSerializer
 
 class LocationFilterList(ListCreateAPIView):
     """ Filter by the field needed.  Currently set to size_in_hectares_error """
     queryset = Location.objects.all().filter(size_in_hectares_error=True)
     serializer_class = LocationUpdateSerializer
-
-
 
 class MapGeocoderView(APIView):
     def get(self, _request, searchQuery, bbox=None, country='ISO 3166-2:GB'):
@@ -46,9 +44,65 @@ class MapGeocoderView(APIView):
         return Response(response.json())
 
 class RouteThenBoundingBox(APIView):
-    def calculate_parks_within_perp_distance(self, parks_dict, orientation, journey_leg, best_fit, rambling_tolerance):
+
+    def get(self, _request, origin, destination, ramblingTolerance):
+        rambling_tolerance = int(ramblingTolerance)
+        origin_lon_lat = [float(x) for x in origin.split(',')]
+        destination_lon_lat = [float(x) for x in destination.split(',')]
+        # calculate the distance from origin to destination
+        best_fit_origin_to_destination = DistanceAndBearing.crowflys_bearing(self, origin_lon_lat, destination_lon_lat)
+        # query the database for parks open to the public
+        queryset = Location.objects.filter(open_to_public='Yes')
+        serializer = LocationSpeedSerializer(queryset, many=True)
+        response_data = serializer.data
+        all_parks = self.populate_all_parks_dict(response_data, origin_lon_lat, best_fit_origin_to_destination)
+
+        # create a boundingbox by filtering out all parks not within the rectangle formed by the distance from origin to destingation and the rambling tolerance (e.g. 500 meters)
+        parks_within_perp_distance = self.calculate_parks_within_perp_distance(all_parks, 'from_origin', 'origin_to_destination', best_fit_origin_to_destination, rambling_tolerance)
+        print('parks_within_perp_distance', len(parks_within_perp_distance))
+        largestPark = parks_within_perp_distance[max(parks_within_perp_distance, key=lambda v: parks_within_perp_distance[v]['size_in_hectares'])]
+
+        # Mapbox has a limit of 25 waypoints including the origin and destination for calls to thier Directions API
+        total_waypoints_dict = self.sort_parks_by_acreage_and_interest(origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, parks_within_perp_distance)
+        # total_waypoints_dict = self.sort_parks_by_acreage(origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, parks_within_perp_distance)
+        # Run the homing_algo.py module to find the most direct route
+        waypoint_route_order = run_homing_algo(total_waypoints_dict)
+        route_waypoints_lon_lat = [total_waypoints_dict[x]['lon_lat'] for x in waypoint_route_order]
+        print(route_waypoints_lon_lat)
+        # Request the route directions from mapboxDirectionsAPI.py module
+        routeGeometry = DirectionsCalculations.returnRouteGeometry(self, route_waypoints_lon_lat)
+        return Response([routeGeometry, largestPark])
+
+    def populate_all_parks_dict(self, response_data, origin_lon_lat, best_fit_origin_to_destination):
+
+        all_parks = {}
+        for park in response_data:
+            lon_lat = [park['lon'], park['lat']]
+            crowflys_distance_and_bearing = DistanceAndBearing.crowflys_bearing(self, origin_lon_lat, lon_lat)
+            size_in_hectares = park['size_in_hectares']
+            try:
+                size_in_hectares_float = float(size_in_hectares)
+            except (TypeError, ValueError):
+                size_in_hectares_float = 0.0
+
+            all_parks[park['id']] = {
+            'id':park['id'],
+            'name':park['name'],
+            'lon_lat': lon_lat,
+            'crowflys_distance_and_bearing': {'from_origin': crowflys_distance_and_bearing},
+            'distance_from_bestfit_line': {'origin_to_destination': DistanceAndBearing.perpendicular_distance_from_bestfit_line(self, best_fit_origin_to_destination, crowflys_distance_and_bearing)},
+            'size_in_hectares': size_in_hectares_float,
+            'listed_structures': park['listed_structures'],
+            'nature_conservation_area': park['nature_conservation_area']}
+        return all_parks
+
+    def populate_total_waypoints_dict(self, origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, waypoints):
+        total_waypoints_dict = {'origin': {'lon_lat': origin_lon_lat, 'crowflys_distance_and_bearing': {'from_origin': (0, 0)}}, **waypoints, 'destination': {'lon_lat': destination_lon_lat, 'crowflys_distance_and_bearing': {'from_origin': best_fit_origin_to_destination}}}
+        return total_waypoints_dict
+
+    def calculate_parks_within_perp_distance(self, all_parks, orientation, journey_leg, best_fit, rambling_tolerance):
         parks_within_perp_distance = {
-        k:v for (k, v) in parks_dict.items() if
+        k:v for (k, v) in all_parks.items() if
             # select only parks within ± 45 degrees of inital bearing towards destination
             v['crowflys_distance_and_bearing'][orientation][1] < (best_fit[1] + math.pi/4) and
             v['crowflys_distance_and_bearing'][orientation][1] > (best_fit[1] - math.pi/4) and
@@ -59,39 +113,34 @@ class RouteThenBoundingBox(APIView):
             v['distance_from_bestfit_line'][journey_leg] >= 0}
         return parks_within_perp_distance
 
-    def get(self, _request, currentWaypoint, destination, ramblingTolerance):
-        rambling_tolerance = int(ramblingTolerance)
-        current_waypoint_lon_lat = [float(x) for x in currentWaypoint.split(',')]
-        destination_lon_lat = [float(x) for x in destination.split(',')]
-        best_fit_origin_to_destination = DistanceAndBearing.crowflys_bearing(self, current_waypoint_lon_lat, destination_lon_lat)
+    def sort_parks_by_acreage_and_interest(self, origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, parks_within_perp_distance):
+        if len(parks_within_perp_distance) <= 23:
+            total_waypoints_dict = self.populate_total_waypoints_dict(origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, parks_within_perp_distance)
+        else:
+            waypoints_sorted_by_acreage = sorted(parks_within_perp_distance.keys(), key=lambda y: (parks_within_perp_distance[y]['size_in_hectares']))
+            print('waypoints_sorted_by_acreage', waypoints_sorted_by_acreage)
+            if len(waypoints_sorted_by_acreage) > 23:
+                count = 23 + math.floor((len(waypoints_sorted_by_acreage) - 23)/2)
+                waypoints_sorted_by_acreage = waypoints_sorted_by_acreage[-count:]
+                waypoints_sorted_by_acreage_dict = {k:v for k, v in parks_within_perp_distance.items() if k in waypoints_sorted_by_acreage}
+                waypoints_sorted_by_listed_structure = {k:v for k, v in waypoints_sorted_by_acreage_dict.items() if v['listed_structures'] != 'None'}
+                # waypoints_sorted_by_listed_structure = {k:v for k, v in waypoints_sorted_by_acreage_dict.items() if v['nature_conservation_area'] == 'Yes'}
+                print('waypoints_sorted_by_listed_structure', len(waypoints_sorted_by_listed_structure))
+                if len(waypoints_sorted_by_listed_structure) > 23:
+                    waypoints_sorted_by_listed_structure_keys = list(waypoints_sorted_by_listed_structure.keys())
+                    waypoints_sliced = waypoints_sorted_by_listed_structure_keys[-23:]
+                else:
+                    waypoints_sliced = waypoints_sorted_by_listed_structure.keys()
 
-        # queryset = Location.objects.all()
-        queryset = Location.objects.filter(open_to_public='Yes')
-        serializer = LocationSpeedSerializer(queryset, many=True)
-        response_data = serializer.data
+                total_waypoints_filtered = {k:v for k, v in parks_within_perp_distance.items() if k in waypoints_sliced}
+                total_waypoints_dict = self.populate_total_waypoints_dict(origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, total_waypoints_filtered)
+            else:
+                total_waypoints_sorted_by_acreage = {k:v for k, v in parks_within_perp_distance.items() if k in waypoints_sorted_by_acreage}
+                total_waypoints_dict = self.populate_total_waypoints_dict(origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, total_waypoints_sorted_by_acreage)
+        print('total_waypoints_dict', len(total_waypoints_dict))
+        return total_waypoints_dict
 
-        parks_dict = {}
-        for park in response_data:
-            lon_lat = [park['lon'], park['lat']]
-            crowflys_distance_and_bearing = DistanceAndBearing.crowflys_bearing(self, current_waypoint_lon_lat, lon_lat)
-            size_in_hectares = park['size_in_hectares']
-            try:
-                size_in_hectares_float = float(size_in_hectares)
-            except (TypeError, ValueError):
-                size_in_hectares_float = 0.0
-
-            parks_dict[park['id']] = {
-            'id':park['id'],
-            'name':park['name'],
-            'lon_lat': lon_lat,
-            'crowflys_distance_and_bearing': {'from_origin': crowflys_distance_and_bearing},
-            'distance_from_bestfit_line': {'origin_to_destination': DistanceAndBearing.perpendicular_distance_from_bestfit_line(self, best_fit_origin_to_destination, crowflys_distance_and_bearing)},
-            'size_in_hectares': size_in_hectares_float}
-
-        parks_within_perp_distance = self.calculate_parks_within_perp_distance(parks_dict, 'from_origin', 'origin_to_destination', best_fit_origin_to_destination, rambling_tolerance)
-
-        largestPark = parks_within_perp_distance[max(parks_within_perp_distance, key=lambda v: parks_within_perp_distance[v]['size_in_hectares'])]
-
+    def sort_parks_by_acreage(self, origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, parks_within_perp_distance):
         if len(parks_within_perp_distance) > 23:
             waypoints_sorted_by_acreage = sorted(parks_within_perp_distance.keys(), key=lambda y: (parks_within_perp_distance[y]['size_in_hectares']))
             print(waypoints_sorted_by_acreage)
@@ -101,16 +150,5 @@ class RouteThenBoundingBox(APIView):
 
             total_waypoints_sorted_by_acreage = {k:v for k, v in parks_within_perp_distance.items() if k in waypoints_sliced_by_acreage}
             print(total_waypoints_sorted_by_acreage)
-            total_waypoints_dict = {'origin': {'lon_lat': current_waypoint_lon_lat, 'crowflys_distance_and_bearing': {'from_origin': (0, 0)}}, **total_waypoints_sorted_by_acreage, 'destination': {'lon_lat': destination_lon_lat, 'crowflys_distance_and_bearing': {'from_origin': best_fit_origin_to_destination}}}
-        else:
-            total_waypoints_dict = {'origin': {'lon_lat': current_waypoint_lon_lat, 'crowflys_distance_and_bearing': {'from_origin': (0, 0)}}, **parks_within_perp_distance, 'destination': {'lon_lat': destination_lon_lat, 'crowflys_distance_and_bearing': {'from_origin': best_fit_origin_to_destination}}}
-        # Run the homingAlgo.py module to filter and sort the parks to generate the route
-        waypoint_route_order = run_homing_algo(total_waypoints_dict)
-        route_waypoints_lon_lat = [total_waypoints_dict[x]['lon_lat'] for x in waypoint_route_order]
-
-        print(route_waypoints_lon_lat)
-
-        # Request the route directions from mapboxDirectionsAPI.py module
-        routeGeometry = DirectionsCalculations.returnRouteGeometry(self, route_waypoints_lon_lat)
-
-        return Response([routeGeometry, largestPark])
+            total_waypoints_dict = self.populate_total_waypoints_dict(origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, total_waypoints_sorted_by_acreage)
+            return total_waypoints_dict

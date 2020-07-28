@@ -7,7 +7,6 @@ verify_ssl = true
 
 [packages]
 django = "*"
-pylint = "*"
 djangorestframework = "*"
 beautifulsoup4 = "*"
 mapbox = "*"

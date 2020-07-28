@@ -5,7 +5,6 @@ import 'mapbox-gl/dist/mapbox-gl.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 // import MapboxGeocoder from 'mapbox-gl-geocoder'
 
-
 import SearchBar from './SearchBar'
 import SearchBarDirections from './SearchBarDirections'
 import DropDownDisplay from './DropDownDisplay'
@@ -14,8 +13,6 @@ import DisplayRouteCheck  from './DisplayRouteCheck'
 
 // import HookDropDownDisplay from './HookDropDownDisplay'
 import Pins from './Pins'
-
-
 
 const lngLat = [-0.097865, 51.514014]
 const routeGeometryStateDefault = {
@@ -35,12 +32,13 @@ const searchReponseStateDefault = {
   attribution: null
 }
 
+
 class Map extends React.Component {
   constructor() {
     super()
 
     this.state = {
-      ramblingTolerance: 500,
+      ramblingTolerance: 1000,
       originFormData: '',
       destinationFormData: '',
       originData: '',
@@ -239,9 +237,6 @@ class Map extends React.Component {
       .then(console.log('routeLargestPark', this.state.routeLargestPark))
   }
 
-
-
-
   render () {
     const {viewport, originFormData, destinationFormData, originData, destinationData, displaySearchBarDirections, displayOriginSearchDropdown, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, parksWithinPerpDistance, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected} = this.state
     const directionsLayer = {routeGeometry}
@@ -301,7 +296,7 @@ class Map extends React.Component {
           }
           <div className="bodyContainer">
             <div>
-              <h1 className="title">Wonder'boutLondon?</h1>
+              <h1 className="title">Foxy Maps</h1>
             </div>
             {displaySearchBarDirections &&
               <SearchBarDirections
