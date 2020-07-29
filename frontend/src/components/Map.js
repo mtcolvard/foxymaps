@@ -1,6 +1,6 @@
 import React from 'react'
 import axios from 'axios'
-import ReactMapGl, {MapGl, BaseControl, NavigationControl, ScaleControl, GeolocateControl, LinearInterpolator, FlyToInterpolator, HTMLOverlay, Layer, Source} from 'react-map-gl'
+import ReactMapGl, {MapGl, BaseControl, NavigationControl, ScaleControl, GeolocateControl, LinearInterpolator, FlyToInterpolator, HTMLOverlay, Layer, Source, WebMercatorViewport} from 'react-map-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 // import MapboxGeocoder from 'mapbox-gl-geocoder'
@@ -47,10 +47,9 @@ class Map extends React.Component {
       destinationLonLat: null,
       routeGeometry: routeGeometryStateDefault,
       routeLargestPark: {},
-      parksWithinPerpDistance: [[-0.071132, 51.518891]],
       viewport: {
-        longitude: lngLat[0],
-        latitude: lngLat[1],
+        longitude: -0.097865,
+        latitude: 51.514014,
         zoom: 11,
         altitude: 0},
       searchResponseData: {
@@ -83,6 +82,7 @@ class Map extends React.Component {
     this.sendDestinationToBackend = this.sendDestinationToBackend.bind(this)
     this.findMyLocation = this.findMyLocation.bind(this)
     this.chooseLocationOnMap = this.chooseLocationOnMap.bind(this)
+    this.fitTheRouteInsideTheViewport = this.fitTheRouteInsideTheViewport()
     // this.handlefakeclick = this.handlefakeclick.bind(this)
     // this.getWalkingRoute = this.getWalkingRoute.bind(this)
   }
@@ -115,6 +115,7 @@ class Map extends React.Component {
         searchResponseData: res.data
       }))
       .then(console.log('submit response geocoder', this.state[name]))
+      .then(console.log('geocoder search response data', this.state.searchResponseData))
   }
 
   handleClear(name) {
@@ -154,6 +155,25 @@ class Map extends React.Component {
     this.handleClear(name)
     this.handleDirectionsButtonClick()
   }
+
+  fitTheRouteInsideTheViewport() {
+    const {longitude, latitude, zoom} = new WebMercatorViewport(this.state.viewport)
+      .fitBounds([this.state.originLonLat, this.state.destinationLonLat], {
+        padding: 20,
+        offset: [0, -100]
+      })
+    // const viewport = {
+    //     ...this.state.viewport,
+    //     longitude,
+    //     latitude,
+    //     zoom,
+    //     transitionDuration: 5000,
+    //     transitionInterpolator: new FlyToInterpolator(),
+    //     transitionEasing: d3.easeCubic
+    // }
+    this.setState({viewport})
+  }
+
 
   // THIS NEEDS TO RECEIVE THE DATA FROM THE GEOLOCATOR AND IF CLICKED TRIGGER THE GEOLOCATOR
   findMyLocation() {
@@ -240,19 +260,29 @@ class Map extends React.Component {
   sendDestinationToBackend(origin, destination) {
     console.log('mapbox request sent')
     axios.get(`api/routethenboundingbox/${origin}/${destination}/${this.state.ramblingTolerance}`)
-      .then(res => this.setState({
-        parksWithinPerpDistance: res.data[0],
-        routeGeometry: res.data[0],
-        routeLargestPark: res.data[1]['name'],
+      // .then(res =>
+      // this.handleViewportChange(center:[res.data['center']]))
+      .then(res =>
+        this.setState({
+        routeGeometry: res.data['route_geometry'],
+        routeLargestPark: res.data['largest_park']['name'],
         isRouteSelected: true,
         displayBottomDestinationData: true
+        // viewport: {
+        //   ...this.state.viewport,
+        //   longitude: res.data['midpoint'][0],
+        //   latitude: res.data['midpoint'][1],
+        //   zoom: 12,
+        //   transitionInterpolator: new FlyToInterpolator({
+        //     curve: 2.4}),
+        //   transitionDuration: 1000
+        // }
       }))
-      .then(console.log('parksWithinPerpDistance', this.state.parksWithinPerpDistance))
-      .then(console.log('routeLargestPark', this.state.routeLargestPark))
+      .then(this.fitTheRouteInsideTheViewport())
   }
 
   render () {
-    const {viewport, originFormData, destinationFormData, originData, destinationData, displaySearchBarDirections, displayOriginSearchDropdown, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, parksWithinPerpDistance, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected} = this.state
+    const {viewport, originFormData, destinationFormData, originData, destinationData, displaySearchBarDirections, displayOriginSearchDropdown, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected} = this.state
     const directionsLayer = {routeGeometry}
     return (
       <div>

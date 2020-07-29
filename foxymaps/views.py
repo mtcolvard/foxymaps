@@ -52,34 +52,37 @@ class RouteThenBoundingBox(APIView):
         rambling_tolerance = int(ramblingTolerance)
         origin_lon_lat = [float(x) for x in origin.split(',')]
         destination_lon_lat = [float(x) for x in destination.split(',')]
-        # calculate the distance from origin to destination
+    # calculate the distance from origin to destination
         best_fit_origin_to_destination = DistanceAndBearing.crowflys_bearing(self, origin_lon_lat, destination_lon_lat)
-        # query the database for parks open to the public
+    # query the database for parks open to the public
         queryset = Location.objects.filter(open_to_public='Yes')
-        # queryset = Location.objects.filter(Q(nature_conservation_area="Yes") | ~Q(listed_structures="None"),open_to_public="Yes")
         serializer = LocationSpeedSerializer(queryset, many=True)
         response_data = serializer.data
         all_parks = self.populate_all_parks_dict(response_data, origin_lon_lat, best_fit_origin_to_destination)
 
-        # create a boundingbox by filtering out all parks not within the rectangle formed by the distance from origin to destingation and the rambling tolerance (e.g. 500 meters)
+    # create a boundingbox by filtering out all parks not within the rectangle formed by the distance from origin to destingation and the rambling tolerance (e.g. 1000 meters)
         parks_within_perp_distance = self.calculate_parks_within_perp_distance(all_parks, 'from_origin', 'origin_to_destination', best_fit_origin_to_destination, rambling_tolerance)
-        print('parks_within_perp_distance', len(parks_within_perp_distance))
+
         if len(parks_within_perp_distance) == 0:
             route_waypoints_lon_lat = [origin_lon_lat, destination_lon_lat]
             largest_park = {'name':'the most Direct Route (No convenient parks enroute)'}
         else:
             largest_park = parks_within_perp_distance[max(parks_within_perp_distance, key=lambda v: parks_within_perp_distance[v]['size_in_hectares'])]
-
-            # Mapbox has a limit of 25 waypoints including the origin and destination for calls to thier Directions API
+        # Mapbox has a limit of 25 waypoints including the origin and destination for calls to thier Directions API
             total_waypoints_dict = self.sort_parks_by_acreage(origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, parks_within_perp_distance)
-
-            # Run the route_calculations/homing_algo.py module to find the most direct route
+        # Run the route_calculations/homing_algo.py module to find the most direct route
             waypoint_route_order = run_homing_algo(total_waypoints_dict)
             route_waypoints_lon_lat = [total_waypoints_dict[x]['lon_lat'] for x in waypoint_route_order]
-        # Request the route directions from mapboxDirectionsAPI.py module
-        print('route_waypoints_lon_lat', route_waypoints_lon_lat)
-        routeGeometry = DirectionsCalculations.returnRouteGeometry(self, route_waypoints_lon_lat)
-        return Response([routeGeometry, largest_park])
+
+    # Request the route directions from mapboxDirectionsAPI.py module
+        route_geometry = DirectionsCalculations.returnRouteGeometry(self, route_waypoints_lon_lat)
+    # Calculate the midpoint between the origin and the destination
+        midpoint = DistanceAndBearing.calculate_midpoint(self, origin_lon_lat, destination_lon_lat)
+        print('midpoint', midpoint)
+        route_response = {'route_geometry':route_geometry, 'largest_park': largest_park, 'midpoint': midpoint}
+        # print('route_response', route_response)
+        return Response(route_response)
+        # return Response([route_geometry, largest_park, midpoint])
 
     def populate_all_parks_dict(self, response_data, origin_lon_lat, best_fit_origin_to_destination):
 
@@ -111,17 +114,18 @@ class RouteThenBoundingBox(APIView):
     def calculate_parks_within_perp_distance(self, all_parks, orientation, journey_leg, best_fit, rambling_tolerance):
         parks_within_perp_distance = {
         k:v for (k, v) in all_parks.items() if
-            # select only parks within ± 45 degrees of inital bearing towards destination
+        # select only parks within ± 45 degrees of inital bearing towards destination
             v['crowflys_distance_and_bearing'][orientation][1] < (best_fit[1] + math.pi/4) and
             v['crowflys_distance_and_bearing'][orientation][1] > (best_fit[1] - math.pi/4) and
-            # select only parks within the radius from origin to destination
+        # select only parks within the radius from origin to destination
             v['crowflys_distance_and_bearing'][orientation][0] < best_fit[0] and
-            # select parks within user's tolerance for rambling
+        # select parks within user's tolerance for rambling
             v['distance_from_bestfit_line'][journey_leg] <= rambling_tolerance and
             v['distance_from_bestfit_line'][journey_leg] >= 0}
         return parks_within_perp_distance
 
     def sort_parks_by_acreage(self, origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, parks_within_perp_distance):
+        # mapbox only allows 25 waypoints including origin and destination so we sort and then slice off the 23 largest parks.
         if len(parks_within_perp_distance) > 23:
             waypoints_sorted_by_acreage = sorted(parks_within_perp_distance.keys(), key=lambda y: (parks_within_perp_distance[y]['size_in_hectares']))
             waypoints_sliced_by_acreage = waypoints_sorted_by_acreage[-23:]
@@ -129,6 +133,4 @@ class RouteThenBoundingBox(APIView):
             total_waypoints_dict = self.populate_total_waypoints_dict(origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, total_waypoints_sorted_by_acreage)
         else:
             total_waypoints_dict = self.populate_total_waypoints_dict(origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, parks_within_perp_distance)
-        print('acreage total_waypoints_dict', total_waypoints_dict)
-        print('length total waypoints dict', len(total_waypoints_dict))
         return total_waypoints_dict
