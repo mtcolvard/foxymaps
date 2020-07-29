@@ -82,7 +82,7 @@ class Map extends React.Component {
     this.sendDestinationToBackend = this.sendDestinationToBackend.bind(this)
     this.findMyLocation = this.findMyLocation.bind(this)
     this.chooseLocationOnMap = this.chooseLocationOnMap.bind(this)
-    this.fitTheRouteInsideTheViewport = this.fitTheRouteInsideTheViewport()
+    // this.fitTheRouteInsideTheViewport = this.fitTheRouteInsideTheViewport()
     // this.handlefakeclick = this.handlefakeclick.bind(this)
     // this.getWalkingRoute = this.getWalkingRoute.bind(this)
   }
@@ -156,23 +156,23 @@ class Map extends React.Component {
     this.handleDirectionsButtonClick()
   }
 
-  fitTheRouteInsideTheViewport() {
-    const {longitude, latitude, zoom} = new WebMercatorViewport(this.state.viewport)
-      .fitBounds([this.state.originLonLat, this.state.destinationLonLat], {
-        padding: 20,
-        offset: [0, -100]
-      })
-    // const viewport = {
-    //     ...this.state.viewport,
-    //     longitude,
-    //     latitude,
-    //     zoom,
-    //     transitionDuration: 5000,
-    //     transitionInterpolator: new FlyToInterpolator(),
-    //     transitionEasing: d3.easeCubic
-    // }
-    this.setState({viewport})
-  }
+  // fitTheRouteInsideTheViewport() {
+  //   const {longitude, latitude, zoom} = new WebMercatorViewport(this.state.viewport)
+  //     .fitBounds([this.state.originLonLat, this.state.destinationLonLat], {
+  //       padding: 20,
+  //       offset: [0, -100]
+  //     })
+  //   // const viewport = {
+  //   //     ...this.state.viewport,
+  //   //     longitude,
+  //   //     latitude,
+  //   //     zoom,
+  //   //     transitionDuration: 5000,
+  //   //     transitionInterpolator: new FlyToInterpolator(),
+  //   //     transitionEasing: d3.easeCubic
+  //   // }
+  //   this.setState({viewport})
+  // }
 
 
   // THIS NEEDS TO RECEIVE THE DATA FROM THE GEOLOCATOR AND IF CLICKED TRIGGER THE GEOLOCATOR
@@ -238,7 +238,7 @@ class Map extends React.Component {
       searchResponseData: searchReponseStateDefault,
       routeGeometry: routeGeometryStateDefault
     })
-    console.log(this.state.destinationData)
+    console.log("destination search response data", data)
     // this.sendDestinationToBackend(data.center)
   }
 // DOES THIS NEED PROMISES TO BE SURE STATE IS SET BEFORE sendDestinationToBackend() IS TRIGGERED?
@@ -255,6 +255,7 @@ class Map extends React.Component {
       routeGeometry: routeGeometryStateDefault
     })
     // this.sendDestinationToBackend(data.center)
+    console.log("origin search response data", data)
   }
 
   sendDestinationToBackend(origin, destination) {
@@ -267,18 +268,18 @@ class Map extends React.Component {
         routeGeometry: res.data['route_geometry'],
         routeLargestPark: res.data['largest_park']['name'],
         isRouteSelected: true,
-        displayBottomDestinationData: true
-        // viewport: {
-        //   ...this.state.viewport,
-        //   longitude: res.data['midpoint'][0],
-        //   latitude: res.data['midpoint'][1],
-        //   zoom: 12,
-        //   transitionInterpolator: new FlyToInterpolator({
-        //     curve: 2.4}),
-        //   transitionDuration: 1000
-        // }
+        displayBottomDestinationData: true,
+        viewport: {
+          ...this.state.viewport,
+          longitude: res.data['midpoint'][0],
+          latitude: res.data['midpoint'][1],
+          zoom: 12,
+          transitionInterpolator: new FlyToInterpolator({
+            curve: 2.4}),
+          transitionDuration: 1000
+        }
       }))
-      .then(this.fitTheRouteInsideTheViewport())
+      // .then(this.fitTheRouteInsideTheViewport())
   }
 
   render () {
