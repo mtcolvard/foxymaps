@@ -16,7 +16,7 @@ class DropDownDisplay extends React.Component {
     const dropDownDisplayName = this.props.dropDownDisplayName
     return(
       <div>
-        <div className="container">
+        <div className="container dropdown">
           <div className={ displayBox ? 'box' : ''} onClick={this.handleClick}>
             {dropDownDisplayName}
           </div>

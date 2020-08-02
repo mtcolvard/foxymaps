@@ -19,7 +19,7 @@ export default class BottomDestinationDisplay extends React.Component {
     const placeAddress = placeNameStrArray[1]+', '+placeNameStrArray[2]
     return(
       <div className="bottomFormContainer">
-        <div className="box is-radiusless">
+        <div className="box">
           <div className="level is-mobile">
             <div className="level-left">
               <div className="level-item">

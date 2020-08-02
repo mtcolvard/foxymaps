@@ -2,7 +2,12 @@
 
 html, body {
   margin: 0;
-  font-family: sans-serif;
+  // font-family: sans-serif;
+  // font-style: normal;
+  font-family: 'Montserrat', sans-serif;
+  font-style: normal;
+  font-weight: 300;
+
 }
 
 * {
@@ -15,7 +20,8 @@ html, body {
 
 .funbox {
   padding: 1em 1em;
-  margin: 0.5em 0.5em 0;
+  // padding: 1em 1em 1.25em;
+  // margin: 0.5em 0.5em 0;
   border-radius:0.25em;
 }
 
@@ -33,17 +39,23 @@ html, body {
   border: 0px;
 }
 
+.dropdown {
+}
 .searchfield {
   padding:0.5em;
   border-radius:1em;
 }
 .title {
-  padding: 6px 16px 6px;
+  padding:1px;
+  padding: 6px 16px 7px;
   // background-color: rgba(229, 221, 186, .5);
   // background-color: rgba(121, 207, 238, 1);
   // background-color: rgba(183, 228, 161, .6);
   background-color: rgba(160, 212, 142, .5);
   border-radius:0.15em;
+  font-family: 'Montserrat', sans-serif;
+  font-style: italic;
+  font-weight: 400;
 }
 
 .mapcontainer {
@@ -55,18 +67,22 @@ html, body {
   width:100%;
   top:0px;
 }
+
+
 .bottomFormContainer {
   position:absolute;
   width:100%;
   bottom:0px;
   padding:0 0 2em 0;
-  border-radius:1em;
+  border-radius:0.15em;
+  // font-weight: 300;
 }
+
 
 @media (min-width: 769px) {
   .bodyContainer {
     // position:absolute;
-    width:33%;
+    width:41%;
     // height:95vh;
     // background-color: #FFFFFF;
     // display: grid;
@@ -74,7 +90,8 @@ html, body {
     // margin: 10px;
   }
   .bottomFormContainer{
-    width:33%;
+    width:41%;
+    // top: 0px;
   }
 }
 

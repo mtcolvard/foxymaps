@@ -10,6 +10,7 @@ django = "*"
 djangorestframework = "*"
 beautifulsoup4 = "*"
 mapbox = "*"
+pyjwt = "*"
 
 [requires]
 python_version = "3.8"

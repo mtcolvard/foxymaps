@@ -36,6 +36,8 @@ def filter_graph_by_angle_then_distance(waypoints_graph):
     # Sort to find closest park
         print('route_order', route_order)
         print('angle_filtered_park_options', angle_filtered_park_options)
+        # if len(angle_filtered_park_options) < 3:
+        #     if waypoints_graph[route_order[-2]]['destination'][1]
         next_park = min(angle_filtered_park_options, key=lambda distance: angle_filtered_park_options[distance][0])
         print(next_park)
         route_order.append(next_park)
