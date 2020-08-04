@@ -14,6 +14,8 @@ import DisplayRouteCheck  from './DisplayRouteCheck'
 // import HookDropDownDisplay from './HookDropDownDisplay'
 import Pins from './Pins'
 
+const lngLat = [-0.097865,51.514014]
+const deltaTime = 0
 const routeGeometryStateDefault = {
   'type': 'Feature',
   'properties': {'name': null},
@@ -107,15 +109,15 @@ class Map extends React.Component {
     // const originMouseUpObject = {place_name: lngLatString, center: lngLat}
     // const destinationMouseUpObject = {place_name: lngLatString, center: lngLat}
     if(deltaTime >= 300) {
-      this.setState({
-        viewport: {
-        longitude: lngLat[0],
-        latitude: lngLat[1],
-        zoom: 12,
-        transitionDuration: 1000,
-        transitionInterpolator: new LinearInterpolator({
-          curve: 2.4})},
-      })
+      // this.setState({
+      //   viewport: {
+      //   longitude: lngLat[0],
+      //   latitude: lngLat[1],
+      //   zoom: 12,
+      //   transitionDuration: 1000,
+      //   transitionInterpolator: new LinearInterpolator({
+      //     curve: 2.4})},
+      // })
       if(this.destinationLonLat === true) {
         this.handleMouseUpSubmit(lngLat, 'OriginData')
       } else {
@@ -159,15 +161,15 @@ class Map extends React.Component {
     if(name === 'OriginData') {
       axios.get(`api/mapbox/geocoder/${lngLatString}`)
         .then(res => this.setState({
-          searchResponseData: res.data.features[0]
+          searchResponseData: res.data
         }))
-        .then(this.displaySelectedOriginData(this.state.searchResponseData))
+        .then(this.displaySelectedOriginData(this.state.searchResponseData.features[0]))
     } else if(name === 'DestinationData') {
       axios.get(`api/mapbox/geocoder/${lngLatString}`)
         .then(res => this.setState({
-          searchResponseData: res.data.features[0]
+          searchResponseData: res.data
         }))
-        .then(this.displaySelectedDestinationData(this.state.searchResponseData))
+        .then(this.displaySelectedDestinationData(this.state.searchResponseData.features[0]))
       }
     }
 
