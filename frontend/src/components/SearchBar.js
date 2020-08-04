@@ -6,7 +6,7 @@ class SearchBar extends React.Component {
   constructor() {
     super()
     this.handleArrowLeftClick = this.handleArrowLeftClick.bind(this)
-    this.handleTimesClick = this.handleTimesClick.bind(this)
+    this.handleDeleteFieldClick = this.handleDeleteFieldClick.bind(this)
     this.handleChange = this.handleChange.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
   }
@@ -14,8 +14,8 @@ class SearchBar extends React.Component {
   handleArrowLeftClick() {
     this.props.onArrowLeft(this.props.name)
   }
-  handleTimesClick() {
-    this.props.onTimes(this.props.name)
+  handleDeleteFieldClick() {
+    this.props.onDeleteField(this.props.name)
   }
   handleChange(e) {
     this.props.onHandleChange(e)
@@ -49,7 +49,7 @@ class SearchBar extends React.Component {
           </form>
         </div>
         <div className="control">
-          <a className="button iconbutton" onClick={this.handleTimesClick}>
+          <a className="button iconbutton" onClick={this.handleDeleteFieldClick}>
             <span className="icon">
               <FontAwesomeIcon icon="times" />
             </span>

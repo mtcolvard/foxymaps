@@ -6,12 +6,17 @@ export default class SearchBarDirections extends React.Component {
   constructor() {
     super()
     this.handleArrowLeftClick = this.handleArrowLeftClick.bind(this)
+    this.handleReverseOriginAndDestination = this.handleReverseOriginAndDestination.bind(this)
     this.triggerOriginSearchMenu = this.triggerOriginSearchMenu.bind(this)
     this.triggerDestinationSearchMenu = this.triggerDestinationSearchMenu.bind(this)
   }
 
   handleArrowLeftClick() {
     this.props.onArrowLeft()
+  }
+
+  handleReverseOriginAndDestination() {
+    this.props.onReverseOriginAndDestination()
   }
 
   triggerOriginSearchMenu() {
@@ -60,7 +65,7 @@ export default class SearchBarDirections extends React.Component {
             </div>
           </div>
           <div className="column funcolumn is-narrow">
-            <a className="button iconbutton" onClick={this.handleArrowLeftClick}>
+            <a className="button iconbutton" onClick={this.handleReverseOriginAndDestination}>
               <span className="icon">
                 <FontAwesomeIcon icon="arrows-alt-v" />
               </span>

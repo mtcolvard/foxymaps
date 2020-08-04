@@ -7,8 +7,8 @@ class DropDownDisplay extends React.Component {
   }
 
   handleClick(e) {
-    this.props.selectDestination(this.props.searchResponseData.features[this.props.index])
-    console.log('handleClick', this.props.index)
+    this.props.selectLocation(this.props.searchResponseData.features[this.props.index])
+    console.log('selectLocation', this.props.searchResponseData.features[this.props.index])
   }
 
   render() {
@@ -16,7 +16,7 @@ class DropDownDisplay extends React.Component {
     const dropDownDisplayName = this.props.dropDownDisplayName
     return(
       <div>
-        <div className="container dropdown">
+        <div className="container">
           <div className={ displayBox ? 'box' : ''} onClick={this.handleClick}>
             {dropDownDisplayName}
           </div>

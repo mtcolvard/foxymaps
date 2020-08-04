@@ -31,8 +31,8 @@ def filter_graph_by_angle_then_distance(waypoints_graph):
     # Filter out parks not within x degrees from each waypoint to the destination
         angle_filtered_park_options = {k:v for k, v in waypoints_graph[route_order[-1]].items() if
         v[1] != 0 and
-        v[1] < (waypoints_graph[route_order[-1]]['destination'][1] + math.pi/5) and
-        v[1] > (waypoints_graph[route_order[-1]]['destination'][1] - math.pi/5)}
+        v[1] < (waypoints_graph[route_order[-1]]['destination'][1] + math.pi/4) and
+        v[1] > (waypoints_graph[route_order[-1]]['destination'][1] - math.pi/4)}
     # Sort to find closest park
         print('route_order', route_order)
         print('angle_filtered_park_options', angle_filtered_park_options)

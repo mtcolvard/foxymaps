@@ -14,13 +14,12 @@ import DisplayRouteCheck  from './DisplayRouteCheck'
 // import HookDropDownDisplay from './HookDropDownDisplay'
 import Pins from './Pins'
 
-const lngLat = [-0.097865, 51.514014]
 const routeGeometryStateDefault = {
   'type': 'Feature',
   'properties': {'name': null},
   'geometry': {
     'type': 'Point',
-    'coordinates': lngLat}
+    'coordinates': null}
 }
 
 const searchReponseStateDefault = {
@@ -52,6 +51,7 @@ class Map extends React.Component {
         latitude: 51.514014,
         zoom: 11,
         altitude: 0},
+      geolocateClick: false,
       searchResponseData: {
         type: null,
         query: [null],
@@ -61,41 +61,77 @@ class Map extends React.Component {
       isoriginFormDataSearchTriggered: false,
       isdestinationFormDataSearchTriggered: false,
       isRouteSelected: false,
-      displaySearchBarDirections: false,
+      displayDirectionsSearchBar: false,
       displayOriginSearchBar: false,
-      displayOriginSearchDropdown: false,
+      displayOriginSearchOptions: false,
       displayDestinationSearchBar: true,
       displayBottomDestinationData: false
     }
-    this.handleMouseDown = this.handleMouseDown.bind(this)
+    this.handleMouseUp = this.handleMouseUp.bind(this)
     this.handleViewportChange =this.handleViewportChange.bind(this)
     this.handleChange = this.handleChange.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
     this.handleClear = this.handleClear.bind(this)
     this.handleDirectionsButtonClick = this.handleDirectionsButtonClick.bind(this)
-    this.handleDirectionsMenuArrowLeftClick = this.handleDirectionsMenuArrowLeftClick.bind(this)
+    this.handleDirectionsSearchBarArrowLeft = this.handleDirectionsSearchBarArrowLeft.bind(this)
     this.handleOriginSearchBarArrowLeft = this.handleOriginSearchBarArrowLeft.bind(this)
     this.displayOriginSearchMenu = this.displayOriginSearchMenu.bind(this)
     this.displayDestinationSearchMenu = this.displayDestinationSearchMenu.bind(this)
-    this.displayDestinationDropDownData = this.displayDestinationDropDownData.bind(this)
-    this.displayOriginDropDownData = this.displayOriginDropDownData.bind(this)
+    this.handleReverseOriginAndDestination = this.handleReverseOriginAndDestination.bind(this)
+    this.displaySelectedDestinationData = this.displaySelectedDestinationData.bind(this)
+    this.displaySelectedOriginData = this.displaySelectedOriginData.bind(this)
     this.sendDestinationToBackend = this.sendDestinationToBackend.bind(this)
-    this.findMyLocation = this.findMyLocation.bind(this)
+    this.handleFindMyLocation = this.handleFindMyLocation.bind(this)
     this.chooseLocationOnMap = this.chooseLocationOnMap.bind(this)
+    this.handleMouseUpSubmit = this.handleMouseUpSubmit.bind(this)
+    // this.handleMapClick = this.handleMapClick.bind(this)
+
     // this.fitTheRouteInsideTheViewport = this.fitTheRouteInsideTheViewport()
     // this.handlefakeclick = this.handlefakeclick.bind(this)
     // this.getWalkingRoute = this.getWalkingRoute.bind(this)
   }
 
-  handleMouseDown( {lngLat} ) {
-    this.setState({viewport: {
-      longitude: lngLat[0],
-      latitude: lngLat[1],
-      zoom: 12,
-      transitionDuration: 1000,
-      transitionInterpolator: new FlyToInterpolator({
-        curve: 2.4})
-    }})
+  // handleMapClick({lngLat}) {
+  //   this.setState({viewport: {
+  //     longitude: lngLat[0],
+  //     latitude: lngLat[1],
+  //     zoom: 12,
+  //     transitionDuration: 1000,
+  //     transitionInterpolator: new FlyToInterpolator({
+  //       curve: 2.4})
+  //   }})
+  // }
+  handleMouseUp({lngLat, deltaTime}) {
+    console.log(lngLat)
+    // const lngLatString = lngLat[0].toString().substr(0,6) +'  '+ lngLat[1].toString().substr(0,6) +','+ 'Custom Location'
+    // const originMouseUpObject = {place_name: lngLatString, center: lngLat}
+    // const destinationMouseUpObject = {place_name: lngLatString, center: lngLat}
+    if(deltaTime >= 300) {
+      this.setState({
+        viewport: {
+        longitude: lngLat[0],
+        latitude: lngLat[1],
+        zoom: 12,
+        transitionDuration: 1000,
+        transitionInterpolator: new LinearInterpolator({
+          curve: 2.4})},
+      })
+      if(this.destinationLonLat === true) {
+        this.handleMouseUpSubmit(lngLat, 'OriginData')
+      } else {
+        this.handleMouseUpSubmit(lngLat, 'DestinationData')
+      }
+    } else {
+      this.setState({
+        viewport: {
+        longitude: lngLat[0],
+        latitude: lngLat[1],
+        zoom: 13,
+        transitionDuration: 1000,
+        transitionInterpolator: new LinearInterpolator({
+          curve: 2.4})},
+      })
+    }
   }
 
   handleChange(e) {
@@ -118,24 +154,62 @@ class Map extends React.Component {
       .then(console.log('geocoder search response data', this.state.searchResponseData))
   }
 
+  handleMouseUpSubmit(lngLat, name) {
+    const lngLatString = lngLat.toString()
+    if(name === 'OriginData') {
+      axios.get(`api/mapbox/geocoder/${lngLatString}`)
+        .then(res => this.setState({
+          searchResponseData: res.data.features[0]
+        }))
+        .then(this.displaySelectedOriginData(this.state.searchResponseData))
+    } else if(name === 'DestinationData') {
+      axios.get(`api/mapbox/geocoder/${lngLatString}`)
+        .then(res => this.setState({
+          searchResponseData: res.data.features[0]
+        }))
+        .then(this.displaySelectedDestinationData(this.state.searchResponseData))
+      }
+    }
+
   handleClear(name) {
     const checkName = [name]
-    const check = checkName.includes('origin')
+    console.log(checkName)
+    const check = checkName.includes('originFormData')
     if(check == true) {
       this.setState({
-        originLonLat: ''
+        originLonLat: '',
+        originFormData: '',
+        originData: '',
+        isoriginFormDataSearchTriggered: false
       })
     }
     else {
       this.setState({
-        destinationLonLat: ''
+        destinationLonLat: '',
+        destinationFormData: '',
+        destinationData: '',
+        isdestinationFormDataSearchTriggered: false
       })
     }
     this.setState({
-      [name]: '',
-      searchResponseData: '',
       isSearchTriggered: false,
-      displayBottomDestinationData: false
+      displayBottomDestinationData: false,
+      searchResponseData: searchReponseStateDefault,
+      routeGeometry: routeGeometryStateDefault
+    })
+  }
+
+  handleReverseOriginAndDestination() {
+    const tempOriginLonLat = this.state.originLonLat
+    const tempOriginFormData = this.state.originFormData
+    const tempOriginData = this.state.originData
+    this.setState({
+    originLonLat: this.state.destinationLonLat,
+    originFormData: this.state.destinationFormData,
+    originData: this.state.destinationData,
+    destinationLonLat: tempOriginLonLat,
+    destinationFormData: tempOriginFormData,
+    destinationData: tempOriginData,
     })
   }
 
@@ -151,33 +225,9 @@ class Map extends React.Component {
     })
   }
 
-  handleOriginSearchBarArrowLeft(name) {
-    this.handleClear(name)
-    this.handleDirectionsButtonClick()
-  }
-
-  // fitTheRouteInsideTheViewport() {
-  //   const {longitude, latitude, zoom} = new WebMercatorViewport(this.state.viewport)
-  //     .fitBounds([this.state.originLonLat, this.state.destinationLonLat], {
-  //       padding: 20,
-  //       offset: [0, -100]
-  //     })
-  //   // const viewport = {
-  //   //     ...this.state.viewport,
-  //   //     longitude,
-  //   //     latitude,
-  //   //     zoom,
-  //   //     transitionDuration: 5000,
-  //   //     transitionInterpolator: new FlyToInterpolator(),
-  //   //     transitionEasing: d3.easeCubic
-  //   // }
-  //   this.setState({viewport})
-  // }
-
-
   // THIS NEEDS TO RECEIVE THE DATA FROM THE GEOLOCATOR AND IF CLICKED TRIGGER THE GEOLOCATOR
-  findMyLocation() {
-    this.setState({originLonLat: [-0.071132, 51.518891]})
+  handleFindMyLocation() {
+    this.setState({geolocateClick: true})
   }
 // THIS NEEDS TO BE ABLE FOR A PERSON TO DROP A PIN ON THIER ORIGIN FROM BOTH THE MOUSE AND FROM MOBILE
   chooseLocationOnMap() {
@@ -186,32 +236,49 @@ class Map extends React.Component {
 
   handleDirectionsButtonClick() {
     this.setState({
-      displaySearchBarDirections: true,
+      displayDirectionsSearchBar: true,
       displayDestinationSearchBar: false,
       displayOriginSearchBar: false,
-      displayOriginSearchDropdown: false,
+      displayOriginSearchOptions: false,
       displayBottomDestinationData: false
     })
   }
 
-  handleDirectionsMenuArrowLeftClick() {
+  handleOriginSearchBarArrowLeft(name) {
+    this.handleClear(name)
+    this.handleDirectionsButtonClick()
     this.setState({
-      displaySearchBarDirections: false,
+      originLonLat: '',
+      searchResponseData: searchReponseStateDefault,
+      routeGeometry: routeGeometryStateDefault,
+      isoriginFormDataSearchTriggered: false
+    })
+  }
+
+  handleDirectionsSearchBarArrowLeft() {
+    this.setState({
+      displayDirectionsSearchBar: false,
       displayDestinationSearchBar: true,
       displayOriginSearchBar: false,
-      displayOriginSearchDropdown: false,
+      displayOriginSearchOptions: false,
       displayBottomDestinationData: false,
+      isRouteSelected: false,
       originLonLat: '',
-      destinationLonLat: ''
+      originFormData: '',
+      originData: '',
+      searchResponseData: searchReponseStateDefault,
+      routeGeometry: routeGeometryStateDefault,
+      isoriginFormDataSearchTriggered: false,
+      isdestinationFormDataSearchTriggered: false
     })
   }
 
   displayOriginSearchMenu() {
     this.setState({
-      displaySearchBarDirections: false,
+      displayDirectionsSearchBar: false,
       displayDestinationSearchBar: false,
       displayOriginSearchBar: true,
-      displayOriginSearchDropdown: true,
+      displayOriginSearchOptions: true,
       displayBottomDestinationData: false,
       isRouteSelected: false
     })
@@ -219,16 +286,17 @@ class Map extends React.Component {
 
   displayDestinationSearchMenu() {
     this.setState({
-      displaySearchBarDirections: false,
+      displayDirectionsSearchBar: false,
       displayDestinationSearchBar: true,
       displayOriginSearchBar: false,
-      displayOriginSearchDropdown: false,
+      displayOriginSearchOptions: false,
       displayBottomDestinationData: false,
       isRouteSelected: false
     })
   }
 
-  displayDestinationDropDownData(data) {
+  displaySelectedDestinationData(data) {
+    console.log('display fired')
     this.handleViewportChange(data)
     this.setState({
       isdestinationFormDataSearchTriggered: false,
@@ -238,17 +306,15 @@ class Map extends React.Component {
       searchResponseData: searchReponseStateDefault,
       routeGeometry: routeGeometryStateDefault
     })
-    console.log("destination search response data", data)
-    // this.sendDestinationToBackend(data.center)
   }
-// DOES THIS NEED PROMISES TO BE SURE STATE IS SET BEFORE sendDestinationToBackend() IS TRIGGERED?
-  displayOriginDropDownData(data) {
+
+  displaySelectedOriginData(data) {
     this.handleViewportChange(data)
     this.setState({
       isoriginFormDataSearchTriggered: false,
       displayOriginSearchBar: false,
-      displayOriginSearchDropdown: false,
-      displaySearchBarDirections: true,
+      displayOriginSearchOptions: false,
+      displayDirectionsSearchBar: true,
       originData: data,
       originLonLat: data.center,
       searchResponseData: searchReponseStateDefault,
@@ -282,8 +348,15 @@ class Map extends React.Component {
       // .then(this.fitTheRouteInsideTheViewport())
   }
 
+  // onClick={this.handleMouseUp}
+  // onMouseDown={lnglat => this.handleMouseUp(lnglat)}
+  // onClick={this.handleMapClick}
+  // onMouseUp={lngLat => this.handleMouseUp({lngLat})}>
+
+
+
   render () {
-    const {viewport, originFormData, destinationFormData, originData, destinationData, displaySearchBarDirections, displayOriginSearchDropdown, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected} = this.state
+    const {viewport, originFormData, destinationFormData, originData, destinationData, displayDirectionsSearchBar, displayOriginSearchOptions, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected, geolocateClick} = this.state
     const directionsLayer = {routeGeometry}
     return (
       <div>
@@ -295,7 +368,7 @@ class Map extends React.Component {
             mapboxApiAccessToken={process.env.MAPBOX_TOKEN}
             mapStyle="mapbox://styles/mtcolvard/ck0wmzhqq0cpu1cqo0uhf1shn"
             onViewportChange={viewport => this.setState({viewport})}
-            onClick={this.handleMouseDown}>
+            onMouseUp={this.handleMouseUp}>
             {destinationLonLat &&
               <Pins
                 originData={originData}
@@ -320,6 +393,7 @@ class Map extends React.Component {
                 showUserLocation={true}
                 captureClick={false}
                 fitBoundsOption={{maxZoom: 11}}
+                auto={geolocateClick}
               />
             </div>
             <div
@@ -343,18 +417,19 @@ class Map extends React.Component {
             <div>
               <h1 className="title">FoxyMaps</h1>
             </div>
-            {displaySearchBarDirections &&
+            {displayDirectionsSearchBar &&
               <SearchBarDirections
                 origin={originData.place_name}
                 destination={destinationData.place_name}
-                onArrowLeft={this.handleDirectionsMenuArrowLeftClick}
+                onArrowLeft={this.handleDirectionsSearchBarArrowLeft}
+                onReverseOriginAndDestination={this.handleReverseOriginAndDestination}
                 onTriggerOriginSearchMenu={this.displayOriginSearchMenu}
                 onTriggerDestinationSearchMenu={this.displayDestinationSearchMenu}/>
             }
             {displayOriginSearchBar &&
               <SearchBar
                 onArrowLeft={this.handleOriginSearchBarArrowLeft}
-                onTimes={this.handleClear}
+                onDeleteField={this.handleClear}
                 onHandleChange={this.handleChange}
                 onHandleSubmit={this.handleSubmit}
                 searchformData={originFormData}
@@ -364,16 +439,16 @@ class Map extends React.Component {
             {displayDestinationSearchBar &&
               <SearchBar
                 onArrowLeft={this.handleClear}
-                onTimes={this.handleClear}
+                onDeleteField={this.handleClear}
                 onHandleChange={this.handleChange}
                 onHandleSubmit={this.handleSubmit}
                 searchformData={destinationFormData}
                 placeholder='Add destination to plan route'
                 name='destinationFormData'/>
             }
-            {displayOriginSearchDropdown &&
+            {displayOriginSearchOptions &&
               <div className="box is-radiusless is-marginless">
-                <button className="button is-fullwidth has-text-left" onClick={this.findMyLocation}>
+                <button className="button is-fullwidth has-text-left" onClick={this.handleFindMyLocation}>
                   <span className="icon">
                     <FontAwesomeIcon icon="location-arrow"/></span>
                   <span>Find my location</span>
@@ -393,7 +468,7 @@ class Map extends React.Component {
                     index={index}
                     dropDownDisplayName={element.place_name}
                     searchResponseData={searchResponseData}
-                    selectDestination={this.displayOriginDropDownData}
+                    selectLocation={this.displaySelectedOriginData}
                     isSearchTriggered={isSearchTriggered}
                     name='Origin'
                   />
@@ -408,7 +483,7 @@ class Map extends React.Component {
                     index={index}
                     dropDownDisplayName={element.place_name}
                     searchResponseData={searchResponseData}
-                    selectDestination={this.displayDestinationDropDownData}
+                    selectLocation={this.displaySelectedDestinationData}
                     isSearchTriggered={isSearchTriggered}
                     name='Destination'
                   />
@@ -432,3 +507,21 @@ class Map extends React.Component {
 }
 
 export default Map
+
+// fitTheRouteInsideTheViewport() {
+//   const {longitude, latitude, zoom} = new WebMercatorViewport(this.state.viewport)
+//     .fitBounds([this.state.originLonLat, this.state.destinationLonLat], {
+//       padding: 20,
+//       offset: [0, -100]
+//     })
+//   // const viewport = {
+//   //     ...this.state.viewport,
+//   //     longitude,
+//   //     latitude,
+//   //     zoom,
+//   //     transitionDuration: 5000,
+//   //     transitionInterpolator: new FlyToInterpolator(),
+//   //     transitionEasing: d3.easeCubic
+//   // }
+//   this.setState({viewport})
+// }
