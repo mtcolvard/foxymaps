@@ -21,7 +21,7 @@ const routeGeometryStateDefault = {
   'properties': {'name': null},
   'geometry': {
     'type': 'Point',
-    'coordinates': null}
+    'coordinates': [-0.097865,51.514014]}
 }
 
 const searchReponseStateDefault = {
@@ -69,7 +69,6 @@ class Map extends React.Component {
       displayDestinationSearchBar: true,
       displayBottomDestinationData: false
     }
-    this.handleMouseUp = this.handleMouseUp.bind(this)
     this.handleViewportChange =this.handleViewportChange.bind(this)
     this.handleChange = this.handleChange.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
@@ -85,56 +84,57 @@ class Map extends React.Component {
     this.sendDestinationToBackend = this.sendDestinationToBackend.bind(this)
     this.handleFindMyLocation = this.handleFindMyLocation.bind(this)
     this.chooseLocationOnMap = this.chooseLocationOnMap.bind(this)
-    this.handleMouseUpSubmit = this.handleMouseUpSubmit.bind(this)
-    // this.handleMapClick = this.handleMapClick.bind(this)
+    this.handleMapClick = this.handleMapClick.bind(this)
+    // this.handleMouseUp = this.handleMouseUp.bind(this)
+    // this.handleMouseUpSubmit = this.handleMouseUpSubmit.bind(this)
 
     // this.fitTheRouteInsideTheViewport = this.fitTheRouteInsideTheViewport()
     // this.handlefakeclick = this.handlefakeclick.bind(this)
     // this.getWalkingRoute = this.getWalkingRoute.bind(this)
   }
 
-  // handleMapClick({lngLat}) {
-  //   this.setState({viewport: {
-  //     longitude: lngLat[0],
-  //     latitude: lngLat[1],
-  //     zoom: 12,
-  //     transitionDuration: 1000,
-  //     transitionInterpolator: new FlyToInterpolator({
-  //       curve: 2.4})
-  //   }})
-  // }
-  handleMouseUp({lngLat, deltaTime}) {
-    console.log(lngLat)
-    // const lngLatString = lngLat[0].toString().substr(0,6) +'  '+ lngLat[1].toString().substr(0,6) +','+ 'Custom Location'
-    // const originMouseUpObject = {place_name: lngLatString, center: lngLat}
-    // const destinationMouseUpObject = {place_name: lngLatString, center: lngLat}
-    if(deltaTime >= 300) {
-      // this.setState({
-      //   viewport: {
-      //   longitude: lngLat[0],
-      //   latitude: lngLat[1],
-      //   zoom: 12,
-      //   transitionDuration: 1000,
-      //   transitionInterpolator: new LinearInterpolator({
-      //     curve: 2.4})},
-      // })
-      if(this.destinationLonLat === true) {
-        this.handleMouseUpSubmit(lngLat, 'OriginData')
-      } else {
-        this.handleMouseUpSubmit(lngLat, 'DestinationData')
-      }
-    } else {
-      this.setState({
-        viewport: {
-        longitude: lngLat[0],
-        latitude: lngLat[1],
-        zoom: 13,
-        transitionDuration: 1000,
-        transitionInterpolator: new LinearInterpolator({
-          curve: 2.4})},
-      })
-    }
+  handleMapClick({lngLat}) {
+    this.setState({viewport: {
+      longitude: lngLat[0],
+      latitude: lngLat[1],
+      zoom: 12,
+      transitionDuration: 1000,
+      transitionInterpolator: new FlyToInterpolator({
+        curve: 2.4})
+    }})
   }
+  // handleMouseUp({lngLat, deltaTime}) {
+  //   console.log(lngLat)
+  //   // const lngLatString = lngLat[0].toString().substr(0,6) +'  '+ lngLat[1].toString().substr(0,6) +','+ 'Custom Location'
+  //   // const originMouseUpObject = {place_name: lngLatString, center: lngLat}
+  //   // const destinationMouseUpObject = {place_name: lngLatString, center: lngLat}
+  //   if(deltaTime >= 300) {
+  //     // this.setState({
+  //     //   viewport: {
+  //     //   longitude: lngLat[0],
+  //     //   latitude: lngLat[1],
+  //     //   zoom: 12,
+  //     //   transitionDuration: 1000,
+  //     //   transitionInterpolator: new LinearInterpolator({
+  //     //     curve: 2.4})},
+  //     // })
+  //     if(this.destinationLonLat === true) {
+  //       this.handleMouseUpSubmit(lngLat, 'OriginData')
+  //     } else {
+  //       this.handleMouseUpSubmit(lngLat, 'DestinationData')
+  //     }
+  //   } else {
+  //     this.setState({
+  //       viewport: {
+  //       longitude: lngLat[0],
+  //       latitude: lngLat[1],
+  //       zoom: 13,
+  //       transitionDuration: 1000,
+  //       transitionInterpolator: new LinearInterpolator({
+  //         curve: 2.4})},
+  //     })
+  //   }
+  // }
 
   handleChange(e) {
     const target = e.target
@@ -156,22 +156,22 @@ class Map extends React.Component {
       .then(console.log('geocoder search response data', this.state.searchResponseData))
   }
 
-  handleMouseUpSubmit(lngLat, name) {
-    const lngLatString = lngLat.toString()
-    if(name === 'OriginData') {
-      axios.get(`api/mapbox/geocoder/${lngLatString}`)
-        .then(res => this.setState({
-          searchResponseData: res.data
-        }))
-        .then(this.displaySelectedOriginData(this.state.searchResponseData.features[0]))
-    } else if(name === 'DestinationData') {
-      axios.get(`api/mapbox/geocoder/${lngLatString}`)
-        .then(res => this.setState({
-          searchResponseData: res.data
-        }))
-        .then(this.displaySelectedDestinationData(this.state.searchResponseData.features[0]))
-      }
-    }
+  // handleMouseUpSubmit(lngLat, name) {
+  //   const lngLatString = lngLat.toString()
+  //   // if(name === 'OriginData') {
+  //   //   axios.get(`api/mapbox/geocoder/${lngLatString}`)
+  //   //     .then(res => this.setState({
+  //   //       searchResponseData: res.data
+  //   //     }))
+  //   //     .then(this.displaySelectedOriginData(this.state.searchResponseData.features[0]))
+  //   // } else if(name === 'DestinationData') {
+  //   //   axios.get(`api/mapbox/geocoder/${lngLatString}`)
+  //   //     .then(res => this.setState({
+  //   //       searchResponseData: res.data
+  //   //     }))
+  //   //     .then(this.displaySelectedDestinationData(this.state.searchResponseData.features[0]))
+  //   //   }
+  //   }
 
   handleClear(name) {
     const checkName = [name]
@@ -298,7 +298,7 @@ class Map extends React.Component {
   }
 
   displaySelectedDestinationData(data) {
-    console.log('display fired')
+    console.log('display fired', data)
     this.handleViewportChange(data)
     this.setState({
       isdestinationFormDataSearchTriggered: false,
@@ -355,7 +355,7 @@ class Map extends React.Component {
   // onClick={this.handleMapClick}
   // onMouseUp={lngLat => this.handleMouseUp({lngLat})}>
 
-
+// onMouseUp={this.handleMouseUp}
 
   render () {
     const {viewport, originFormData, destinationFormData, originData, destinationData, displayDirectionsSearchBar, displayOriginSearchOptions, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected, geolocateClick} = this.state
@@ -370,7 +370,7 @@ class Map extends React.Component {
             mapboxApiAccessToken={process.env.MAPBOX_TOKEN}
             mapStyle="mapbox://styles/mtcolvard/ck0wmzhqq0cpu1cqo0uhf1shn"
             onViewportChange={viewport => this.setState({viewport})}
-            onMouseUp={this.handleMouseUp}>
+            onClick={this.handleMapClick}>
             {destinationLonLat &&
               <Pins
                 originData={originData}

@@ -129,7 +129,7 @@ class RouteThenBoundingBox(APIView):
         # select parks within user's tolerance for rambling
             v['distance_from_bestfit_line'][journey_leg] <= rambling_tolerance and
             v['distance_from_bestfit_line'][journey_leg] >= 0 and
-            v['size_in_hectares'] > 0.15}
+            v['size_in_hectares'] >= 0.24}
         return parks_within_perp_distance
 
     def sort_parks_by_acreage(self, origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, parks_within_perp_distance):
