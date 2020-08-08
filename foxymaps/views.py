@@ -43,9 +43,9 @@ class LocationFilterList(ListCreateAPIView):
     serializer_class = LocationUpdateSerializer
 
 class MapGeocoderView(APIView):
-    def get(self, _request, searchQuery, bbox=None, country='ISO 3166-2:GB'):
+    def get(self, _request, searchQuery):
         geocoder = Geocoder(name='mapbox.places', access_token='pk.eyJ1IjoibXRjb2x2YXJkIiwiYSI6ImNrZDIycDBuaTAyYjQyeG55azNwYzd0ZjMifQ.yYcTjTmpZ89j4vMWS8VdrA')
-        response = geocoder.forward(searchQuery, bbox, country)
+        response = geocoder.forward(searchQuery, bbox=[-0.542935,51.255636,0.335605,51.726673])
         data = response.json()
         print(data)
         return Response(response.json())
