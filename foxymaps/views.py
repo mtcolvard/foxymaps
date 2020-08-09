@@ -66,7 +66,8 @@ class RouteThenBoundingBox(APIView):
 
     # create a boundingbox by filtering out all parks not within the rectangle formed by the distance from origin to destingation and the rambling tolerance (e.g. 1000 meters)
         parks_within_perp_distance = self.calculate_parks_within_perp_distance(all_parks, 'from_origin', 'origin_to_destination', best_fit_origin_to_destination, rambling_tolerance)
-        print('parks_within_perp_distance', len(parks_within_perp_distance))
+        print('parks_within_perp_distance length', len(parks_within_perp_distance))
+        print('parks_within_perp_distance', parks_within_perp_distance)
 
         if len(parks_within_perp_distance) == 0:
             route_waypoints_lon_lat = [origin_lon_lat, destination_lon_lat]
@@ -83,6 +84,7 @@ class RouteThenBoundingBox(APIView):
 
     # Request the route directions from mapboxDirectionsAPI.py module
         route_geometry = DirectionsCalculations.returnRouteGeometry(self, route_waypoints_lon_lat)
+        # route_geometry = DirectionsCalculations.get(self, _request, route_waypoints_lon_lat)
     # Calculate the midpoint between the origin and the destination
         midpoint = DistanceAndBearing.calculate_midpoint(self, origin_lon_lat, destination_lon_lat)
         print('midpoint', midpoint)
