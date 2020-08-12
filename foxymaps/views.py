@@ -32,8 +32,8 @@ class LocationSpeedList(ListCreateAPIView):
     # queryset = Location.objects.filter(Q(nature_conservation_area="Yes") | ~Q(listed_structures="None")).filter(open_to_public="Yes").filter(size_in_hectares__gte=1.0)
     # queryset = Location.objects.filter(Q(listed_structures="None"),on_eh_national_register="Yes")
     # queryset = Location.objects.get(id=1327)
-    print('queryset Location Speed List',len( queryset))
-    print('queryset', queryset)
+    # print('queryset Location Speed List',len( queryset))
+    # print('queryset', queryset)
     serializer_class = LocationSpeedSerializer
 
 class LocationFilterList(ListCreateAPIView):
@@ -47,7 +47,7 @@ class MapGeocoderView(APIView):
         geocoder = Geocoder(name='mapbox.places', access_token='pk.eyJ1IjoibXRjb2x2YXJkIiwiYSI6ImNrZDIycDBuaTAyYjQyeG55azNwYzd0ZjMifQ.yYcTjTmpZ89j4vMWS8VdrA')
         response = geocoder.forward(searchQuery, bbox=[-0.542935,51.255636,0.335605,51.726673])
         data = response.json()
-        print(data)
+        # print(data)
         return Response(response.json())
 
 class RouteThenBoundingBox(APIView):
@@ -66,14 +66,13 @@ class RouteThenBoundingBox(APIView):
 
     # create a boundingbox by filtering out all parks not within the rectangle formed by the distance from origin to destingation and the rambling tolerance (e.g. 1000 meters)
         parks_within_perp_distance = self.calculate_parks_within_perp_distance(all_parks, 'from_origin', 'origin_to_destination', best_fit_origin_to_destination, rambling_tolerance)
-        print('parks_within_perp_distance length', len(parks_within_perp_distance))
-        print('parks_within_perp_distance', parks_within_perp_distance)
+        # print('parks_within_perp_distance length', len(parks_within_perp_distance))
+        # print('parks_within_perp_distance', parks_within_perp_distance)
 
         if len(parks_within_perp_distance) == 0:
             route_waypoints_lon_lat = [origin_lon_lat, destination_lon_lat]
             largest_park = {'name':'the most Direct Route (No convenient parks enroute)'}
         else:
-            # largest_park = parks_within_perp_distance[max(parks_within_perp_distance, key=lambda v: parks_within_perp_distance[v]['size_in_hectares'])]
         # Mapbox has a limit of 25 waypoints including the origin and destination for calls to thier Directions API
             total_waypoints_dict = self.sort_parks_by_acreage(origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, parks_within_perp_distance)
         # Run the route_calculations/homing_algo.py module to find the most direct route
@@ -87,7 +86,7 @@ class RouteThenBoundingBox(APIView):
         # route_geometry = DirectionsCalculations.get(self, _request, route_waypoints_lon_lat)
     # Calculate the midpoint between the origin and the destination
         midpoint = DistanceAndBearing.calculate_midpoint(self, origin_lon_lat, destination_lon_lat)
-        print('midpoint', midpoint)
+        # print('midpoint', midpoint)
         route_response = {'route_geometry':route_geometry, 'largest_park': largest_park, 'midpoint': midpoint}
         # print('route_response', route_response)
         return Response(route_response)
@@ -138,7 +137,7 @@ class RouteThenBoundingBox(APIView):
         # mapbox only allows 25 waypoints including origin and destination so we sort and then slice off the 23 largest parks.
         if len(parks_within_perp_distance) > 23:
             waypoints_sorted_by_acreage = sorted(parks_within_perp_distance.keys(), key=lambda y: (parks_within_perp_distance[y]['size_in_hectares']))
-            print('waypoints_sorted_by_acreage', waypoints_sorted_by_acreage)
+            # print('waypoints_sorted_by_acreage', waypoints_sorted_by_acreage)
             waypoints_sliced_by_acreage = waypoints_sorted_by_acreage[-23:]
             total_waypoints_sorted_by_acreage = {k:v for k, v in parks_within_perp_distance.items() if k in waypoints_sliced_by_acreage}
             total_waypoints_dict = self.populate_total_waypoints_dict(origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, total_waypoints_sorted_by_acreage)
