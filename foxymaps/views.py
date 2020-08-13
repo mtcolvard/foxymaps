@@ -78,7 +78,13 @@ class RouteThenBoundingBox(APIView):
         # Run the route_calculations/homing_algo.py module to find the most direct route
             waypoint_route_order = run_homing_algo(total_waypoints_dict)
             waypoints_size_in_hectares = {k:v for k, v in total_waypoints_dict.items() if k in waypoint_route_order}
-            largest_park = waypoints_size_in_hectares[max(waypoints_size_in_hectares, key=lambda v: waypoints_size_in_hectares[v]['size_in_hectares'])]
+            # largest_park = waypoints_size_in_hectares[max(waypoints_size_in_hectares, key=lambda v: waypoints_size_in_hectares[v]['size_in_hectares'])]
+            largest_park_order = sorted(waypoints_size_in_hectares, key=lambda v: waypoints_size_in_hectares[v]['size_in_hectares'])
+            if len(parks_within_perp_distance) == 1:
+                largest_park = waypoints_size_in_hectares[largest_park_order[-1]]['name']
+            else:
+                largest_park = waypoints_size_in_hectares[largest_park_order[-1]]['name']+' and '+waypoints_size_in_hectares[largest_park_order[-2]]['name']
+            print(largest_park)
             route_waypoints_lon_lat = [total_waypoints_dict[x]['lon_lat'] for x in waypoint_route_order]
 
     # Request the route directions from mapboxDirectionsAPI.py module

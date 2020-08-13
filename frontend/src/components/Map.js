@@ -334,7 +334,7 @@ class Map extends React.Component {
       .then(res =>
         this.setState({
         routeGeometry: res.data['route_geometry'],
-        routeLargestPark: res.data['largest_park']['name'],
+        routeLargestPark: res.data['largest_park'],
         isRouteSelected: true,
         displayBottomDestinationData: true,
         viewport: {
