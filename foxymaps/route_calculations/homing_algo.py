@@ -8,20 +8,17 @@ Repeat until the destination is the next closest waypoint.
 import math
 
 def run_homing_algo(all_waypoints):
-    # create a graph with nodes for each waypoint
-    # waypoints_lon_lat = {k:[v['lon_lat'],v['size_in_hectares']] for k, v in all_waypoints.items()}
+    # create a graph whose nodes represent the waypoints (all the visitable parks enroute to the destination)
     waypoint_ids = list(all_waypoints.keys())
     waypoints_graph = {}
     for waypoint_id in waypoint_ids:
         waypoints_graph[waypoint_id] = {}
         for each_id in waypoint_ids:
-            # populate every waypoint node [waypoint_id] with a list of the distance and angle to all other waypoints [each_id]
-            # crowflys_bearing_and_platonic_width = crowflys_distance_and_bearing(waypoints_lon_lat[waypoint_id][0], waypoints_lon_lat[each_id][0], math.sqrt(waypoints_lon_lat[each_id][1]*10000))
+            # from each park, calculate the distance-as-the-crowflys and the bearing to every other park.  also calculate the square root each park's area, to get a sortof ideal ("platonic") estimate of how tall or wide each park is.
             crowflys_distance_bearing_and_platonic_width = crowflys_distance_and_bearing(all_waypoints[waypoint_id]['lon_lat'], all_waypoints[each_id]['lon_lat'], math.sqrt(all_waypoints[each_id]['size_in_hectares']*10000))
-            # waypoints_graph[waypoint_id][each_id] = crowflys_distance_and_bearing(waypoints_lon_lat[waypoint_id][0], waypoints_lon_lat[each_id][0], math.sqrt(waypoints_lon_lat[each_id][1]*10000))
-            #
-            # crowflys_bearing_and_platonic_width = crowflys_distance_and_bearing(waypoints_lon_lat[waypoint_id][0], waypoints_lon_lat[each_id][0], math.sqrt(waypoints_lon_lat[each_id][1]*10000))
-
+            # populate each node with the above distance-as-the-crowflys, bearing, estimate of the park's width, and a heuristic 'crowflys-distance minus the platonic-width'.
+            # This heuristic guesses how important a park might be. At each point along the journey, instead of targeting the absolute next closest park, the algorithm considers how wide each park might be. 
+            # Thus, a large park somewhat farther away may be prioritized over a closer yet smaller park -- if the distance to the large park minus the large park's width is less than the distance to the closer park minus the closer park's width.
             waypoints_graph[waypoint_id][each_id] = {'crowflys_distance': crowflys_distance_bearing_and_platonic_width[0], 'bearing': crowflys_distance_bearing_and_platonic_width[1], 'platonic_width': crowflys_distance_bearing_and_platonic_width[2], 'crowflys_distance_minus_platonic_width': (crowflys_distance_bearing_and_platonic_width[0]-crowflys_distance_bearing_and_platonic_width[2])}
     print('waypoints graph', waypoints_graph)
     # Run filtering algorithm
