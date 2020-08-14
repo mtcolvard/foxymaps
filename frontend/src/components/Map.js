@@ -69,7 +69,8 @@ class Map extends React.Component {
       displayDestinationSearchBar: true,
       displayBottomDestinationData: false,
       loadingSpinner: false,
-      isMapboxSearching: false
+      isMapboxSearching: false,
+      parkPins: []
     }
     this.handleViewportChange =this.handleViewportChange.bind(this)
     this.handleChange = this.handleChange.bind(this)
@@ -354,6 +355,7 @@ class Map extends React.Component {
         this.setState({
         routeGeometry: res.data['route_geometry'],
         routeLargestPark: res.data['largest_park'],
+        parkPins: res.data['parks_within_perp_distance_lon_lat'],
         isRouteSelected: true,
         displayBottomDestinationData: true,
         viewport: {
@@ -378,7 +380,7 @@ class Map extends React.Component {
 // onMouseUp={this.handleMouseUp}
 
   render () {
-    const {viewport, originFormData, destinationFormData, originData, destinationData, displayDirectionsSearchBar, displayOriginSearchOptions, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected, geolocateClick, loadingSpinner, isMapboxSearching} = this.state
+    const {viewport, originFormData, destinationFormData, originData, destinationData, displayDirectionsSearchBar, displayOriginSearchOptions, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected, geolocateClick, loadingSpinner, isMapboxSearching, parkPins} = this.state
     const directionsLayer = {routeGeometry}
     return (
       <div>
@@ -395,6 +397,7 @@ class Map extends React.Component {
               <Pins
                 originData={originData}
                 destinationData={destinationData}
+                parkPins={parkPins}
               />
             }
             {routeGeometry &&
@@ -522,7 +525,7 @@ class Map extends React.Component {
             <BottomDestinationDisplay
               onHandleDirectionsButtonClick={this.handleDirectionsButtonClick}
               destinationData={destinationData}
-              routeDistance={routeGeometry['properties']['distance']}
+              routeDistance={routeGeometry['properties']['duration']}
               routeLargestPark={routeLargestPark}
               isRouteSelected={isRouteSelected}
             />

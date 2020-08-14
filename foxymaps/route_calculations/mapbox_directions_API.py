@@ -7,12 +7,16 @@ from mapbox import Directions
 
 service = Directions(access_token='pk.eyJ1IjoibXRjb2x2YXJkIiwiYSI6ImNrZDIycDBuaTAyYjQyeG55azNwYzd0ZjMifQ.yYcTjTmpZ89j4vMWS8VdrA')
 
-class DirectionsCalculations:
+class Mapbox_Directions_API:
 
-    def returnRouteGeometry(self, waypoints_list):
-        response = service.directions(waypoints_list, profile='mapbox/walking', continue_straight=True, walkway_bias=1, alley_bias=1)
+    def returnRouteGeometry(self, waypoints_list, walkway_bias, alley_bias):
+        walk = walkway_bias
+        alley = alley_bias
+        response = service.directions(waypoints_list, profile='mapbox/walking', continue_straight=True, walking_speed=5, walkway_bias=walk, alley_bias=alley)
         # response = service.directions(waypoints_list, profile='mapbox/walking', continue_straight=True)
+        print('API json', response.json())
         data = response.geojson()
+        print('API, geojson', data)
         # print('DirectionsCalulations', data)
         return data['features'][0]
 

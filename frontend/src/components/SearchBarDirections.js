@@ -75,7 +75,7 @@ export default class SearchBarDirections extends React.Component {
           </div>
         </div>
       </div>
-      {isMapboxSearching ? <progress className="progress is-small" max="100">20%</progress>: ''}
+      {isMapboxSearching ? <progress className="progress is-small is-info" max="100">20%</progress>: ''}
       </div>
     )
   }

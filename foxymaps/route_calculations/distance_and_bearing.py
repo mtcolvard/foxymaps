@@ -1,6 +1,6 @@
 import math
 
-class DistanceAndBearing:
+class Distance_And_Bearing:
     def crowflys_bearing(self, startpoint, endpoint):
         # this function measure the distance and compass bearing from a startpoint to an endpoint
         startpoint_lon = startpoint[0]

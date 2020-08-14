@@ -10,23 +10,26 @@ const SIZE = 20
 
 // Important for perf: the markers never change, avoid rerender when the map viewport changes
 export default class Pins extends PureComponent {
+  // const {originData, destinationData, parkPins} = this.props
+  // let dataArray = []
+  // if(originData && !destinationData) {
+  //   dataArray = [originData.center]
+  // } else if(!originData && destinationData) {
+  //   dataArray = [destinationData.center]
+  // } else if(originData && destinationData) {
+  //   dataArray = parkPins
+  // } else {
+  //   dataArray = []
+  // }
+
   render() {
-    const {originData, destinationData} = this.props
-    let dataArray = []
-    if(originData && !destinationData) {
-      dataArray = [originData]
-    } else if(!originData && destinationData) {
-      dataArray = [destinationData]
-    } else if(originData && destinationData) {
-      dataArray = [originData, destinationData]
-    } else {
-      dataArray = []
-    }
+    const {originData, destinationData, parkPins} = this.props
+    let dataArray = parkPins
     return dataArray.map((place, index) => (
       <Marker
         key={`marker-${index}`}
-        longitude={place.center[0]}
-        latitude={place.center[1]}>
+        longitude={place[0]}
+        latitude={place[1]}>
         <svg
           height={SIZE}
           viewBox="0 0 24 24"

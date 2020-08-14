@@ -7,7 +7,7 @@ Repeat until the destination is the next closest waypoint.
 """
 import math
 
-def run_homing_algo(all_waypoints):
+def run_homing_algo(all_waypoints, angle_filter, platonic_width_factor):
     # create a graph whose nodes represent the waypoints (all the visitable parks enroute to the destination)
     waypoint_ids = list(all_waypoints.keys())
     waypoints_graph = {}
@@ -15,18 +15,18 @@ def run_homing_algo(all_waypoints):
         waypoints_graph[waypoint_id] = {}
         for each_id in waypoint_ids:
             # from each park, calculate the distance-as-the-crowflys and the bearing to every other park.  also calculate the square root each park's area, to get a sortof ideal ("platonic") estimate of how tall or wide each park is.
-            crowflys_distance_bearing_and_platonic_width = crowflys_distance_and_bearing(all_waypoints[waypoint_id]['lon_lat'], all_waypoints[each_id]['lon_lat'], math.sqrt(all_waypoints[each_id]['size_in_hectares']*10000))
+            crowflys_distance_bearing_and_platonic_width = crowflys_distance_and_bearing(all_waypoints[waypoint_id]['lon_lat'], all_waypoints[each_id]['lon_lat'], (math.sqrt(all_waypoints[each_id]['size_in_hectares']*10000)*platonic_width_factor))
             # populate each node with the above distance-as-the-crowflys, bearing, estimate of the park's width, and a heuristic 'crowflys-distance minus the platonic-width'.
-            # This heuristic guesses how important a park might be. At each point along the journey, instead of targeting the absolute next closest park, the algorithm considers how wide each park might be. 
+            # This heuristic guesses how important a park might be. At each point along the journey, instead of targeting the absolute next closest park, the algorithm considers how wide each park might be.
             # Thus, a large park somewhat farther away may be prioritized over a closer yet smaller park -- if the distance to the large park minus the large park's width is less than the distance to the closer park minus the closer park's width.
             waypoints_graph[waypoint_id][each_id] = {'crowflys_distance': crowflys_distance_bearing_and_platonic_width[0], 'bearing': crowflys_distance_bearing_and_platonic_width[1], 'platonic_width': crowflys_distance_bearing_and_platonic_width[2], 'crowflys_distance_minus_platonic_width': (crowflys_distance_bearing_and_platonic_width[0]-crowflys_distance_bearing_and_platonic_width[2])}
-    print('waypoints graph', waypoints_graph)
     # Run filtering algorithm
-    waypoint_route_order = filter_graph_by_angle_then_distance(waypoints_graph)
+    waypoint_route_order = filter_graph_by_angle_then_distance(waypoints_graph, angle_filter)
+    print('waypoint_route_order length', len(waypoint_route_order))
     print('waypoint_route_order', waypoint_route_order)
     return waypoint_route_order
 
-def filter_graph_by_angle_then_distance(waypoints_graph):
+def filter_graph_by_angle_then_distance(waypoints_graph, angle_filter):
     route_order = ['origin']
     next_park = None
     while route_order:
@@ -35,11 +35,13 @@ def filter_graph_by_angle_then_distance(waypoints_graph):
     # Filter out parks not within x degrees from each waypoint to the destination
         angle_filtered_park_options = {k:v for k, v in waypoints_graph[route_order[-1]].items() if
         v['bearing'] != 0 and
-        v['bearing'] < (waypoints_graph[route_order[-1]]['destination']['bearing'] + math.pi/5) and
-        v['bearing'] > (waypoints_graph[route_order[-1]]['destination']['bearing'] - math.pi/5)}
+        v['bearing'] < (waypoints_graph[route_order[-1]]['destination']['bearing'] + angle_filter) and
+        v['bearing'] > (waypoints_graph[route_order[-1]]['destination']['bearing'] - angle_filter)}
     # Sort to find closest park
         # print('route_order', route_order)
-        print('angle_filtered_park_options', angle_filtered_park_options)
+        print('length angle_filtered_park_options', len(angle_filtered_park_options))
+        # for x in angle_filtered_park_options:
+        #     print('angle_filtered_park_options', x, angle_filtered_park_options[x]['crowflys_distance'], angle_filtered_park_options[x]['crowflys_distance_minus_platonic_width'])
 
         # next_park = min(angle_filtered_park_options, key=lambda distance: angle_filtered_park_options[distance]['crowflys_distance'])
         next_park = min(angle_filtered_park_options, key=lambda distance: angle_filtered_park_options[distance]['crowflys_distance_minus_platonic_width'])
