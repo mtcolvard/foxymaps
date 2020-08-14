@@ -17,8 +17,10 @@ export default class Pins extends PureComponent {
       dataArray = [originData]
     } else if(!originData && destinationData) {
       dataArray = [destinationData]
-    } else {
+    } else if(originData && destinationData) {
       dataArray = [originData, destinationData]
+    } else {
+      dataArray = []
     }
     return dataArray.map((place, index) => (
       <Marker

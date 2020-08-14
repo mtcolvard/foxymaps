@@ -26,6 +26,7 @@ class SearchBar extends React.Component {
   }
 
   render() {
+    const loadingSpinner =  this.props.loadingSpinner
     return(
       <div className="field searchfield has-addons is-marginless" >
         <div className="control">
@@ -35,11 +36,12 @@ class SearchBar extends React.Component {
             </span>
           </a>
         </div>
-        <div className="control is-expanded">
+        <div className={ loadingSpinner ? "control is-loading is-expanded ": "control is-expanded"}>
           <form onSubmit={this.handleSubmit}>
             <input
-              className="input is-focused"
+              className="input is-focus"
               autoFocus
+              autoComplete="off"
               type="text"
               placeholder={this.props.placeholder}
               onChange={this.handleChange}
@@ -49,8 +51,8 @@ class SearchBar extends React.Component {
           </form>
         </div>
         <div className="control">
-          <a className="button iconbutton" onClick={this.handleDeleteFieldClick}>
-            <span className="icon">
+          <a className="button" onClick={this.handleDeleteFieldClick}>
+            <span className="icon iconbutton">
               <FontAwesomeIcon icon="times" />
             </span>
           </a>

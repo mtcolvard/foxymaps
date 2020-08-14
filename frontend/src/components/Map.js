@@ -67,7 +67,9 @@ class Map extends React.Component {
       displayOriginSearchBar: false,
       displayOriginSearchOptions: false,
       displayDestinationSearchBar: true,
-      displayBottomDestinationData: false
+      displayBottomDestinationData: false,
+      loadingSpinner: false,
+      isMapboxSearching: false
     }
     this.handleViewportChange =this.handleViewportChange.bind(this)
     this.handleChange = this.handleChange.bind(this)
@@ -146,12 +148,14 @@ class Map extends React.Component {
 
   handleSubmit(name) {
     const searchName = `is${name}SearchTriggered`
+    this.setState({loadingSpinner: true, displayOriginSearchOptions: false})
     axios.get(`api/mapbox/geocoder/${this.state[name]}`)
       .then(res => this.setState({
         isSearchTriggered: true,
         [searchName]: true,
         searchResponseData: res.data
       }))
+      .then(() => this.setState({loadingSpinner: false}))
       .then(console.log('submit response geocoder', this.state[name]))
       .then(console.log('geocoder search response data', this.state.searchResponseData))
   }
@@ -174,6 +178,12 @@ class Map extends React.Component {
   //   }
 
   handleClear(name) {
+    this.setState({
+      isSearchTriggered: false,
+      displayBottomDestinationData: false,
+      searchResponseData: searchReponseStateDefault,
+      routeGeometry: routeGeometryStateDefault
+    })
     const checkName = [name]
     console.log(checkName)
     const check = checkName.includes('originFormData')
@@ -182,7 +192,8 @@ class Map extends React.Component {
         originLonLat: '',
         originFormData: '',
         originData: '',
-        isoriginFormDataSearchTriggered: false
+        isoriginFormDataSearchTriggered: false,
+        displayOriginSearchOptions: true
       })
     }
     else {
@@ -193,12 +204,6 @@ class Map extends React.Component {
         isdestinationFormDataSearchTriggered: false
       })
     }
-    this.setState({
-      isSearchTriggered: false,
-      displayBottomDestinationData: false,
-      searchResponseData: searchReponseStateDefault,
-      routeGeometry: routeGeometryStateDefault
-    })
   }
 
   handleReverseOriginAndDestination() {
@@ -268,6 +273,7 @@ class Map extends React.Component {
       originLonLat: '',
       originFormData: '',
       originData: '',
+      destinationData: '',
       searchResponseData: searchReponseStateDefault,
       routeGeometry: routeGeometryStateDefault,
       isoriginFormDataSearchTriggered: false,
@@ -302,13 +308,25 @@ class Map extends React.Component {
     this.handleViewportChange(data)
     this.setState({
       isdestinationFormDataSearchTriggered: false,
-      displayBottomDestinationData: true,
       destinationData: data,
       destinationLonLat: data.center,
       searchResponseData: searchReponseStateDefault,
       routeGeometry: routeGeometryStateDefault
     })
+    if(this.state.originFormData) {
+      this.setState({
+        displayBottomDestinationData: true,
+        isRouteSelected: true,
+        displayDirectionsSearchBar: true,
+        displayDestinationSearchBar: false,
+        displayOriginSearchBar: false,
+        displayOriginSearchOptions: false,
+        displayBottomDestinationData: false })
+    } else if(!this.state.originFormData) {
+      this.setState({displayBottomDestinationData: true, isRouteSelected:false})
+    }
   }
+
 
   displaySelectedOriginData(data) {
     this.handleViewportChange(data)
@@ -328,6 +346,7 @@ class Map extends React.Component {
 
   sendDestinationToBackend(origin, destination) {
     console.log('mapbox request sent')
+    this.setState({isMapboxSearching:true})
     axios.get(`api/routethenboundingbox/${origin}/${destination}/${this.state.ramblingTolerance}`)
       // .then(res =>
       // this.handleViewportChange(center:[res.data['center']]))
@@ -345,7 +364,8 @@ class Map extends React.Component {
           transitionInterpolator: new FlyToInterpolator({
             curve: 2.4}),
           transitionDuration: 1000
-        }
+        },
+        isMapboxSearching:false
       }))
       // .then(this.fitTheRouteInsideTheViewport())
   }
@@ -358,7 +378,7 @@ class Map extends React.Component {
 // onMouseUp={this.handleMouseUp}
 
   render () {
-    const {viewport, originFormData, destinationFormData, originData, destinationData, displayDirectionsSearchBar, displayOriginSearchOptions, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected, geolocateClick} = this.state
+    const {viewport, originFormData, destinationFormData, originData, destinationData, displayDirectionsSearchBar, displayOriginSearchOptions, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected, geolocateClick, loadingSpinner, isMapboxSearching} = this.state
     const directionsLayer = {routeGeometry}
     return (
       <div>
@@ -426,7 +446,8 @@ class Map extends React.Component {
                 onArrowLeft={this.handleDirectionsSearchBarArrowLeft}
                 onReverseOriginAndDestination={this.handleReverseOriginAndDestination}
                 onTriggerOriginSearchMenu={this.displayOriginSearchMenu}
-                onTriggerDestinationSearchMenu={this.displayDestinationSearchMenu}/>
+                onTriggerDestinationSearchMenu={this.displayDestinationSearchMenu}
+                isMapboxSearching={isMapboxSearching}/>
             }
             {displayOriginSearchBar &&
               <SearchBar
@@ -434,6 +455,7 @@ class Map extends React.Component {
                 onDeleteField={this.handleClear}
                 onHandleChange={this.handleChange}
                 onHandleSubmit={this.handleSubmit}
+                loadingSpinner={loadingSpinner}
                 searchformData={originFormData}
                 placeholder='Search'
                 name='originFormData'/>
@@ -444,12 +466,14 @@ class Map extends React.Component {
                 onDeleteField={this.handleClear}
                 onHandleChange={this.handleChange}
                 onHandleSubmit={this.handleSubmit}
+                loadingSpinner={loadingSpinner}
                 searchformData={destinationFormData}
                 placeholder='Add destination to plan route'
                 name='destinationFormData'/>
             }
             {displayOriginSearchOptions &&
-              <div className="box is-radiusless is-marginless">
+              <div className="locationbuttonfield">
+              <div className="box locationbuttonbox">
                 <button className="button is-fullwidth has-text-left" onClick={this.handleFindMyLocation}>
                   <span className="icon">
                     <FontAwesomeIcon icon="location-arrow"/></span>
@@ -460,6 +484,7 @@ class Map extends React.Component {
                     <FontAwesomeIcon icon="map-marker-alt"/></span>
                   <span>Choose on map</span>
                 </button>
+              </div>
               </div>
             }
             <div className="dropdown">

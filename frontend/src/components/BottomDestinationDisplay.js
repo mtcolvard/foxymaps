@@ -19,14 +19,14 @@ export default class BottomDestinationDisplay extends React.Component {
     const placeAddress = placeNameStrArray[1]+', '+placeNameStrArray[2]
     return(
       <div className="bottomFormContainer">
-        <div className="box">
-          <div className="level is-mobile">
+        <div className="box bottombox">
+          <div className="level is-mobile bottomboxtitle">
             <div className="level-left">
               <div className="level-item">
-                <p className="subtitle is-5">{isRouteSelected ? 'to ' : ''}<b>{placeName}</b></p>
+                <p className="subtitle ital is-5">{isRouteSelected ? 'to ' : ''}<b>{placeName}</b></p>
               </div>
             </div>
-            {routeDistance &&
+            {isRouteSelected && routeDistance &&
             <div className="level-right">
               <div className="level-item">
                 <p className="subtitle is-5">{routeDistanceFormatted} km</p>
@@ -36,7 +36,7 @@ export default class BottomDestinationDisplay extends React.Component {
           <div className="content">
             {isRouteSelected ? <p>via {routeLargestPark}</p> : <p>{placeAddress}</p>}
             {isRouteSelected ? <div></div> :
-            <button className="button is-info" onClick={this.handleClick} >
+            <button className="button is-info directionsbutton" onClick={this.handleClick} >
               <span className="icon">
                 <FontAwesomeIcon icon="directions"/>
               </span>

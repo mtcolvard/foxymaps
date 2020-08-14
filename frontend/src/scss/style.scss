@@ -1,3 +1,7 @@
+$progress-bar-background-color: transparent;
+$progress-indeterminate-duration: 6s;
+$progress-value-background-color: #4790E5;
+
 @import '~bulma';
 
 html, body {
@@ -7,12 +11,31 @@ html, body {
   font-family: 'Montserrat', sans-serif;
   font-style: normal;
   font-weight: 300;
+}
 
+button {
+  font-family: 'Montserrat', sans-serif;
+  font-style: normal;
+  font-weight: 400;
 }
 
 * {
   box-sizing: border-box;
 }
+
+.content p:not(:last-child) {
+  margin: 0;
+}
+
+.directionsbutton {
+  margin-top: 1em;
+}
+
+.level:not(:last-child) {
+  margin: 0 0 1em 0
+}
+
+
 
 .box:not(:last-child) {
   margin-bottom: 0.75em;
@@ -31,6 +54,14 @@ html, body {
   // padding-right:0px;
 }
 
+
+
+.bottombox {
+  padding: 1em 1em 1.5em 1em;
+}
+
+
+
 .centercolumn {
   padding: 0px;
 }
@@ -43,8 +74,21 @@ html, body {
 //   width: 100%;
 // }
 .searchfield {
-  padding:0.5em;
+  padding:0.5em 0.5em 0.33em 0.5em;
   border-radius:1em;
+}
+
+.locationbuttonfield {
+  padding:0em 0.5em 0.5em 0.5em;
+  border-radius:1em;
+}
+
+.locationbuttonbox {
+  border-radius:0.25em;
+}
+
+input {
+  background-color: white;
 }
 .title {
   padding:1px;

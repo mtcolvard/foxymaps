@@ -30,8 +30,10 @@ export default class SearchBarDirections extends React.Component {
   render() {
     const destination = this.props.destination
     const origin = this.props.origin
+    const isMapboxSearching = this.props.isMapboxSearching
     return (
-      <div className="box funbox">
+      <div>
+      <div className="box funbox is-marginless">
         <div className="columns is-mobile is-vcentered">
           <div className="column funcolumn is-narrow">
             <a className="button iconbutton" onClick={this.handleArrowLeftClick}>
@@ -72,6 +74,8 @@ export default class SearchBarDirections extends React.Component {
             </a>
           </div>
         </div>
+      </div>
+      {isMapboxSearching ? <progress className="progress is-small" max="100">20%</progress>: ''}
       </div>
     )
   }

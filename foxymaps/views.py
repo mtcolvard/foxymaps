@@ -80,7 +80,7 @@ class RouteThenBoundingBox(APIView):
             waypoints_size_in_hectares = {k:v for k, v in total_waypoints_dict.items() if k in waypoint_route_order}
             # largest_park = waypoints_size_in_hectares[max(waypoints_size_in_hectares, key=lambda v: waypoints_size_in_hectares[v]['size_in_hectares'])]
             largest_park_order = sorted(waypoints_size_in_hectares, key=lambda v: waypoints_size_in_hectares[v]['size_in_hectares'])
-            if len(parks_within_perp_distance) == 1:
+            if len(waypoint_route_order) == 3:
                 largest_park = waypoints_size_in_hectares[largest_park_order[-1]]['name']
             else:
                 largest_park = waypoints_size_in_hectares[largest_park_order[-1]]['name']+' and '+waypoints_size_in_hectares[largest_park_order[-2]]['name']
