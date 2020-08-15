@@ -19,12 +19,12 @@ def run_homing_algo(all_waypoints, angle_filter, platonic_width_factor):
             # populate each node with the above distance-as-the-crowflys, bearing, estimate of the park's width, and a heuristic 'crowflys-distance minus the platonic-width'.
             # This heuristic guesses how important a park might be. At each point along the journey, instead of targeting the absolute next closest park, the algorithm considers how wide each park might be.
             # Thus, a large park somewhat farther away may be prioritized over a closer yet smaller park -- if the distance to the large park minus the large park's width is less than the distance to the closer park minus the closer park's width.
-            waypoints_graph[waypoint_id][each_id] = {'crowflys_distance': crowflys_distance_bearing_and_platonic_width[0], 'bearing': crowflys_distance_bearing_and_platonic_width[1], 'platonic_width': crowflys_distance_bearing_and_platonic_width[2], 'crowflys_distance_minus_platonic_width': (crowflys_distance_bearing_and_platonic_width[0]-crowflys_distance_bearing_and_platonic_width[2])}
+            waypoints_graph[waypoint_id][each_id] = {'crowflys_distance': crowflys_distance_bearing_and_platonic_width[0], 'bearing': crowflys_distance_bearing_and_platonic_width[1], 'compass_bearing':crowflys_distance_bearing_and_platonic_width[3], 'platonic_width': crowflys_distance_bearing_and_platonic_width[2], 'crowflys_distance_minus_platonic_width': (crowflys_distance_bearing_and_platonic_width[0]-crowflys_distance_bearing_and_platonic_width[2])}
     # Run filtering algorithm
     waypoint_route_order = filter_graph_by_angle_then_distance(waypoints_graph, angle_filter)
     print('waypoint_route_order length', len(waypoint_route_order))
     print('waypoint_route_order', waypoint_route_order)
-    return waypoint_route_order
+    return [waypoint_route_order, waypoints_graph]
 
 def filter_graph_by_angle_then_distance(waypoints_graph, angle_filter):
     route_order = ['origin']
@@ -95,4 +95,6 @@ def crowflys_distance_and_bearing(startpoint, endpoint, size_in_hectares):
     y = math.sin(Δλ) * math.cos(φ2)
     x = math.cos(φ1)*math.sin(φ2) - math.sin(φ1)*math.cos(φ2)*math.cos(Δλ)
     θ = math.atan2(y, x)
-    return crowflys_distance, θ, size_in_hectares
+    compass_bearing = (θ*180/math.pi + 360) % 360
+
+    return crowflys_distance, θ, size_in_hectares, compass_bearing

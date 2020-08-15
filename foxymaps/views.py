@@ -100,10 +100,28 @@ class RouteThenBoundingBox(APIView):
         else:
         # Mapbox has a limit of 25 waypoints including the origin and destination for calls to thier Directions API
             total_waypoints_dict = self.sort_parks_by_acreage(origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, parks_within_perp_distance)
+
         # Run the route_calculations/homing_algo.py module to find the most direct route
-            waypoint_route_order = run_homing_algo(total_waypoints_dict, angle_filter, platonic_width_factor)
+            waypoint_route_return = run_homing_algo(total_waypoints_dict, angle_filter, platonic_width_factor)
+
+            waypoint_route_order = waypoint_route_return[0]
+            for x in waypoint_route_order:
+                waypoint_bearing_to_destination = {k:v[x]['compass_bearing'] for k, v in waypoint_route_return[1].items()}
+            compass_bearing_dict = {k:v for k, v in waypoint_bearing_to_destination.items() if k in waypoint_route_order}
+            # count = 0
+            # while count <= len(waypoint_route_order):
+            #     radius_list = []
+            #     radius_angle = '45'
+            #     radius_list = radius_list.append(radius_angle)
+            #     count = count + 1
+            waypoint_bearings_radius = list(zip(compass_bearing_dict.values(), '45'))
+            print('waypoint_bearing_to_destination', waypoint_bearing_to_destination)
+            print('compass_bearing_list', compass_bearing_dict.values())
+            # print('radius_list', radius_list)
+            print('waypoint_bearings_radius', waypoint_bearings_radius)
+
+        # Determine the largest park to display in the frontend UI
             waypoints_size_in_hectares = {k:v for k, v in total_waypoints_dict.items() if k in waypoint_route_order}
-            # largest_park = waypoints_size_in_hectares[max(waypoints_size_in_hectares, key=lambda v: waypoints_size_in_hectares[v]['size_in_hectares'])]
             largest_park_order = sorted(waypoints_size_in_hectares, key=lambda v: waypoints_size_in_hectares[v]['size_in_hectares'])
             if len(waypoint_route_order) == 3:
                 largest_park = waypoints_size_in_hectares[largest_park_order[-1]]['name']
@@ -112,37 +130,46 @@ class RouteThenBoundingBox(APIView):
             print(largest_park)
             route_waypoints_lon_lat = [total_waypoints_dict[x]['lon_lat'] for x in waypoint_route_order]
 
+    # Format parks within the perpendicular distance for display with pins on the map
         parks_within_perp_distance_lon_lat = list({k:v['lon_lat'] for k, v in parks_within_perp_distance.items()}.values())
         print('parks_within_perp_distance lon_lat', parks_within_perp_distance_lon_lat)
+        print('route_waypoints_lon_lat', route_waypoints_lon_lat)
+
     # Request the route directions from mapboxDirectionsAPI.py module
-        route_geometry = Mapbox_Directions_API.returnRouteGeometry(self, route_waypoints_lon_lat, walkway_bias, alley_bias)
-        route_waypoints_string = ';'.join([str(elem) for elem in route_waypoints_lon_lat])
-        route_waypoints_string_modified = route_waypoints_string.replace('[', '').replace(']', '').replace(' ', '')
-        print('waypoints_string', route_waypoints_string_modified)
-        route_geometry_2 = self.returnRouteGeometry(_request, route_waypoints_string_modified)
+        # route_geometry = Mapbox_Directions_API.returnRouteGeometry(self, route_waypoints_lon_lat, walkway_bias, alley_bias)
+
+        mapbox_directions_API_response = self.returnRouteGeometry(_request, route_waypoints_lon_lat)
+
+        route_coordinates = mapbox_directions_API_response['routes'][0]['geometry']['coordinates']
+        route_distance = mapbox_directions_API_response['routes'][0]['distance']
+        route_duration = mapbox_directions_API_response['routes'][0]['duration']
+        route_geometry = {'type': 'Feature','geometry': {'type': 'LineString', 'coordinates': route_coordinates}, 'properties':{'distance': route_distance, 'duration': route_duration}}
+        print('route_geometry', route_geometry)
+
     # Calculate the midpoint between the origin and the destination
         midpoint = Distance_And_Bearing.calculate_midpoint(self, origin_lon_lat, destination_lon_lat)
-        # print('midpoint', midpoint)
-        route_response = {'route_geometry':route_geometry, 'largest_park': largest_park, 'midpoint': midpoint, 'parks_within_perp_distance_lon_lat': parks_within_perp_distance_lon_lat}
-        # print('route_response', route_response)
+
+    # Return the response to the frontend Directions API call
+        route_response = {'route_geometry':route_geometry, 'largest_park': largest_park, 'midpoint': midpoint, 'parks_within_perp_distance_lon_lat': route_waypoints_lon_lat}
         return Response(route_response)
-        # return Response([route_geometry, largest_park, midpoint])
-    def returnRouteGeometry(self, _request, coords):
-        print('coords', coords)
+
+    def returnRouteGeometry(self, _request, route_waypoints_lon_lat):
+        route_waypoints_string = ','.join([str(elem) for elem in route_waypoints_lon_lat])
+        coords = route_waypoints_string.replace('[', '').replace(']', '').replace(' ', '')
+        # bearings='336,45;334,45;336,45;328,45;333,45;344,45;342,45;343,45;332,45;339,45;337,45;340,45;340,45;339,45;338,45;337,45;338,45;45,45'
         params = {
             # 'country': 'GB'
             'geometries': 'geojson',
-            # 'walkway_bias':1,
-            # 'alleyway_bias':1,
-            'access_token': 'pk.eyJ1IjoibXRjb2x2YXJkIiwiYSI6ImNrMDgzYndkZjBoanUzb21jaTkzajZjNWEifQ.ocEzAm8Y7a6im_FVc92HjQ'
+            'continue_straight':'false',
+            'access_token': 'pk.eyJ1IjoibXRjb2x2YXJkIiwiYSI6ImNrMDgzYndkZjBoanUzb21jaTkzajZjNWEifQ.ocEzAm8Y7a6im_FVc92HjQ',
+            'walkway_bias':1,
+            'alley_bias':1,
         }
         response = requests.get(f'https://api.mapbox.com/directions/v5/mapbox/walking/{coords}', params=params)
-
+        # ,data=bearings)
+        print(response.url)
         data = response.json()
-        route_geometry = data['routes'][0]['geometry']['coordinates']
-        print('view response.json()', data)
-        print('view response.json()[\'routes\'][0][\'geometry\'][\'coordinates\']', route_geometry)
-        return route_geometry
+        return data
 
     def populate_all_parks_dict(self, response_data, origin_lon_lat, best_fit_origin_to_destination):
 

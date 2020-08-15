@@ -12,12 +12,13 @@ class Mapbox_Directions_API:
     def returnRouteGeometry(self, waypoints_list, walkway_bias, alley_bias):
         walk = walkway_bias
         alley = alley_bias
+
         response = service.directions(waypoints_list, profile='mapbox/walking', continue_straight=True, walking_speed=5, walkway_bias=walk, alley_bias=alley)
-        # response = service.directions(waypoints_list, profile='mapbox/walking', continue_straight=True)
-        print('API json', response.json())
+
         data = response.geojson()
+        
+        print('API json', response.json())
         print('API, geojson', data)
-        # print('DirectionsCalulations', data)
         return data['features'][0]
 
 

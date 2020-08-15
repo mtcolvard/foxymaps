@@ -525,7 +525,7 @@ class Map extends React.Component {
             <BottomDestinationDisplay
               onHandleDirectionsButtonClick={this.handleDirectionsButtonClick}
               destinationData={destinationData}
-              routeDistance={routeGeometry['properties']['duration']}
+              routeDistance={routeGeometry['properties']['distance']}
               routeLargestPark={routeLargestPark}
               isRouteSelected={isRouteSelected}
             />
