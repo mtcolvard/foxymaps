@@ -56,13 +56,14 @@ class RouteThenBoundingBox(APIView):
     def get(self, _request, origin, destination, ramblingTolerance):
         rambling_tolerance = int(ramblingTolerance)
         rambling_tolerance = 1000
-        size_in_hectares_filter = 0.20
+        size_in_hectares_filter = 0.28
         angle_filter = math.pi/5
         platonic_width_factor = 1
         walking_speed = 1.42
         alley_bias = 1
         walkway_bias = 1
         waypoint_exit_radius='45'
+        snap_tolerance='140'
 
 
         origin_lon_lat = [float(x) for x in origin.split(',')]
@@ -78,7 +79,7 @@ class RouteThenBoundingBox(APIView):
         all_parks = self.populate_all_parks_dict(response_data, origin_lon_lat, best_fit_origin_to_destination)
 
     # create a boundingbox by filtering out all parks not within the rectangle formed by the distance from origin to destingation and the rambling tolerance (e.g. 1000 meters)
-        parks_within_perp_distance = self.calculate_parks_within_perp_distance(all_parks, 'from_origin', 'origin_to_destination', origin_to_destination_distance, origin_to_destination_bearing, rambling_tolerance, size_in_hectares_filter)
+        parks_within_perp_distance = self.calculate_parks_within_perp_distance(all_parks, origin_to_destination_distance, origin_to_destination_bearing, rambling_tolerance, size_in_hectares_filter)
         # print('parks_within_perp_distance length', len(parks_within_perp_distance))
         # print('parks_within_perp_distance', parks_within_perp_distance)
 
@@ -94,16 +95,17 @@ class RouteThenBoundingBox(APIView):
             waypoint_route_order = waypoint_route_order_and_graph[0]
             waypoint_graph = waypoint_route_order_and_graph[1]
 
+            # compass_and_radius_routing_option is a optional parameter on the mapbox directions API which influences the direction a route starts from each waypoint.  it is useful for making sure routes continue traveling in their current direction
             waypoints_bearing_towards_destination = {}
             for x in waypoint_route_order:
                 waypoints_bearing_towards_destination[x] = waypoint_graph[x]['destination']['compass_bearing']
-            print("waypoints_bearing_towards_destination", waypoints_bearing_towards_destination)
             waypoints_bearing_list = list(waypoints_bearing_towards_destination.values())
-            print('waypoints_bearing_list', waypoints_bearing_list)
-            # compass_and_radius_routing_option is a optional parameter on the mapbox directions API which influences the direction a route starts from each waypoint.  it is useful for making sure routes continue traveling in their current direction
             compass_and_radius_routing_option = f',{waypoint_exit_radius};'.join(str(elem) for elem in waypoints_bearing_list)
             compass_and_radius_routing_option_formatted = compass_and_radius_routing_option+f',{waypoint_exit_radius}'
-            print('compass_and_radius_routing_option', compass_and_radius_routing_option_formatted)
+
+            # waypoint_snap_to_road_grid_radius is an optional parameter on the mapbox directions API which sets a tolerance for how far mapbox is allowed to move the lon_lat waypoint coordinate is the coordinate is not directly on the road grid
+            waypoint_snap_to_road_grid_tolerance = f'{snap_tolerance};'*(len(waypoint_route_order)-1)+f'{snap_tolerance}'
+            print(waypoint_snap_to_road_grid_tolerance)
 
         # Determine the largest park to display in the frontend UI
             waypoints_size_in_hectares = {k:v for k, v in total_waypoints_dict.items() if k in waypoint_route_order}
@@ -125,7 +127,7 @@ class RouteThenBoundingBox(APIView):
         route_waypoints_lon_lat_string = ';'.join([str(elem) for elem in route_waypoints_lon_lat])
         route_waypoints_lon_lat_formatted = route_waypoints_lon_lat_string.replace('[', '').replace(']', '').replace(' ', '')
 
-        mapbox_directions_API_response = self.returnRouteGeometry(_request, route_waypoints_lon_lat_formatted, compass_and_radius_routing_option_formatted, walking_speed, walkway_bias, alley_bias)
+        mapbox_directions_API_response = self.returnRouteGeometry(_request, route_waypoints_lon_lat_formatted, compass_and_radius_routing_option_formatted, walking_speed, walkway_bias, alley_bias, waypoint_snap_to_road_grid_tolerance)
 
         route_coordinates = mapbox_directions_API_response['routes'][0]['geometry']['coordinates']
         route_distance = mapbox_directions_API_response['routes'][0]['distance']
@@ -142,7 +144,7 @@ class RouteThenBoundingBox(APIView):
         # print("waypoint_route_order_and_graph", waypoint_route_order_and_graph[1])
         return Response(route_response)
 
-    def returnRouteGeometry(self, _request, waypoints, bearings, walking_speed, walkway_bias, alley_bias):
+    def returnRouteGeometry(self, _request, waypoints, bearings, walking_speed, walkway_bias, alley_bias, _snap_to_grid_tolerance):
         params = {
             'geometries': 'geojson',
             # 'continue_straight':'false',
@@ -150,7 +152,8 @@ class RouteThenBoundingBox(APIView):
             'walking_speed': walking_speed,
             'walkway_bias': walkway_bias,
             'alley_bias': alley_bias,
-            'bearings': bearings
+            'bearings': bearings,
+            # 'radiuses': snap_to_grid_tolerance,
         }
         response = requests.get(f'https://api.mapbox.com/directions/v5/mapbox/walking/{waypoints}', params=params)
         print('response.url', response.url)
@@ -174,33 +177,46 @@ class RouteThenBoundingBox(APIView):
             'id':park['id'],
             'name':park['name'],
             'lon_lat': lon_lat,
-            'crowflys_distance_and_bearing': {'from_origin': crowflys_distance_and_bearing},
-            'distance_from_bestfit_line': {'origin_to_destination': Distance_And_Bearing.perpendicular_distance_from_bestfit_line(self, best_fit_origin_to_destination, crowflys_distance_and_bearing)},
+            'type_of_site': park['type_of_site'],
+            'borough': park['borough'],
+            'crowflys_distance_and_bearing': crowflys_distance_and_bearing,
+            'distance_from_bestfit_line': Distance_And_Bearing.perpendicular_distance_from_bestfit_line(self, best_fit_origin_to_destination, crowflys_distance_and_bearing),
             'size_in_hectares': size_in_hectares_float,
             'listed_structures': park['listed_structures'],
             'nature_conservation_area': park['nature_conservation_area']}
         return all_parks
 
     def populate_total_waypoints_dict(self, origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, parks_within_perp_distance):
-        total_waypoints_dict = {'origin': {'lon_lat': origin_lon_lat, 'size_in_hectares': 0, 'crowflys_distance_and_bearing': {'from_origin': (0, 0)}}, **parks_within_perp_distance, 'destination': {'lon_lat': destination_lon_lat, 'size_in_hectares': 0, 'crowflys_distance_and_bearing': {'from_origin': best_fit_origin_to_destination}}}
+        total_waypoints_dict = {'origin': {'lon_lat': origin_lon_lat, 'size_in_hectares': 0, 'crowflys_distance_and_bearing': (0, 0)}, **parks_within_perp_distance, 'destination': {'lon_lat': destination_lon_lat, 'size_in_hectares': 0, 'crowflys_distance_and_bearing': best_fit_origin_to_destination}}
         return total_waypoints_dict
 
-    def calculate_parks_within_perp_distance(self, all_parks, orientation, journey_leg, origin_to_destination_distance, origin_to_destination_bearing, rambling_tolerance, size_in_hectares_filter):
+    def calculate_parks_within_perp_distance(self, all_parks, origin_to_destination_distance, origin_to_destination_bearing, rambling_tolerance, size_in_hectares_filter):
         parks_within_perp_distance = {
         k:v for (k, v) in all_parks.items() if
         # select only parks within ± 45 degrees of inital bearing towards destination
-            v['crowflys_distance_and_bearing'][orientation][1] < (origin_to_destination_bearing + math.pi/8) and
-            v['crowflys_distance_and_bearing'][orientation][1] > (origin_to_destination_bearing - math.pi/8) and
+            v['crowflys_distance_and_bearing'][1] < (origin_to_destination_bearing + math.pi/8) and
+            v['crowflys_distance_and_bearing'][1] > (origin_to_destination_bearing - math.pi/8) and
         # select only parks within the radius from origin to destination
-            v['crowflys_distance_and_bearing'][orientation][0] < origin_to_destination_distance and
+            v['crowflys_distance_and_bearing'][0] < origin_to_destination_distance and
         # select parks within user's tolerance for rambling
-            v['distance_from_bestfit_line'][journey_leg] <= rambling_tolerance and
-            v['distance_from_bestfit_line'][journey_leg] >= 0 and
+            v['distance_from_bestfit_line'] <= rambling_tolerance and
+            v['distance_from_bestfit_line'] >= 0
+            and
+            # v['size_in_hectares'] >= size_in_hectares_filter}
+            # v['type_of_site'] != 'Square' and
+            # (v['size_in_hectares'] >= size_in_hectares_filter or
+            # (v['size_in_hectares'] == 0 and v['type_of_site'] != 'Churchyard'))}
+            (v['size_in_hectares'] >= size_in_hectares_filter
+            or
+            (v['size_in_hectares'] == 0 and (v['borough'] != 'City of London' and v['type_of_site'] != 'Square'))
+            or v['size_in_hectares'] > 0 and v['borough'] == 'City of London' and v['type_of_site'] != 'Square' and v['type_of_site'] != 'Churchyard')}
             # (v['size_in_hectares'] >= size_in_hectares_filter or
             # v['size_in_hectares'] == 0)}
-            v['size_in_hectares'] >= size_in_hectares_filter or
-            v['size_in_hectares'] == 0}
+            # v['size_in_hectares'] >= size_in_hectares_filter or
+            # v['size_in_hectares'] == 0}
+
         print('parks_within_perp_distance length', len(parks_within_perp_distance))
+        print('parks_within_perp_distance', parks_within_perp_distance)
         return parks_within_perp_distance
 
     def sort_parks_by_acreage(self, origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, parks_within_perp_distance):
