@@ -43,10 +43,11 @@ class MapGeocoderView(APIView):
         # print(data)
         return Response(data)
 class RouteThenBoundingBox(APIView):
-    def get(self, _request, origin, destination, ramblingTolerance):
+    def get(self, _request, origin, destination, ramblingTolerance, parkAccessFilter):
         rambling_tolerance = int(ramblingTolerance)
         origin_lon_lat = [float(x) for x in origin.split(',')]
         destination_lon_lat = [float(x) for x in destination.split(',')]
+        park_access = str(parkAccessFilter)
     # parameters
         rambling_tolerance = 1000
         size_in_hectares_filter = 0.28
@@ -59,15 +60,19 @@ class RouteThenBoundingBox(APIView):
         alley_bias = 1
         walkway_bias = 1
         walking_speed = 1.42
-        snap_tolerance='unlimited'
+        snap_tolerance= 'unlimited'
 
     # calculate the distance from origin to destination
         best_fit_origin_to_destination = Distance_And_Bearing.crowflys_bearing(self, origin_lon_lat, destination_lon_lat)
         origin_to_destination_distance = best_fit_origin_to_destination[0]
         origin_to_destination_bearing = best_fit_origin_to_destination[1]
     # query the database for parks open to the public
-        queryset = Location.objects.filter(open_to_public='Yes')
-        serializer = LocationSpeedSerializer(queryset, many=True)
+        query_all = list(Location.objects.all())
+        open_to_public = query_all.filter(open_to_public='Yes')
+        open_to_private = query_all.filter(open_to_public='No')
+        serializer_query_all = LocationSpeedSerializer(query_all, many=True)
+        serializer_open_to_public = LocationSpeedSerializer(open_to_public, many=True)
+        serializer_open_to_private = LocationSpeedSerializer(open_to_private, many=True)
         response_data = serializer.data
         all_parks = self.populate_all_parks_dict(response_data, origin_lon_lat, best_fit_origin_to_destination)
 

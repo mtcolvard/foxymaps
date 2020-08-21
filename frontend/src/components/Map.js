@@ -10,7 +10,8 @@ import SearchBarDirections from './SearchBarDirections'
 import DropDownDisplay from './DropDownDisplay'
 import BottomDestinationDisplay from './BottomDestinationDisplay'
 import DisplayRouteCheck  from './DisplayRouteCheck'
-import CommuteVsExploreOptions from './CommuteVsExploreOptions'
+import CommuteVsExplore from './CommuteVsExplore'
+import ExploreOptions from './ExploreOptions'
 
 // import HookDropDownDisplay from './HookDropDownDisplay'
 import Pins from './Pins'
@@ -69,13 +70,14 @@ class Map extends React.Component {
       displayOriginSearchOptions: false,
       displayDestinationSearchBar: true,
       displayBottomDestinationData: false,
-      displayCommuteVsExploreOptions: true,
+      displayCommuteVsExplore: true,
       loadingSpinner: false,
       isMapboxSearching: false,
       parkPins: [],
       publicButton: true,
       publicPrivateButton: false,
-      privateButton: false
+      privateButton: false,
+      toggleExplore: false,
     }
     this.handleViewportChange =this.handleViewportChange.bind(this)
     this.handleChange = this.handleChange.bind(this)
@@ -94,6 +96,7 @@ class Map extends React.Component {
     this.chooseLocationOnMap = this.chooseLocationOnMap.bind(this)
     this.handleMapClick = this.handleMapClick.bind(this)
     this.handlePublicPrivateButtonClick = this.handlePublicPrivateButtonClick.bind(this)
+    this.handleToggleClick = this.handleToggleClick.bind(this)
     // this.handleMouseUp = this.handleMouseUp.bind(this)
     // this.handleMouseUpSubmit = this.handleMouseUpSubmit.bind(this)
 
@@ -280,6 +283,10 @@ class Map extends React.Component {
     }
   }
 
+  handleToggleClick() {
+    this.setState({ toggleExplore: !this.state.toggleExplore })
+  }
+
   handleOriginSearchBarArrowLeft(name) {
     this.handleClear(name)
     this.handleDirectionsButtonClick()
@@ -376,7 +383,7 @@ class Map extends React.Component {
   sendDestinationToBackend(origin, destination) {
     console.log('mapbox request sent')
     this.setState({isMapboxSearching:true})
-    axios.get(`api/routethenboundingbox/${origin}/${destination}/${this.state.ramblingTolerance}`)
+    axios.get(`api/routethenboundingbox/${origin}/${destination}/${this.state.ramblingTolerance}${this.state.parkAccessFilter}`)
       // .then(res =>
       // this.handleViewportChange(center:[res.data['center']]))
       .then(res =>
@@ -408,7 +415,7 @@ class Map extends React.Component {
 // onMouseUp={this.handleMouseUp}
 
   render () {
-    const {viewport, originFormData, destinationFormData, originData, destinationData, displayDirectionsSearchBar, displayOriginSearchOptions, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected, geolocateClick, loadingSpinner, isMapboxSearching, parkPins, displayCommuteVsExploreOptions, publicButton, publicPrivateButton, privateButton} = this.state
+    const {viewport, originFormData, destinationFormData, originData, destinationData, displayDirectionsSearchBar, displayOriginSearchOptions, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected, geolocateClick, loadingSpinner, isMapboxSearching, parkPins, displayCommuteVsExplore, publicButton, publicPrivateButton, privateButton, toggleExplore} = this.state
     const directionsLayer = {routeGeometry}
     return (
       <div>
@@ -502,12 +509,17 @@ class Map extends React.Component {
                 placeholder='Add destination to plan route'
                 name='destinationFormData'/>
             }
-            {displayCommuteVsExploreOptions &&
-              <CommuteVsExploreOptions
-                onHandlePublicPrivateButtonClick={this.handlePublicPrivateButtonClick}publicButton={publicButton}
-                publicPrivateButton={publicPrivateButton}
-                privateButton={privateButton}/>
+            {displayCommuteVsExplore &&
+              <CommuteVsExplore
+                onHandleToggleClick={this.handleToggleClick}
+                toggleExplore={toggleExplore}/>
             }
+            {toggleExplore &&
+              <ExploreOptions
+                onHandlePublicPrivateButtonClick={this.handlePublicPrivateButtonClick}
+                publicButton={publicButton}
+                publicPrivateButton={publicPrivateButton}
+                privateButton={privateButton}/>}
             {displayOriginSearchOptions &&
               <div className="locationbuttonfield">
               <div className="box locationbuttonbox">
