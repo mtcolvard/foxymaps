@@ -10,6 +10,7 @@ import SearchBarDirections from './SearchBarDirections'
 import DropDownDisplay from './DropDownDisplay'
 import BottomDestinationDisplay from './BottomDestinationDisplay'
 import DisplayRouteCheck  from './DisplayRouteCheck'
+import CommuteVsExploreOptions from './CommuteVsExploreOptions'
 
 // import HookDropDownDisplay from './HookDropDownDisplay'
 import Pins from './Pins'
@@ -68,9 +69,13 @@ class Map extends React.Component {
       displayOriginSearchOptions: false,
       displayDestinationSearchBar: true,
       displayBottomDestinationData: false,
+      displayCommuteVsExploreOptions: true,
       loadingSpinner: false,
       isMapboxSearching: false,
-      parkPins: []
+      parkPins: [],
+      publicButton: true,
+      publicPrivateButton: false,
+      privateButton: false
     }
     this.handleViewportChange =this.handleViewportChange.bind(this)
     this.handleChange = this.handleChange.bind(this)
@@ -88,6 +93,7 @@ class Map extends React.Component {
     this.handleFindMyLocation = this.handleFindMyLocation.bind(this)
     this.chooseLocationOnMap = this.chooseLocationOnMap.bind(this)
     this.handleMapClick = this.handleMapClick.bind(this)
+    this.handlePublicPrivateButtonClick = this.handlePublicPrivateButtonClick.bind(this)
     // this.handleMouseUp = this.handleMouseUp.bind(this)
     // this.handleMouseUpSubmit = this.handleMouseUpSubmit.bind(this)
 
@@ -252,6 +258,28 @@ class Map extends React.Component {
     })
   }
 
+  handlePublicPrivateButtonClick(buttonName) {
+    if(buttonName == 'privateButton') {
+      this.setState({
+        publicButton: false,
+        publicPrivateButton: false,
+        privateButton: true
+      })
+    } else if(buttonName == 'publicPrivateButton') {
+      this.setState({
+        publicButton: false,
+        publicPrivateButton: true,
+        privateButton: false
+      })
+    } else {
+      this.setState({
+        publicButton: true,
+        publicPrivateButton: false,
+        privateButton: false
+      })
+    }
+  }
+
   handleOriginSearchBarArrowLeft(name) {
     this.handleClear(name)
     this.handleDirectionsButtonClick()
@@ -380,7 +408,7 @@ class Map extends React.Component {
 // onMouseUp={this.handleMouseUp}
 
   render () {
-    const {viewport, originFormData, destinationFormData, originData, destinationData, displayDirectionsSearchBar, displayOriginSearchOptions, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected, geolocateClick, loadingSpinner, isMapboxSearching, parkPins} = this.state
+    const {viewport, originFormData, destinationFormData, originData, destinationData, displayDirectionsSearchBar, displayOriginSearchOptions, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected, geolocateClick, loadingSpinner, isMapboxSearching, parkPins, displayCommuteVsExploreOptions, publicButton, publicPrivateButton, privateButton} = this.state
     const directionsLayer = {routeGeometry}
     return (
       <div>
@@ -473,6 +501,12 @@ class Map extends React.Component {
                 searchformData={destinationFormData}
                 placeholder='Add destination to plan route'
                 name='destinationFormData'/>
+            }
+            {displayCommuteVsExploreOptions &&
+              <CommuteVsExploreOptions
+                onHandlePublicPrivateButtonClick={this.handlePublicPrivateButtonClick}publicButton={publicButton}
+                publicPrivateButton={publicPrivateButton}
+                privateButton={privateButton}/>
             }
             {displayOriginSearchOptions &&
               <div className="locationbuttonfield">
