@@ -9,7 +9,7 @@ import SearchBar from './SearchBar'
 import SearchBarDirections from './SearchBarDirections'
 import DropDownDisplay from './DropDownDisplay'
 import BottomDestinationDisplay from './BottomDestinationDisplay'
-import DisplayRouteCheck  from './DisplayRouteCheck'
+import ShouldTheRouteBeDisplayed  from './ShouldTheRouteBeDisplayed'
 import CommuteVsExplore from './CommuteVsExplore'
 import ExploreOptions from './ExploreOptions'
 
@@ -77,6 +77,7 @@ class Map extends React.Component {
       publicButton: true,
       publicPrivateButton: false,
       privateButton: false,
+      parkAccessFilter: 'publicParks',
       toggleExplore: false,
     }
     this.handleViewportChange =this.handleViewportChange.bind(this)
@@ -115,6 +116,27 @@ class Map extends React.Component {
         curve: 2.4})
     }})
   }
+
+  handleViewportChange(data) {
+    this.setState({
+      viewport: {
+        ...this.state.viewport,
+        longitude: data.center[0],
+        latitude: data.center[1],
+        transitionInterpolator: new LinearInterpolator(),
+        transitionDuration: 1000
+      }
+    })
+  }
+
+  // THIS NEEDS TO RECEIVE THE DATA FROM THE GEOLOCATOR AND IF CLICKED TRIGGER THE GEOLOCATOR
+  handleFindMyLocation() {
+    this.setState({geolocateClick: true})
+  }
+// THIS NEEDS TO BE ABLE FOR A PERSON TO DROP A PIN ON THIER ORIGIN FROM BOTH THE MOUSE AND FROM MOBILE
+  chooseLocationOnMap() {
+    this.setState({originLonLat: [-0.071132, 51.518891]})
+  }
   // handleMouseUp({lngLat, deltaTime}) {
   //   console.log(lngLat)
   //   // const lngLatString = lngLat[0].toString().substr(0,6) +'  '+ lngLat[1].toString().substr(0,6) +','+ 'Custom Location'
@@ -148,6 +170,23 @@ class Map extends React.Component {
   //   }
   // }
 
+  // handleMouseUpSubmit(lngLat, name) {
+  //   const lngLatString = lngLat.toString()
+  //   // if(name === 'OriginData') {
+  //   //   axios.get(`api/mapbox/geocoder/${lngLatString}`)
+  //   //     .then(res => this.setState({
+  //   //       searchResponseData: res.data
+  //   //     }))
+  //   //     .then(this.displaySelectedOriginData(this.state.searchResponseData.features[0]))
+  //   // } else if(name === 'DestinationData') {
+  //   //   axios.get(`api/mapbox/geocoder/${lngLatString}`)
+  //   //     .then(res => this.setState({
+  //   //       searchResponseData: res.data
+  //   //     }))
+  //   //     .then(this.displaySelectedDestinationData(this.state.searchResponseData.features[0]))
+  //   //   }
+  //   }
+
   handleChange(e) {
     const target = e.target
     const value = target.value
@@ -169,23 +208,6 @@ class Map extends React.Component {
       .then(console.log('submit response geocoder', this.state[name]))
       .then(console.log('geocoder search response data', this.state.searchResponseData))
   }
-
-  // handleMouseUpSubmit(lngLat, name) {
-  //   const lngLatString = lngLat.toString()
-  //   // if(name === 'OriginData') {
-  //   //   axios.get(`api/mapbox/geocoder/${lngLatString}`)
-  //   //     .then(res => this.setState({
-  //   //       searchResponseData: res.data
-  //   //     }))
-  //   //     .then(this.displaySelectedOriginData(this.state.searchResponseData.features[0]))
-  //   // } else if(name === 'DestinationData') {
-  //   //   axios.get(`api/mapbox/geocoder/${lngLatString}`)
-  //   //     .then(res => this.setState({
-  //   //       searchResponseData: res.data
-  //   //     }))
-  //   //     .then(this.displaySelectedDestinationData(this.state.searchResponseData.features[0]))
-  //   //   }
-  //   }
 
   handleClear(name) {
     this.setState({
@@ -216,41 +238,6 @@ class Map extends React.Component {
     }
   }
 
-  handleReverseOriginAndDestination() {
-    const tempOriginLonLat = this.state.originLonLat
-    const tempOriginFormData = this.state.originFormData
-    const tempOriginData = this.state.originData
-    this.setState({
-    originLonLat: this.state.destinationLonLat,
-    originFormData: this.state.destinationFormData,
-    originData: this.state.destinationData,
-    destinationLonLat: tempOriginLonLat,
-    destinationFormData: tempOriginFormData,
-    destinationData: tempOriginData,
-    })
-  }
-
-  handleViewportChange(data) {
-    this.setState({
-      viewport: {
-        ...this.state.viewport,
-        longitude: data.center[0],
-        latitude: data.center[1],
-        transitionInterpolator: new LinearInterpolator(),
-        transitionDuration: 1000
-      }
-    })
-  }
-
-  // THIS NEEDS TO RECEIVE THE DATA FROM THE GEOLOCATOR AND IF CLICKED TRIGGER THE GEOLOCATOR
-  handleFindMyLocation() {
-    this.setState({geolocateClick: true})
-  }
-// THIS NEEDS TO BE ABLE FOR A PERSON TO DROP A PIN ON THIER ORIGIN FROM BOTH THE MOUSE AND FROM MOBILE
-  chooseLocationOnMap() {
-    this.setState({originLonLat: [-0.071132, 51.518891]})
-  }
-
   handleDirectionsButtonClick() {
     this.setState({
       displayDirectionsSearchBar: true,
@@ -266,25 +253,30 @@ class Map extends React.Component {
       this.setState({
         publicButton: false,
         publicPrivateButton: false,
-        privateButton: true
+        privateButton: true,
+        parkAccessFilter: 'privateParks'
       })
     } else if(buttonName == 'publicPrivateButton') {
       this.setState({
         publicButton: false,
         publicPrivateButton: true,
-        privateButton: false
+        privateButton: false,
+        parkAccessFilter: 'allParks'
       })
     } else {
       this.setState({
         publicButton: true,
         publicPrivateButton: false,
-        privateButton: false
+        privateButton: false,
+        parkAccessFilter: 'publicParks'
       })
     }
   }
 
   handleToggleClick() {
     this.setState({ toggleExplore: !this.state.toggleExplore })
+    if(!this.state.toggleExplore && this.state.parkAccessFilter != 'publicParks') {
+        this.setState({parkAccessFilter: 'publicParks'})}
   }
 
   handleOriginSearchBarArrowLeft(name) {
@@ -314,6 +306,20 @@ class Map extends React.Component {
       routeGeometry: routeGeometryStateDefault,
       isoriginFormDataSearchTriggered: false,
       isdestinationFormDataSearchTriggered: false
+    })
+  }
+
+  handleReverseOriginAndDestination() {
+    const tempOriginLonLat = this.state.originLonLat
+    const tempOriginFormData = this.state.originFormData
+    const tempOriginData = this.state.originData
+    this.setState({
+    originLonLat: this.state.destinationLonLat,
+    originFormData: this.state.destinationFormData,
+    originData: this.state.destinationData,
+    destinationLonLat: tempOriginLonLat,
+    destinationFormData: tempOriginFormData,
+    destinationData: tempOriginData,
     })
   }
 
@@ -363,7 +369,6 @@ class Map extends React.Component {
     }
   }
 
-
   displaySelectedOriginData(data) {
     this.handleViewportChange(data)
     this.setState({
@@ -380,10 +385,10 @@ class Map extends React.Component {
     console.log("origin search response data", data)
   }
 
-  sendDestinationToBackend(origin, destination) {
+  sendDestinationToBackend(origin, destination, parkAccessFilter) {
     console.log('mapbox request sent')
     this.setState({isMapboxSearching:true})
-    axios.get(`api/routethenboundingbox/${origin}/${destination}/${this.state.ramblingTolerance}${this.state.parkAccessFilter}`)
+    axios.get(`api/routethenboundingbox/${origin}/${destination}/${this.state.ramblingTolerance}/${this.state.parkAccessFilter}`)
       // .then(res =>
       // this.handleViewportChange(center:[res.data['center']]))
       .then(res =>
@@ -415,7 +420,7 @@ class Map extends React.Component {
 // onMouseUp={this.handleMouseUp}
 
   render () {
-    const {viewport, originFormData, destinationFormData, originData, destinationData, displayDirectionsSearchBar, displayOriginSearchOptions, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected, geolocateClick, loadingSpinner, isMapboxSearching, parkPins, displayCommuteVsExplore, publicButton, publicPrivateButton, privateButton, toggleExplore} = this.state
+    const {viewport, originFormData, destinationFormData, originData, destinationData, displayDirectionsSearchBar, displayOriginSearchOptions, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected, geolocateClick, loadingSpinner, isMapboxSearching, parkPins, displayCommuteVsExplore, publicButton, publicPrivateButton, privateButton, parkAccessFilter, toggleExplore} = this.state
     const directionsLayer = {routeGeometry}
     return (
       <div>
@@ -468,9 +473,10 @@ class Map extends React.Component {
           </ReactMapGl>
 
           {originLonLat && destinationLonLat &&
-            <DisplayRouteCheck
+            <ShouldTheRouteBeDisplayed
               originLonLat={originLonLat}
               destinationLonLat={destinationLonLat}
+              parkAccessFilter={parkAccessFilter}
               sendDestinationToBackend={this.sendDestinationToBackend}/>
           }
           <div className="bodyContainer">

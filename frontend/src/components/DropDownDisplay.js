@@ -1,6 +1,6 @@
 import React from 'react'
 
-class DropDownDisplay extends React.Component {
+export default class DropDownDisplay extends React.Component {
   constructor() {
     super()
     this.handleClick = this.handleClick.bind(this)
@@ -25,5 +25,3 @@ class DropDownDisplay extends React.Component {
     )
   }
 }
-
-export default DropDownDisplay

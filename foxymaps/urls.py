@@ -7,5 +7,5 @@ urlpatterns = [
     path('locations/<int:pk>', LocationDetail.as_view()),
     path('locationsspeed/', LocationSpeedList.as_view()),
     path('mapbox/geocoder/<searchQuery>', MapGeocoderView.as_view()),
-    path('routethenboundingbox/<origin>/<destination>/<ramblingTolerance>', RouteThenBoundingBox.as_view()),
+    path('routethenboundingbox/<origin>/<destination>/<ramblingTolerance>/<parkAccessFilter>', RouteThenBoundingBox.as_view()),
 ]

@@ -43,11 +43,14 @@ class MapGeocoderView(APIView):
         # print(data)
         return Response(data)
 class RouteThenBoundingBox(APIView):
+    def __init__(self):
+        self.query_all_parks = Location.objects.all()
+
     def get(self, _request, origin, destination, ramblingTolerance, parkAccessFilter):
         rambling_tolerance = int(ramblingTolerance)
         origin_lon_lat = [float(x) for x in origin.split(',')]
         destination_lon_lat = [float(x) for x in destination.split(',')]
-        park_access = str(parkAccessFilter)
+        access_filter = parkAccessFilter
     # parameters
         rambling_tolerance = 1000
         size_in_hectares_filter = 0.28
@@ -62,19 +65,25 @@ class RouteThenBoundingBox(APIView):
         walking_speed = 1.42
         snap_tolerance= 'unlimited'
 
-    # calculate the distance from origin to destination
+    # calculate the distance and compass bearing from origin to destination
         best_fit_origin_to_destination = Distance_And_Bearing.crowflys_bearing(self, origin_lon_lat, destination_lon_lat)
         origin_to_destination_distance = best_fit_origin_to_destination[0]
         origin_to_destination_bearing = best_fit_origin_to_destination[1]
-    # query the database for parks open to the public
-        query_all = list(Location.objects.all())
-        open_to_public = query_all.filter(open_to_public='Yes')
-        open_to_private = query_all.filter(open_to_public='No')
-        serializer_query_all = LocationSpeedSerializer(query_all, many=True)
-        serializer_open_to_public = LocationSpeedSerializer(open_to_public, many=True)
-        serializer_open_to_private = LocationSpeedSerializer(open_to_private, many=True)
-        response_data = serializer.data
-        all_parks = self.populate_all_parks_dict(response_data, origin_lon_lat, best_fit_origin_to_destination)
+
+    # query the database for all parks and filter the query by public access
+        # query_all_parks = Location.objects.all()
+        parks_open_to_public = self.query_all_parks.filter(open_to_public='Yes')
+        parks_open_to_private = self.query_all_parks.filter(open_to_public='No')
+        parks_all_serializer = LocationSpeedSerializer(self.query_all_parks, many=True)
+        parks_open_to_public_serializer = LocationSpeedSerializer(parks_open_to_public, many=True)
+        parks_open_to_private_serializer = LocationSpeedSerializer(parks_open_to_private, many=True)
+        parks_all_data = parks_all_serializer.data
+        parks_open_to_public_data = parks_open_to_public_serializer.data
+        parks_open_to_private_data = parks_open_to_private_serializer.data
+
+        queryset = self.set_park_access_filter(access_filter, parks_all_data, parks_open_to_public_data, parks_open_to_private_data)
+
+        all_parks = self.populate_all_parks_dict(queryset, origin_lon_lat, best_fit_origin_to_destination)
 
     # create a boundingbox by filtering out all parks not within the rectangle formed by the distance from origin to destingation and the rambling tolerance (e.g. 1000 meters)
         parks_within_perp_distance = self.calculate_parks_within_perp_distance(all_parks, origin_to_destination_distance, origin_to_destination_bearing, rambling_tolerance, size_in_hectares_filter, pi_divisor)
@@ -83,7 +92,14 @@ class RouteThenBoundingBox(APIView):
 
         if len(parks_within_perp_distance) == 0:
             route_waypoints_lon_lat = [origin_lon_lat, destination_lon_lat]
-            largest_park = {'name':'the most Direct Route (No convenient parks enroute)'}
+            parks_within_perp_distance_lon_lat = []
+            # largest_park = {'name':'the most Direct Route (No convenient parks enroute)'}
+            if access_filter == 'privateParks':
+                largest_park = 'the most Direct Route  (No private parks enroute)'
+            else:
+                largest_park = 'the most Direct Route  (No convenient parks enroute)'
+            compass_and_radius_routing_option_formatted = ';'
+            waypoint_snap_to_road_grid_tolerance = 'unlimited;unlimited'
         else:
         # Mapbox has a limit of 25 waypoints including the origin and destination for calls to thier Directions API
             total_waypoints_dict = self.sort_parks_by_acreage(origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, parks_within_perp_distance)
@@ -99,7 +115,7 @@ class RouteThenBoundingBox(APIView):
                 waypoints_bearing_list = list(waypoints_bearing_towards_destination.values())
                 compass_and_radius_routing_option = f',{waypoint_exit_radius};'.join(str(elem) for elem in waypoints_bearing_list)
                 compass_and_radius_routing_option_formatted = compass_and_radius_routing_option+f',{waypoint_exit_radius}'
-                print('waypoints_bearing_towards_destination',waypoints_bearing_towards_destination)
+                print('waypoints_bearing_towards_destination', waypoints_bearing_towards_destination)
             else:
                 waypoints_bearing_towards_next_waypoint = {}
                 count = 0
@@ -115,8 +131,7 @@ class RouteThenBoundingBox(APIView):
                 compass_and_radius_routing_option = f',{waypoint_exit_radius};'.join(str(elem) for elem in waypoints_bearing_list)
                 compass_and_radius_routing_option_formatted = compass_and_radius_routing_option+f',{waypoint_exit_radius}'
                 print('waypoints_bearing_towards_next_waypoint', waypoints_bearing_towards_next_waypoint)
-
-
+                
         # waypoint_snap_to_road_grid_radius is an optional parameter on the mapbox directions API which sets a tolerance for how far mapbox is allowed to move the lon_lat waypoint coordinate is the coordinate is not directly on the road grid
             waypoint_snap_to_road_grid_tolerance = f'{snap_tolerance};'*(len(waypoint_route_order)-1)+f'{snap_tolerance}'
             print(waypoint_snap_to_road_grid_tolerance)
@@ -167,6 +182,7 @@ class RouteThenBoundingBox(APIView):
             'walkway_bias': walkway_bias,
             'alley_bias': alley_bias,
             'bearings': bearings,
+            # 'exclude': 'ferry',
             # 'radiuses': snap_to_grid_tolerance,
         }
         response = requests.get(f'https://api.mapbox.com/directions/v5/mapbox/walking/{waypoints}', params=params)
@@ -175,9 +191,18 @@ class RouteThenBoundingBox(APIView):
         # print('response.json', data)
         return data
 
-    def populate_all_parks_dict(self, response_data, origin_lon_lat, best_fit_origin_to_destination):
+    def set_park_access_filter(self, access_filter, parks_all_data, parks_open_to_public_data, parks_open_to_private_data):
+        if access_filter == 'allParks':
+            queryset = parks_all_data
+        elif access_filter == 'publicParks':
+            queryset = parks_open_to_public_data
+        elif access_filter == 'privateParks':
+            queryset = parks_open_to_private_data
+        return queryset
+
+    def populate_all_parks_dict(self, queryset_data, origin_lon_lat, best_fit_origin_to_destination):
         all_parks = {}
-        for park in response_data:
+        for park in queryset_data:
             lon_lat = [park['lon'], park['lat']]
             crowflys_distance_and_bearing = Distance_And_Bearing.crowflys_bearing(self, origin_lon_lat, lon_lat)
             size_in_hectares = park['size_in_hectares']

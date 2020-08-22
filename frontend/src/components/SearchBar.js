@@ -2,7 +2,7 @@ import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 
-class SearchBar extends React.Component {
+export default class SearchBar extends React.Component {
   constructor() {
     super()
     this.state = {
@@ -72,5 +72,3 @@ class SearchBar extends React.Component {
     )
   }
 }
-
-export default SearchBar
