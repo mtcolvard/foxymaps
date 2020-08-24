@@ -70,7 +70,7 @@ class Map extends React.Component {
       displayOriginSearchOptions: false,
       displayDestinationSearchBar: true,
       displayBottomDestinationData: false,
-      displayCommuteVsExplore: true,
+      displayCommuteVsExplore: false,
       loadingSpinner: false,
       isMapboxSearching: false,
       routePins: [],
@@ -80,9 +80,10 @@ class Map extends React.Component {
       privateButton: false,
       parkAccessFilter: 'publicParks',
       toggleExplore: false,
+      toggleRecalculate: false,
       route_waypoints_lon_lat_formatted: '',
       compass_and_radius_routing_option_formatted: '',
-      sizeFormData: 0,
+      sizeFormData: 28,
     }
     this.handleViewportChange =this.handleViewportChange.bind(this)
     this.handleChange = this.handleChange.bind(this)
@@ -102,6 +103,7 @@ class Map extends React.Component {
     this.handleMapClick = this.handleMapClick.bind(this)
     this.handleExploreOptionsButtonsClick = this.handleExploreOptionsButtonsClick.bind(this)
     this.handleToggleClick = this.handleToggleClick.bind(this)
+    this.handleRecalculate = this.handleRecalculate.bind(this)
     this.queryBackendForRouteGeometry = this.queryBackendForRouteGeometry.bind(this)
     // this.handleMouseUp = this.handleMouseUp.bind(this)
     // this.handleMouseUpSubmit = this.handleMouseUpSubmit.bind(this)
@@ -390,6 +392,12 @@ class Map extends React.Component {
     console.log("origin search response data", data)
   }
 
+  handleRecalculate() {
+    this.setState({
+      toggleRecalculate: !this.state.toggleRecalculate
+    })
+  }
+
   sendDestinationToBackend(origin, destination) {
     console.log('mapbox request sent')
     this.setState({isMapboxSearching:true})
@@ -400,6 +408,7 @@ class Map extends React.Component {
         routePins: res.data['route_pins'],
         allParkPins: res.data['all_park_pins'],
         displayBottomDestinationData: true,
+        displayCommuteVsExplore: true,
         viewport: {
           ...this.state.viewport,
           longitude: res.data['midpoint'][0],
@@ -462,7 +471,7 @@ class Map extends React.Component {
 // onMouseUp={this.handleMouseUp}
 
   render () {
-    const {viewport, originFormData, destinationFormData, originData, destinationData, displayDirectionsSearchBar, displayOriginSearchOptions, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected, geolocateClick, loadingSpinner, isMapboxSearching, routePins, allParkPins, displayCommuteVsExplore, publicButton, publicPrivateButton, privateButton, parkAccessFilter, toggleExplore, sizeFormData} = this.state
+    const {viewport, originFormData, destinationFormData, originData, destinationData, displayDirectionsSearchBar, displayOriginSearchOptions, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected, geolocateClick, loadingSpinner, isMapboxSearching, routePins, allParkPins, displayCommuteVsExplore, publicButton, publicPrivateButton, privateButton, parkAccessFilter, toggleExplore, toggleRecalculate, sizeFormData} = this.state
     const directionsLayer = {routeGeometry}
     return (
       <div>
@@ -519,6 +528,7 @@ class Map extends React.Component {
               originLonLat={originLonLat}
               destinationLonLat={destinationLonLat}
               parkAccessFilter={parkAccessFilter}
+              toggleRecalculate={toggleRecalculate}
               sendDestinationToBackend={this.sendDestinationToBackend}/>
           }
           <div className="bodyContainer">
@@ -565,13 +575,13 @@ class Map extends React.Component {
             {toggleExplore &&
               <ExploreOptions
                 onHandleExploreOptionsButtonClick={this.handleExploreOptionsButtonsClick}
-                publicButton={publicButton}
                 onHandleChange={this.handleChange}
+                onHandleRecalculate={this.handleRecalculate}
+                publicButton={publicButton}
                 publicPrivateButton={publicPrivateButton}
                 privateButton={privateButton}
                 sizeFormData={sizeFormData}
-                placeholder={0}
-                value={0}
+                placeholder={sizeFormData}
                 name='sizeFormData'
                 />}
             {displayOriginSearchOptions &&

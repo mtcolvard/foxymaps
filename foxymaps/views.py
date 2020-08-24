@@ -106,7 +106,7 @@ class ParksWithinBoundingBox(APIView):
         rambling_tolerance = 1000
         size_in_hectares_filter = float(minParkSize)/100
         angle_filter = math.pi/5
-        pi_divisor = 3
+        pi_divisor = 2.3
         bearing_towards_destination = True
         waypoint_exit_radius='45'
         platonic_width_factor = 1

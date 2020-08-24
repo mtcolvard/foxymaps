@@ -7,6 +7,7 @@ export default class ExploreOptions extends React.Component {
     this.handlePublicPrivateButtonClick = this.handlePublicPrivateButtonClick.bind(this)
     this.handlePrivateButtonClick = this.handlePrivateButtonClick.bind(this)
     this.handleChange = this.handleChange.bind(this)
+    this.handleRecalculate = this.handleRecalculate.bind(this)
   }
 
   handlePublicButtonClick() {
@@ -20,6 +21,9 @@ export default class ExploreOptions extends React.Component {
   }
   handleChange(e) {
     this.props.onHandleChange(e)
+  }
+  handleRecalculate(e) {
+    this.props.onHandleRecalculate()
   }
   render() {
     const {privateButton, publicPrivateButton, publicButton} = this.props
@@ -59,6 +63,14 @@ export default class ExploreOptions extends React.Component {
                 />
             </p>
           </div>
+          <div className="panel-block">
+            <button
+              className="button is-link is-outlined is-fullwidth"
+              onClick={this.handleRecalculate}>
+              Recalculate
+            </button>
+          </div>
+
         </div>
       </div>
     )
