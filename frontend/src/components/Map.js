@@ -73,7 +73,8 @@ class Map extends React.Component {
       displayCommuteVsExplore: true,
       loadingSpinner: false,
       isMapboxSearching: false,
-      parkPins: [],
+      routePins: [],
+      allParkPins: [],
       publicButton: true,
       publicPrivateButton: false,
       privateButton: false,
@@ -392,11 +393,12 @@ class Map extends React.Component {
   sendDestinationToBackend(origin, destination) {
     console.log('mapbox request sent')
     this.setState({isMapboxSearching:true})
-    axios.get(`api/parkswithinboundingbox/${origin}/${destination}/${this.state.ramblingTolerance}/${this.state.parkAccessFilter}/${this.state.sizeFormData}/${this.state.toggleExplore}`)
+    axios.get(`api/parkswithinboundingbox/${origin}/${destination}/${this.state.ramblingTolerance}/${this.state.parkAccessFilter}/${this.state.sizeFormData}`)
       .then(res =>
         this.setState({
         routeLargestPark: res.data['largest_park'],
-        parkPins: res.data['pins_to_display'],
+        routePins: res.data['route_pins'],
+        allParkPins: res.data['all_park_pins'],
         displayBottomDestinationData: true,
         viewport: {
           ...this.state.viewport,
@@ -435,7 +437,7 @@ class Map extends React.Component {
   //       this.setState({
   //       routeGeometry: res.data['route_geometry'],
   //       routeLargestPark: res.data['largest_park'],
-  //       parkPins: res.data['parks_within_perp_distance_lon_lat'],
+  //       routePins: res.data['parks_within_perp_distance_lon_lat'],
   //       isRouteSelected: true,
   //       displayBottomDestinationData: true,
   //       viewport: {
@@ -460,7 +462,7 @@ class Map extends React.Component {
 // onMouseUp={this.handleMouseUp}
 
   render () {
-    const {viewport, originFormData, destinationFormData, originData, destinationData, displayDirectionsSearchBar, displayOriginSearchOptions, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected, geolocateClick, loadingSpinner, isMapboxSearching, parkPins, displayCommuteVsExplore, publicButton, publicPrivateButton, privateButton, parkAccessFilter, toggleExplore, sizeFormData} = this.state
+    const {viewport, originFormData, destinationFormData, originData, destinationData, displayDirectionsSearchBar, displayOriginSearchOptions, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected, geolocateClick, loadingSpinner, isMapboxSearching, routePins, allParkPins, displayCommuteVsExplore, publicButton, publicPrivateButton, privateButton, parkAccessFilter, toggleExplore, sizeFormData} = this.state
     const directionsLayer = {routeGeometry}
     return (
       <div>
@@ -477,7 +479,7 @@ class Map extends React.Component {
               <Pins
                 originData={originData}
                 destinationData={destinationData}
-                parkPins={parkPins}
+                parkPins={toggleExplore ? allParkPins : routePins}
               />
             }
             {routeGeometry &&
