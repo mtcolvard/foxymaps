@@ -13,7 +13,7 @@ export default class CommuteVsExplore extends React.Component {
   render() {
     const toggleExplore = this.props.toggleExplore
     return(
-        <div className="searchfield">
+        <div className="commuteExploreField">
           <div className="level levelCommuteExplore is-mobile">
             <div className="level-item has-text-centered">
               <div>

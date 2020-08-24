@@ -41,7 +41,7 @@ class Distance_And_Bearing:
 
         bx = math.cos(φ2) * math.cos(λ2 - λ1)
         by = math.cos(φ2) * math.sin(λ2 - λ1)
-        φ3 = math.atan2(math.sin(φ1) + math.sin(φ2), math.sqrt( (math.cos(φ1) + bx) * (math.cos(φ1) + bx) + by*by))
+        φ3 = math.atan2(math.sin(φ1) + math.sin(φ2), math.sqrt((math.cos(φ1) + bx) * (math.cos(φ1) + bx) + by*by))
         λ3 = λ1 + math.atan2(by, math.cos(φ1) + bx)
         midpoint = [λ3*180/math.pi, φ3*180/math.pi]
         return midpoint
@@ -51,6 +51,6 @@ class Distance_And_Bearing:
         # this finds the difference between the compass bearing (origin to destination) and the compass bearing (origin to a given waypoint)
         angle_to_waypoint = math.fabs(bestFit[1] - waypointFit[1])
 
-        # this calculates the perpendicular distance from the bestfit line (origin to destination) and a given waypoint.  it is used to figure out if a point is within the boundingbox formed from the user's rambling_tolerance
+        # this calculates the perpendicular distance from the bestfit line (origin to destination) to a given waypoint.  it is used to figure out if a point is within the boundingbox. the boundingbox's length is the distance from origin to destination and it's width is the user's rambling_tolerance
         perp_distance_to_waypoint = waypointFit[0] * math.sin(angle_to_waypoint)
         return perp_distance_to_waypoint

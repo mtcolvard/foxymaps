@@ -18,8 +18,10 @@ class LocationList(ListCreateAPIView):
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
     # queryset = Location.objects.filter(type_of_site="Churchyard").aggregate(Avg('size_in_hectares'))
-    # queryset1 = Location.objects.filter(type_of_site="Churchyard").filter(size_in_hectares__lte=0.834)
-    # queryset2 = queryset1.aggregate(Avg('size_in_hectares'))
+
+    # find_average_of_parks_smaller_than_average_size_of_all_parks = Location.objects.filter(type_of_site="Churchyard").filter(size_in_hectares__lte=0.834)
+    # queryset = find_average_of_parks_smaller_than_average_size_of_all_parks.aggregate(Avg('size_in_hectares'))
+
     # queryset1 = Location.objects.filter(type_of_site="Churchyard")
     # queryset2 = queryset1.filter(size_in_hectares__lt=0.334).filter(borough='City of London')
     # queryset3 = queryset1.filter(size_in_hectares__gt=0.834)
@@ -128,19 +130,19 @@ class ParksWithinBoundingBox(APIView):
         parks_all_serializer = LocationSpeedSerializer(self.query_all_parks, many=True)
         parks_open_to_public_serializer = LocationSpeedSerializer(parks_open_to_public, many=True)
         parks_open_to_private_serializer = LocationSpeedSerializer(parks_open_to_private, many=True)
+
         parks_all_data = parks_all_serializer.data
         parks_open_to_public_data = parks_open_to_public_serializer.data
         parks_open_to_private_data = parks_open_to_private_serializer.data
-
+    # select which queryset to use based on user's choice of public and/or private parks
         queryset = self.set_park_access_filter(access_filter, parks_all_data, parks_open_to_public_data, parks_open_to_private_data)
-
+    # create a dictionary containing all the parks selected from the database
         all_parks = self.populate_all_parks_dict(queryset, origin_lon_lat, best_fit_origin_to_destination)
-
-    # create a boundingbox by filtering out all parks not within the rectangle formed by the distance from origin to destingation and the rambling tolerance (e.g. 1000 meters)
+    # create a boundingbox by filtering out all parks not within the rectangle formed between the distance from origin to destination (length) and the rambling tolerance (width) (e.g. 1000 meters)
         parks_within_perp_distance = self.calculate_parks_within_perp_distance(all_parks, origin_to_destination_distance, origin_to_destination_bearing, rambling_tolerance, size_in_hectares_filter, pi_divisor)
         # print('parks_within_perp_distance length', len(parks_within_perp_distance))
         # print('parks_within_perp_distance', parks_within_perp_distance)
-
+    # if no parks are within this bounding box return the direct route
         if len(parks_within_perp_distance) == 0:
             route_waypoints_lon_lat = [origin_lon_lat, destination_lon_lat]
             parks_within_perp_distance_lon_lat = []
@@ -151,99 +153,64 @@ class ParksWithinBoundingBox(APIView):
                 largest_park = 'the most Direct Route  (No convenient parks enroute)'
             compass_and_radius_routing_option_formatted = ';'
             waypoint_snap_to_road_grid_tolerance = 'unlimited;unlimited'
+    #
         else:
-        # Mapbox has a limit of 25 waypoints including the origin and destination for calls to thier Directions API
+        # Mapbox has a limit of 25 waypoints including the origin and destination for calls to their Directions API
             total_waypoints_dict = self.sort_parks_by_acreage(origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, parks_within_perp_distance)
         # Run the route_calculations.homing_algo.py module to find route order of the most direct route
             waypoint_route_order_and_graph = run_homing_algo(total_waypoints_dict, angle_filter, platonic_width_factor)
             waypoint_route_order = waypoint_route_order_and_graph[0]
             waypoint_graph = waypoint_route_order_and_graph[1]
         # compass_and_radius_routing_option is a optional parameter on the mapbox directions API which influences the direction a route starts from each waypoint.  it is useful for making sure routes continue traveling in their current direction
-            if bearing_towards_destination is True:
-                waypoints_bearing_towards_destination = {}
+        if bearing_towards_destination is True:
+            waypoints_bearing_towards_destination = {}
+            for x in waypoint_route_order:
+                waypoints_bearing_towards_destination[x] = waypoint_graph[x]['destination']['compass_bearing']
+            waypoints_bearing_list = list(waypoints_bearing_towards_destination.values())
+            compass_and_radius_routing_option = f',{waypoint_exit_radius};'.join(str(elem) for elem in waypoints_bearing_list)
+            compass_and_radius_routing_option_formatted = compass_and_radius_routing_option+f',{waypoint_exit_radius}'
+            print('waypoints_bearing_towards_destination', waypoints_bearing_towards_destination)
+        else:
+            waypoints_bearing_towards_next_waypoint = {}
+            count = 0
+            while count < (len(waypoint_route_order)-1):
                 for x in waypoint_route_order:
-                    waypoints_bearing_towards_destination[x] = waypoint_graph[x]['destination']['compass_bearing']
-                waypoints_bearing_list = list(waypoints_bearing_towards_destination.values())
-                compass_and_radius_routing_option = f',{waypoint_exit_radius};'.join(str(elem) for elem in waypoints_bearing_list)
-                compass_and_radius_routing_option_formatted = compass_and_radius_routing_option+f',{waypoint_exit_radius}'
-                print('waypoints_bearing_towards_destination', waypoints_bearing_towards_destination)
-            else:
-                waypoints_bearing_towards_next_waypoint = {}
-                count = 0
-                while count < (len(waypoint_route_order)-1):
-                    for x in waypoint_route_order:
-                        if x == 'destination':
-                            waypoints_bearing_towards_next_waypoint['destination'] = 0
-                            break
-                        count += 1
-                        waypoint_target = waypoint_route_order[count]
-                        waypoints_bearing_towards_next_waypoint[x] = waypoint_graph[x][waypoint_target]['compass_bearing']
-                waypoints_bearing_list = list(waypoints_bearing_towards_next_waypoint.values())
-                compass_and_radius_routing_option = f',{waypoint_exit_radius};'.join(str(elem) for elem in waypoints_bearing_list)
-                compass_and_radius_routing_option_formatted = compass_and_radius_routing_option+f',{waypoint_exit_radius}'
-                print('waypoints_bearing_towards_next_waypoint', waypoints_bearing_towards_next_waypoint)
+                    if x == 'destination':
+                        waypoints_bearing_towards_next_waypoint['destination'] = 0
+                        break
+                    count += 1
+                    waypoint_target = waypoint_route_order[count]
+                    waypoints_bearing_towards_next_waypoint[x] = waypoint_graph[x][waypoint_target]['compass_bearing']
+            waypoints_bearing_list = list(waypoints_bearing_towards_next_waypoint.values())
+            compass_and_radius_routing_option = f',{waypoint_exit_radius};'.join(str(elem) for elem in waypoints_bearing_list)
+            compass_and_radius_routing_option_formatted = compass_and_radius_routing_option+f',{waypoint_exit_radius}'
+            print('waypoints_bearing_towards_next_waypoint', waypoints_bearing_towards_next_waypoint)
 
-        # waypoint_snap_to_road_grid_radius is an optional parameter on the mapbox directions API which sets a tolerance for how far mapbox is allowed to move the lon_lat waypoint coordinate is the coordinate is not directly on the road grid
-            waypoint_snap_to_road_grid_tolerance = f'{snap_tolerance};'*(len(waypoint_route_order)-1)+f'{snap_tolerance}'
-            print(waypoint_snap_to_road_grid_tolerance)
+    # waypoint_snap_to_road_grid_radius is an optional parameter on the mapbox directions API which sets a tolerance for how far mapbox is allowed to move the lon_lat waypoint coordinate is the coordinate is not directly on the road grid
+        waypoint_snap_to_road_grid_tolerance = f'{snap_tolerance};'*(len(waypoint_route_order)-1)+f'{snap_tolerance}'
+        print(waypoint_snap_to_road_grid_tolerance)
 
-        # Determine the largest park to display in the frontend UI
-            waypoints_size_in_hectares = {k:v for k, v in total_waypoints_dict.items() if k in waypoint_route_order}
-            largest_park_order = sorted(waypoints_size_in_hectares, key=lambda v: waypoints_size_in_hectares[v]['size_in_hectares'])
-            if len(waypoint_route_order) == 3:
-                largest_park = waypoints_size_in_hectares[largest_park_order[-1]]['name']
-            else:
-                largest_park = waypoints_size_in_hectares[largest_park_order[-1]]['name']+' and '+waypoints_size_in_hectares[largest_park_order[-2]]['name']
-            # print(largest_park)
-            route_waypoints_lon_lat = [total_waypoints_dict[x]['lon_lat'] for x in waypoint_route_order]
+    # Determine the largest park to display in the frontend UI
+        waypoints_size_in_hectares = {k:v for k, v in total_waypoints_dict.items() if k in waypoint_route_order}
+        largest_park_order = sorted(waypoints_size_in_hectares, key=lambda v: waypoints_size_in_hectares[v]['size_in_hectares'])
+        if len(waypoint_route_order) == 3:
+            largest_park = waypoints_size_in_hectares[largest_park_order[-1]]['name']
+        else:
+            largest_park = waypoints_size_in_hectares[largest_park_order[-1]]['name']+' and '+waypoints_size_in_hectares[largest_park_order[-2]]['name']
 
-    # Formatting for displaying parks within the perpendicular distance with pins on the map if necessary for tuning algorithm
+    # Coordinates for all parks within the user's rambling tolerance for displaying in Explore Mode
         parks_within_perp_distance_lon_lat = list({k:v['lon_lat'] for k, v in parks_within_perp_distance.items()}.values())
-        print('parks_within_perp_distance_lon_lat', parks_within_perp_distance_lon_lat)
-
-    # Request the route directions from mapboxDirectionsAPI.py module
-        # route_geometry = Mapbox_Directions_API.returnRouteGeometry(self, route_waypoints_lon_lat, walkway_bias, alley_bias)
-
-    #  Request the route directions directly from the Mapbox Directions API
+    # Coordinates for the parks enroute to destination as determined by the holming algorithm
+        route_waypoints_lon_lat = [total_waypoints_dict[x]['lon_lat'] for x in waypoint_route_order]
+    #  Formating for requesting the route directions directly from the Mapbox Directions API
         route_waypoints_lon_lat_string = ';'.join([str(elem) for elem in route_waypoints_lon_lat])
         route_waypoints_lon_lat_formatted = route_waypoints_lon_lat_string.replace('[', '').replace(']', '').replace(' ', '')
-# ////////////
-        # mapbox_directions_API_response = self.returnRouteGeometry(_request, route_waypoints_lon_lat_formatted, compass_and_radius_routing_option_formatted, walking_speed, walkway_bias, alley_bias, waypoint_snap_to_road_grid_tolerance)
-        #
-        # route_coordinates = mapbox_directions_API_response['routes'][0]['geometry']['coordinates']
-        # route_distance = mapbox_directions_API_response['routes'][0]['distance']
-        # route_duration = mapbox_directions_API_response['routes'][0]['duration']
-        # route_geometry = {'type': 'Feature', 'geometry': {'type': 'LineString', 'coordinates': route_coordinates}, 'properties':{'distance': route_distance, 'duration': route_duration}}
-        # print('route_geometry', route_geometry)
-
     # Calculate the midpoint between the origin and the destination
         midpoint = Distance_And_Bearing.calculate_midpoint(self, origin_lon_lat, destination_lon_lat)
 
     # Return the response to the frontend Directions API call
-        # route_response = {'route_geometry':route_geometry, 'largest_park': largest_park, 'midpoint': midpoint, 'pin_display': route_waypoints_lon_lat}
-# ////////////////
-        # route_response = {'route_geometry':route_geometry, 'largest_park': largest_park, 'midpoint': midpoint, 'pin_display': parks_within_perp_distance_lon_lat}
-        route_response = {'largest_park': largest_park, 'midpoint': midpoint, 'route_pins': route_waypoints_lon_lat, 'all_park_pins': parks_within_perp_distance_lon_lat, 'route_waypoints_lon_lat_formatted': route_waypoints_lon_lat_formatted, 'compass_and_radius_routing_option_formatted': compass_and_radius_routing_option_formatted}
-        # print("waypoint_route_order_and_graph", waypoint_route_order_and_graph[1])
+        route_response = {'largest_park': largest_park, 'midpoint': midpoint, 'route_waypoints_lon_lat': route_waypoints_lon_lat, 'all_waypoints_in_bbox_lon_lat': parks_within_perp_distance_lon_lat, 'route_waypoints_lon_lat_formatted': route_waypoints_lon_lat_formatted, 'compass_and_radius_routing_option_formatted': compass_and_radius_routing_option_formatted}
         return Response(route_response)
-# ///////////////////////////////////
-    # def returnRouteGeometry(self, _request, waypoints, bearings, walking_speed, walkway_bias, alley_bias, _snap_to_grid_tolerance):
-    #     params = {
-    #         'geometries': 'geojson',
-    #         # 'continue_straight':'false',
-    #         'access_token': 'pk.eyJ1IjoibXRjb2x2YXJkIiwiYSI6ImNrMDgzYndkZjBoanUzb21jaTkzajZjNWEifQ.ocEzAm8Y7a6im_FVc92HjQ',
-    #         'walking_speed': walking_speed,
-    #         'walkway_bias': walkway_bias,
-    #         'alley_bias': alley_bias,
-    #         'bearings': bearings,
-    #         # 'exclude': 'ferry',
-    #         # 'radiuses': snap_to_grid_tolerance,
-    #     }
-    #     response = requests.get(f'https://api.mapbox.com/directions/v5/mapbox/walking/{waypoints}', params=params)
-    #     print('response.url', response.url)
-    #     data = response.json()
-    #     # print('response.json', data)
-    #     return data
 
     def set_park_access_filter(self, access_filter, parks_all_data, parks_open_to_public_data, parks_open_to_private_data):
         if access_filter == 'allParks':

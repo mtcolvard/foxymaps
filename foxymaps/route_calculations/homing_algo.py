@@ -32,7 +32,7 @@ def filter_graph_by_angle_then_distance(waypoints_graph, angle_filter):
     while route_order:
         if next_park == 'destination':
             break
-    # Filter out parks not within x degrees from each waypoint to the destination
+    # Filter out parks not within x degrees ('angle_filter') from each waypoint to the destination
         angle_filtered_park_options = {k:v for k, v in waypoints_graph[route_order[-1]].items() if
         v['bearing'] != 0 and
         v['bearing'] < (waypoints_graph[route_order[-1]]['destination']['bearing'] + angle_filter) and

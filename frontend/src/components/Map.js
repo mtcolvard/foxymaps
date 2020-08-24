@@ -405,8 +405,8 @@ class Map extends React.Component {
       .then(res =>
         this.setState({
         routeLargestPark: res.data['largest_park'],
-        routePins: res.data['route_pins'],
-        allParkPins: res.data['all_park_pins'],
+        routePins: res.data['route_waypoints_lon_lat'],
+        allParkPins: res.data['all_waypoints_in_bbox_lon_lat'],
         displayBottomDestinationData: true,
         displayCommuteVsExplore: true,
         viewport: {
@@ -567,7 +567,7 @@ class Map extends React.Component {
                 placeholder='Add destination to plan route'
                 name='destinationFormData'/>
             }
-            {displayCommuteVsExplore &&
+            {displayDirectionsSearchBar &&
               <CommuteVsExplore
                 onHandleToggleClick={this.handleToggleClick}
                 toggleExplore={toggleExplore}/>

@@ -3,6 +3,9 @@ from mapbox import Directions
 # # from rest_framework.response import Response
 # import requests
 
+# Depricated, from views: Request the route directions from mapboxDirectionsAPI.py module
+    # route_geometry = Mapbox_Directions_API.returnRouteGeometry(self, route_waypoints_lon_lat, walkway_bias, alley_bias)
+
 service = Directions(access_token='pk.eyJ1IjoibXRjb2x2YXJkIiwiYSI6ImNrZDIycDBuaTAyYjQyeG55azNwYzd0ZjMifQ.yYcTjTmpZ89j4vMWS8VdrA')
 
 class Mapbox_Directions_API:
