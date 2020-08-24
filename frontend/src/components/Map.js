@@ -79,6 +79,9 @@ class Map extends React.Component {
       privateButton: false,
       parkAccessFilter: 'publicParks',
       toggleExplore: false,
+      route_waypoints_lon_lat_formatted: '',
+      compass_and_radius_routing_option_formatted: '',
+      sizeFormData: 0,
     }
     this.handleViewportChange =this.handleViewportChange.bind(this)
     this.handleChange = this.handleChange.bind(this)
@@ -96,8 +99,9 @@ class Map extends React.Component {
     this.handleFindMyLocation = this.handleFindMyLocation.bind(this)
     this.chooseLocationOnMap = this.chooseLocationOnMap.bind(this)
     this.handleMapClick = this.handleMapClick.bind(this)
-    this.handlePublicPrivateButtonClick = this.handlePublicPrivateButtonClick.bind(this)
+    this.handleExploreOptionsButtonsClick = this.handleExploreOptionsButtonsClick.bind(this)
     this.handleToggleClick = this.handleToggleClick.bind(this)
+    this.queryBackendForRouteGeometry = this.queryBackendForRouteGeometry.bind(this)
     // this.handleMouseUp = this.handleMouseUp.bind(this)
     // this.handleMouseUpSubmit = this.handleMouseUpSubmit.bind(this)
 
@@ -248,7 +252,7 @@ class Map extends React.Component {
     })
   }
 
-  handlePublicPrivateButtonClick(buttonName) {
+  handleExploreOptionsButtonsClick(buttonName) {
     if(buttonName == 'privateButton') {
       this.setState({
         publicButton: false,
@@ -385,18 +389,14 @@ class Map extends React.Component {
     console.log("origin search response data", data)
   }
 
-  sendDestinationToBackend(origin, destination, parkAccessFilter) {
+  sendDestinationToBackend(origin, destination) {
     console.log('mapbox request sent')
     this.setState({isMapboxSearching:true})
-    axios.get(`api/routethenboundingbox/${origin}/${destination}/${this.state.ramblingTolerance}/${this.state.parkAccessFilter}`)
-      // .then(res =>
-      // this.handleViewportChange(center:[res.data['center']]))
+    axios.get(`api/parkswithinboundingbox/${origin}/${destination}/${this.state.ramblingTolerance}/${this.state.parkAccessFilter}/${this.state.sizeFormData}/${this.state.toggleExplore}`)
       .then(res =>
         this.setState({
-        routeGeometry: res.data['route_geometry'],
         routeLargestPark: res.data['largest_park'],
-        parkPins: res.data['parks_within_perp_distance_lon_lat'],
-        isRouteSelected: true,
+        parkPins: res.data['pins_to_display'],
         displayBottomDestinationData: true,
         viewport: {
           ...this.state.viewport,
@@ -407,10 +407,50 @@ class Map extends React.Component {
             curve: 2.4}),
           transitionDuration: 1000
         },
-        isMapboxSearching:false
+        route_waypoints_lon_lat_formatted: res.data['route_waypoints_lon_lat_formatted'],
+        compass_and_radius_routing_option_formatted: res.data['compass_and_radius_routing_option_formatted']
       }))
-      // .then(this.fitTheRouteInsideTheViewport())
+      .then(()=>this.queryBackendForRouteGeometry(this.state.route_waypoints_lon_lat_formatted, this.state.compass_and_radius_routing_option_formatted))
   }
+
+  queryBackendForRouteGeometry(route, compassBearing) {
+    axios.get(`api/queryroutegeometry/${route}/${compassBearing}`)
+      .then(res =>
+        this.setState({
+        routeGeometry: res.data['route_geometry'],
+        isMapboxSearching:false,
+        isRouteSelected: true,
+        }))
+    }
+
+
+
+  // sendDestinationToBackend(origin, destination, parkAccessFilter) {
+  //   console.log('mapbox request sent')
+  //   this.setState({isMapboxSearching:true})
+  //   axios.get(`api/parkswithinboundingbox/${origin}/${destination}/${this.state.ramblingTolerance}/${this.state.parkAccessFilter}`)
+  //     // .then(res =>
+  //     // this.handleViewportChange(center:[res.data['center']]))
+  //     .then(res =>
+  //       this.setState({
+  //       routeGeometry: res.data['route_geometry'],
+  //       routeLargestPark: res.data['largest_park'],
+  //       parkPins: res.data['parks_within_perp_distance_lon_lat'],
+  //       isRouteSelected: true,
+  //       displayBottomDestinationData: true,
+  //       viewport: {
+  //         ...this.state.viewport,
+  //         longitude: res.data['midpoint'][0],
+  //         latitude: res.data['midpoint'][1],
+  //         zoom: 12,
+  //         transitionInterpolator: new FlyToInterpolator({
+  //           curve: 2.4}),
+  //         transitionDuration: 1000
+  //       },
+  //       isMapboxSearching:false
+  //     }))
+  //     // .then(this.fitTheRouteInsideTheViewport())
+  // }
 
   // onClick={this.handleMouseUp}
   // onMouseDown={lnglat => this.handleMouseUp(lnglat)}
@@ -420,7 +460,7 @@ class Map extends React.Component {
 // onMouseUp={this.handleMouseUp}
 
   render () {
-    const {viewport, originFormData, destinationFormData, originData, destinationData, displayDirectionsSearchBar, displayOriginSearchOptions, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected, geolocateClick, loadingSpinner, isMapboxSearching, parkPins, displayCommuteVsExplore, publicButton, publicPrivateButton, privateButton, parkAccessFilter, toggleExplore} = this.state
+    const {viewport, originFormData, destinationFormData, originData, destinationData, displayDirectionsSearchBar, displayOriginSearchOptions, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected, geolocateClick, loadingSpinner, isMapboxSearching, parkPins, displayCommuteVsExplore, publicButton, publicPrivateButton, privateButton, parkAccessFilter, toggleExplore, sizeFormData} = this.state
     const directionsLayer = {routeGeometry}
     return (
       <div>
@@ -500,7 +540,7 @@ class Map extends React.Component {
                 onHandleChange={this.handleChange}
                 onHandleSubmit={this.handleSubmit}
                 loadingSpinner={loadingSpinner}
-                searchformData={originFormData}
+                searchFormData={originFormData}
                 placeholder='Search'
                 name='originFormData'/>
             }
@@ -511,7 +551,7 @@ class Map extends React.Component {
                 onHandleChange={this.handleChange}
                 onHandleSubmit={this.handleSubmit}
                 loadingSpinner={loadingSpinner}
-                searchformData={destinationFormData}
+                searchFormData={destinationFormData}
                 placeholder='Add destination to plan route'
                 name='destinationFormData'/>
             }
@@ -522,10 +562,16 @@ class Map extends React.Component {
             }
             {toggleExplore &&
               <ExploreOptions
-                onHandlePublicPrivateButtonClick={this.handlePublicPrivateButtonClick}
+                onHandleExploreOptionsButtonClick={this.handleExploreOptionsButtonsClick}
                 publicButton={publicButton}
+                onHandleChange={this.handleChange}
                 publicPrivateButton={publicPrivateButton}
-                privateButton={privateButton}/>}
+                privateButton={privateButton}
+                sizeFormData={sizeFormData}
+                placeholder={0}
+                value={0}
+                name='sizeFormData'
+                />}
             {displayOriginSearchOptions &&
               <div className="locationbuttonfield">
               <div className="box locationbuttonbox">

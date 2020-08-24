@@ -5,16 +5,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 export default class SearchBar extends React.Component {
   constructor() {
     super()
-    this.state = {
-      publicButton: true,
-      publicPrivateButton: false,
-      privateButton: false
-    }
     this.handleArrowLeftClick = this.handleArrowLeftClick.bind(this)
     this.handleDeleteFieldClick = this.handleDeleteFieldClick.bind(this)
     this.handleChange = this.handleChange.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
-    this.handleButtonClick = this.handleButtonClick.bind(this)
   }
 
   handleArrowLeftClick() {
@@ -31,13 +25,8 @@ export default class SearchBar extends React.Component {
     this.props.onHandleSubmit(this.props.name)
   }
 
-  handleButtonClick(buttonName) {
-    this.props.handlePublicPrivateButtonClick(buttonName)
-  }
-
   render() {
     const loadingSpinner =  this.props.loadingSpinner
-    const {publicButton, publicPrivateButton, privateButton} = this.state
     return(
         <div className="field searchfield has-addons is-marginless" >
           <div className="control">
@@ -56,7 +45,7 @@ export default class SearchBar extends React.Component {
                 type="text"
                 placeholder={this.props.placeholder}
                 onChange={this.handleChange}
-                value={this.props.searchformData}
+                value={this.props.searchFormData}
                 name={this.props.name}
               />
             </form>

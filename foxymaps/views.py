@@ -1,11 +1,12 @@
 import math
 import requests
 # from django.http import Http404
+from django.db.models import Avg
+from django.db.models import Q
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
-# from django.db.models import Q
 from mapbox import Geocoder
 from .models import Location
 from .serializers import LocationSerializer, LocationUpdateSerializer, LocationSpeedSerializer, BoundingBoxSerializer
@@ -16,6 +17,16 @@ class LocationList(ListCreateAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
+    # queryset = Location.objects.filter(type_of_site="Churchyard").aggregate(Avg('size_in_hectares'))
+    # queryset1 = Location.objects.filter(type_of_site="Churchyard").filter(size_in_hectares__lte=0.834)
+    # queryset2 = queryset1.aggregate(Avg('size_in_hectares'))
+    # queryset1 = Location.objects.filter(type_of_site="Churchyard")
+    # queryset2 = queryset1.filter(size_in_hectares__lt=0.334).filter(borough='City of London')
+    # queryset3 = queryset1.filter(size_in_hectares__gt=0.834)
+    # print('between 0.334 and 0.834',len(queryset1)-len(queryset2)-len(queryset3))
+    # print('lessthan 0.334', len(queryset2))
+    # print('greaterthan 0.834', len(queryset3))
+
 class LocationDetail(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     queryset = Location.objects.all()
@@ -23,7 +34,8 @@ class LocationDetail(RetrieveUpdateDestroyAPIView):
 class LocationSpeedList(ListCreateAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     # queryset = Location.objects.filter(open_to_public="Yes").exclude(size_in_hectares__lt=0.15)
-    queryset = Location.objects.filter(open_to_public="Yes")
+    queryset = Location.objects.filter(open_to_public="No")
+    # .filter(type_of_site="Housing/Estate Landscaping")
     # queryset = Location.objects.filter(Q(nature_conservation_area="Yes") | ~Q(listed_structures="None")).filter(open_to_public="Yes").filter(size_in_hectares__gte=1.0)
     # queryset = Location.objects.filter(Q(listed_structures="None"),on_eh_national_register="Yes")
     # queryset = Location.objects.get(id=1327)
@@ -42,20 +54,59 @@ class MapGeocoderView(APIView):
         data = response.json()
         # print(data)
         return Response(data)
-class RouteThenBoundingBox(APIView):
+
+class QueryRouteGeometry(APIView):
+    def get(self, _request, route_waypoints_lon_lat_formatted, compass_and_radius_routing_option_formatted):
+        bearing_towards_destination = True
+        waypoint_exit_radius='45'
+        alley_bias = 1
+        walkway_bias = 1
+        walking_speed = 1.42
+        snap_tolerance= 'unlimited'
+
+        mapbox_directions_API_response = self.returnRouteGeometry(_request, route_waypoints_lon_lat_formatted, compass_and_radius_routing_option_formatted, walking_speed, walkway_bias, alley_bias)
+
+        route_coordinates = mapbox_directions_API_response['routes'][0]['geometry']['coordinates']
+        route_distance = mapbox_directions_API_response['routes'][0]['distance']
+        route_duration = mapbox_directions_API_response['routes'][0]['duration']
+        route_geometry = {'type': 'Feature', 'geometry': {'type': 'LineString', 'coordinates': route_coordinates}, 'properties':{'distance': route_distance, 'duration': route_duration}}
+
+        route_response = {'route_geometry':route_geometry}
+        # print("waypoint_route_order_and_graph", waypoint_route_order_and_graph[1])
+        return Response(route_response)
+
+    def returnRouteGeometry(self, _request, waypoints, bearings, walking_speed, walkway_bias, alley_bias):
+        params = {
+            'geometries': 'geojson',
+            # 'continue_straight':'false',
+            'access_token': 'pk.eyJ1IjoibXRjb2x2YXJkIiwiYSI6ImNrMDgzYndkZjBoanUzb21jaTkzajZjNWEifQ.ocEzAm8Y7a6im_FVc92HjQ',
+            'walking_speed': walking_speed,
+            'walkway_bias': walkway_bias,
+            'alley_bias': alley_bias,
+            'bearings': bearings,
+            # 'exclude': 'ferry',
+            # 'radiuses': snap_to_grid_tolerance,
+        }
+        response = requests.get(f'https://api.mapbox.com/directions/v5/mapbox/walking/{waypoints}', params=params)
+        print('response.url', response.url)
+        data = response.json()
+        # print('response.json', data)
+        return data
+
+class ParksWithinBoundingBox(APIView):
     def __init__(self):
         self.query_all_parks = Location.objects.all()
 
-    def get(self, _request, origin, destination, ramblingTolerance, parkAccessFilter):
+    def get(self, _request, origin, destination, ramblingTolerance, parkAccessFilter, minParkSize):
         rambling_tolerance = int(ramblingTolerance)
         origin_lon_lat = [float(x) for x in origin.split(',')]
         destination_lon_lat = [float(x) for x in destination.split(',')]
         access_filter = parkAccessFilter
     # parameters
         rambling_tolerance = 1000
-        size_in_hectares_filter = 0.28
+        size_in_hectares_filter = float(minParkSize)/100
         angle_filter = math.pi/5
-        pi_divisor = 8
+        pi_divisor = 3
         bearing_towards_destination = True
         waypoint_exit_radius='45'
         platonic_width_factor = 1
@@ -73,7 +124,7 @@ class RouteThenBoundingBox(APIView):
     # query the database for all parks and filter the query by public access
         # query_all_parks = Location.objects.all()
         parks_open_to_public = self.query_all_parks.filter(open_to_public='Yes')
-        parks_open_to_private = self.query_all_parks.filter(open_to_public='No')
+        parks_open_to_private = self.query_all_parks.exclude(open_to_public='Yes')
         parks_all_serializer = LocationSpeedSerializer(self.query_all_parks, many=True)
         parks_open_to_public_serializer = LocationSpeedSerializer(parks_open_to_public, many=True)
         parks_open_to_private_serializer = LocationSpeedSerializer(parks_open_to_private, many=True)
@@ -131,7 +182,7 @@ class RouteThenBoundingBox(APIView):
                 compass_and_radius_routing_option = f',{waypoint_exit_radius};'.join(str(elem) for elem in waypoints_bearing_list)
                 compass_and_radius_routing_option_formatted = compass_and_radius_routing_option+f',{waypoint_exit_radius}'
                 print('waypoints_bearing_towards_next_waypoint', waypoints_bearing_towards_next_waypoint)
-                
+
         # waypoint_snap_to_road_grid_radius is an optional parameter on the mapbox directions API which sets a tolerance for how far mapbox is allowed to move the lon_lat waypoint coordinate is the coordinate is not directly on the road grid
             waypoint_snap_to_road_grid_tolerance = f'{snap_tolerance};'*(len(waypoint_route_order)-1)+f'{snap_tolerance}'
             print(waypoint_snap_to_road_grid_tolerance)
@@ -148,6 +199,7 @@ class RouteThenBoundingBox(APIView):
 
     # Formatting for displaying parks within the perpendicular distance with pins on the map if necessary for tuning algorithm
         parks_within_perp_distance_lon_lat = list({k:v['lon_lat'] for k, v in parks_within_perp_distance.items()}.values())
+        print('parks_within_perp_distance_lon_lat', parks_within_perp_distance_lon_lat)
 
     # Request the route directions from mapboxDirectionsAPI.py module
         # route_geometry = Mapbox_Directions_API.returnRouteGeometry(self, route_waypoints_lon_lat, walkway_bias, alley_bias)
@@ -155,41 +207,43 @@ class RouteThenBoundingBox(APIView):
     #  Request the route directions directly from the Mapbox Directions API
         route_waypoints_lon_lat_string = ';'.join([str(elem) for elem in route_waypoints_lon_lat])
         route_waypoints_lon_lat_formatted = route_waypoints_lon_lat_string.replace('[', '').replace(']', '').replace(' ', '')
-
-        mapbox_directions_API_response = self.returnRouteGeometry(_request, route_waypoints_lon_lat_formatted, compass_and_radius_routing_option_formatted, walking_speed, walkway_bias, alley_bias, waypoint_snap_to_road_grid_tolerance)
-
-        route_coordinates = mapbox_directions_API_response['routes'][0]['geometry']['coordinates']
-        route_distance = mapbox_directions_API_response['routes'][0]['distance']
-        route_duration = mapbox_directions_API_response['routes'][0]['duration']
-        route_geometry = {'type': 'Feature', 'geometry': {'type': 'LineString', 'coordinates': route_coordinates}, 'properties':{'distance': route_distance, 'duration': route_duration}}
+# ////////////
+        # mapbox_directions_API_response = self.returnRouteGeometry(_request, route_waypoints_lon_lat_formatted, compass_and_radius_routing_option_formatted, walking_speed, walkway_bias, alley_bias, waypoint_snap_to_road_grid_tolerance)
+        #
+        # route_coordinates = mapbox_directions_API_response['routes'][0]['geometry']['coordinates']
+        # route_distance = mapbox_directions_API_response['routes'][0]['distance']
+        # route_duration = mapbox_directions_API_response['routes'][0]['duration']
+        # route_geometry = {'type': 'Feature', 'geometry': {'type': 'LineString', 'coordinates': route_coordinates}, 'properties':{'distance': route_distance, 'duration': route_duration}}
         # print('route_geometry', route_geometry)
 
     # Calculate the midpoint between the origin and the destination
         midpoint = Distance_And_Bearing.calculate_midpoint(self, origin_lon_lat, destination_lon_lat)
 
     # Return the response to the frontend Directions API call
-        # route_response = {'route_geometry':route_geometry, 'largest_park': largest_park, 'midpoint': midpoint, 'parks_within_perp_distance_lon_lat': route_waypoints_lon_lat}
-        route_response = {'route_geometry':route_geometry, 'largest_park': largest_park, 'midpoint': midpoint, 'parks_within_perp_distance_lon_lat': parks_within_perp_distance_lon_lat}
+        # route_response = {'route_geometry':route_geometry, 'largest_park': largest_park, 'midpoint': midpoint, 'pin_display': route_waypoints_lon_lat}
+# ////////////////
+        # route_response = {'route_geometry':route_geometry, 'largest_park': largest_park, 'midpoint': midpoint, 'pin_display': parks_within_perp_distance_lon_lat}
+        route_response = {'largest_park': largest_park, 'midpoint': midpoint, 'route_pins': route_waypoints_lon_lat, 'all_park_pins': parks_within_perp_distance_lon_lat, 'route_waypoints_lon_lat_formatted': route_waypoints_lon_lat_formatted, 'compass_and_radius_routing_option_formatted': compass_and_radius_routing_option_formatted}
         # print("waypoint_route_order_and_graph", waypoint_route_order_and_graph[1])
         return Response(route_response)
-
-    def returnRouteGeometry(self, _request, waypoints, bearings, walking_speed, walkway_bias, alley_bias, _snap_to_grid_tolerance):
-        params = {
-            'geometries': 'geojson',
-            # 'continue_straight':'false',
-            'access_token': 'pk.eyJ1IjoibXRjb2x2YXJkIiwiYSI6ImNrMDgzYndkZjBoanUzb21jaTkzajZjNWEifQ.ocEzAm8Y7a6im_FVc92HjQ',
-            'walking_speed': walking_speed,
-            'walkway_bias': walkway_bias,
-            'alley_bias': alley_bias,
-            'bearings': bearings,
-            # 'exclude': 'ferry',
-            # 'radiuses': snap_to_grid_tolerance,
-        }
-        response = requests.get(f'https://api.mapbox.com/directions/v5/mapbox/walking/{waypoints}', params=params)
-        print('response.url', response.url)
-        data = response.json()
-        # print('response.json', data)
-        return data
+# ///////////////////////////////////
+    # def returnRouteGeometry(self, _request, waypoints, bearings, walking_speed, walkway_bias, alley_bias, _snap_to_grid_tolerance):
+    #     params = {
+    #         'geometries': 'geojson',
+    #         # 'continue_straight':'false',
+    #         'access_token': 'pk.eyJ1IjoibXRjb2x2YXJkIiwiYSI6ImNrMDgzYndkZjBoanUzb21jaTkzajZjNWEifQ.ocEzAm8Y7a6im_FVc92HjQ',
+    #         'walking_speed': walking_speed,
+    #         'walkway_bias': walkway_bias,
+    #         'alley_bias': alley_bias,
+    #         'bearings': bearings,
+    #         # 'exclude': 'ferry',
+    #         # 'radiuses': snap_to_grid_tolerance,
+    #     }
+    #     response = requests.get(f'https://api.mapbox.com/directions/v5/mapbox/walking/{waypoints}', params=params)
+    #     print('response.url', response.url)
+    #     data = response.json()
+    #     # print('response.json', data)
+    #     return data
 
     def set_park_access_filter(self, access_filter, parks_all_data, parks_open_to_public_data, parks_open_to_private_data):
         if access_filter == 'allParks':
