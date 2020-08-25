@@ -105,7 +105,6 @@ class ParksWithinBoundingBox(APIView):
         destination_lon_lat = [float(x) for x in destination.split(',')]
         access_filter = parkAccessFilter
     # parameters
-        rambling_tolerance = 1000
         size_in_hectares_filter = float(minParkSize)/100
         angle_filter = math.pi/5
         pi_divisor = 2.3

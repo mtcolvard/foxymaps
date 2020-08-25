@@ -30,36 +30,51 @@ export default class ExploreOptions extends React.Component {
 
     return(
       <div>
-        <div className="field searchfield has-addons">
-          <p className="control">
-            <button className={publicButton ? "button is-info is-selected" : "button"} onClick={this.handlePublicButtonClick}>
-              <span>Public</span>
-            </button>
-          </p>
-          <p className="control">
-            <button className={publicPrivateButton ? "button is-info is-selected" : "button"} onClick={this.handlePublicPrivateButtonClick}>
-              <span>Public & Private</span>
-            </button>
-          </p>
-          <p className="control">
-            <button className={privateButton ? "button is-info is-selected" : "button"} onClick={this.handlePrivateButtonClick}>
-              <span>Private</span>
-            </button>
-          </p>
-        </div>
         <div className="panel">
-          <p className="panel-heading">
-            Minimum Size In Hectares
-          </p>
+          <div className="panel-tabs">
+            <p className="control">
+              <a className={publicButton ? "button is-info is-selected" : "button"} onClick={this.handlePublicButtonClick}>
+                <span>Public</span>
+              </a>
+            </p>
+            <p className="control">
+              <a className={publicPrivateButton ? "button is-info is-selected" : "button"} onClick={this.handlePublicPrivateButtonClick}>
+                <span>Public & Private</span>
+              </a>
+            </p>
+            <p className="control">
+              <a className={privateButton ? "button is-info is-selected" : "button"} onClick={this.handlePrivateButtonClick}>
+                <span>Private</span>
+              </a>
+            </p>
+          </div>
           <div className="panel-block">
+            <p className="panelLabels">
+              Park Size (min)
+            </p>
             <p className="control has-icons-left">
               <input
-                className="input"
+                className="input panelInput"
                 type="text"
-                placeholder={this.props.placeholder}
                 onChange={this.handleChange}
+                placeholder={this.props.sizeFormData}
                 value={this.props.sizeFormData}
-                name={this.props.name}
+                name={this.props.sizeName}
+                />
+            </p>
+          </div>
+          <div className="panel-block">
+            <p className="panelLabels">
+              Rambling Tolerance
+            </p>
+            <p className="control has-icons-left">
+              <input
+                className="input panelInput"
+                type="text"
+                onChange={this.handleChange}
+                placeholder={this.props.ramblingTolerance}
+                value={this.props.ramblingTolerance}
+                name={this.props.ramblingName}
                 />
             </p>
           </div>
@@ -70,12 +85,65 @@ export default class ExploreOptions extends React.Component {
               Recalculate
             </button>
           </div>
-
         </div>
       </div>
     )
   }
 }
+
+// <p className="control">
+//   <button className={publicButton ? "button is-info is-selected" : "button"} onClick={this.handlePublicButtonClick}>
+//     <span>Public</span>
+//   </button>
+// </p>
+// <p className="control">
+//   <button className={publicPrivateButton ? "button is-info is-selected" : "button"} onClick={this.handlePublicPrivateButtonClick}>
+//     <span>Public & Private</span>
+//   </button>
+// </p>
+// <p className="control">
+//   <button className={privateButton ? "button is-info is-selected" : "button"} onClick={this.handlePrivateButtonClick}>
+//     <span>Private</span>
+//   </button>
+// </p>
+
+// <div class="tabs is-toggle">
+//   <ul>
+//     <li class="is-active">
+//       <a>
+//         <span class="icon is-small"><i class="fas fa-image" aria-hidden="true"></i></span>
+//         <span>Pictures</span>
+//       </a>
+//     </li>
+//     <li>
+//       <a>
+//         <span class="icon is-small"><i class="fas fa-music" aria-hidden="true"></i></span>
+//         <span>Music</span>
+//       </a>
+//     </li>
+//     <li>
+//       <a>
+//         <span class="icon is-small"><i class="fas fa-film" aria-hidden="true"></i></span>
+//         <span>Videos</span>
+//       </a>
+//     </li>
+//     <li>
+//       <a>
+//         <span class="icon is-small"><i class="far fa-file-alt" aria-hidden="true"></i></span>
+//         <span>Documents</span>
+//       </a>
+//     </li>
+//   </ul>
+// </div>
+
+
+
+// <div className="field has-addons">            </div>
+
+
+// <p className="panel-heading">
+//   Minimum Size In Hectares
+// </p>
 
 // handleDisplayAllParks() {
 //   this.props.onHandleDisplayAllParks()

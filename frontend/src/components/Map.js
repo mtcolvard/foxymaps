@@ -41,7 +41,7 @@ class Map extends React.Component {
     super()
 
     this.state = {
-      ramblingTolerance: 1000,
+      ramblingTolerance: '1000',
       originFormData: '',
       destinationFormData: '',
       originData: '',
@@ -70,7 +70,7 @@ class Map extends React.Component {
       displayOriginSearchOptions: false,
       displayDestinationSearchBar: true,
       displayBottomDestinationData: false,
-      displayCommuteVsExplore: false,
+      displayCommuteVsExplore: true,
       loadingSpinner: false,
       isMapboxSearching: false,
       routePins: [],
@@ -471,7 +471,7 @@ class Map extends React.Component {
 // onMouseUp={this.handleMouseUp}
 
   render () {
-    const {viewport, originFormData, destinationFormData, originData, destinationData, displayDirectionsSearchBar, displayOriginSearchOptions, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected, geolocateClick, loadingSpinner, isMapboxSearching, routePins, allParkPins, displayCommuteVsExplore, publicButton, publicPrivateButton, privateButton, parkAccessFilter, toggleExplore, toggleRecalculate, sizeFormData} = this.state
+    const {viewport, originFormData, destinationFormData, originData, destinationData, displayDirectionsSearchBar, displayOriginSearchOptions, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected, geolocateClick, loadingSpinner, isMapboxSearching, routePins, allParkPins, displayCommuteVsExplore, publicButton, publicPrivateButton, privateButton, parkAccessFilter, toggleExplore, toggleRecalculate, sizeFormData, ramblingTolerance} = this.state
     const directionsLayer = {routeGeometry}
     return (
       <div>
@@ -581,8 +581,9 @@ class Map extends React.Component {
                 publicPrivateButton={publicPrivateButton}
                 privateButton={privateButton}
                 sizeFormData={sizeFormData}
-                placeholder={sizeFormData}
-                name='sizeFormData'
+                sizeName='sizeFormData'
+                ramblingTolerance={ramblingTolerance}
+                ramblingName='ramblingTolerance'
                 />}
             {displayOriginSearchOptions &&
               <div className="locationbuttonfield">

@@ -13,15 +13,20 @@ html, body {
   font-weight: 300;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 button {
   font-family: 'Montserrat', sans-serif;
   font-style: normal;
   font-weight: 400;
 }
 
-* {
-  box-sizing: border-box;
+input {
+  background-color: white;
 }
+
 
 .commuteExploreField {
   padding:0.5em 0.5em 0.33em 0em;
@@ -147,7 +152,15 @@ button {
   border-radius:0.25em;
 }
 
-input {
+.panelInput {
+  padding: 0;
+}
+
+.panel-tabs {
+  background-color: white;
+}
+
+.panel-block {
   background-color: white;
 }
 
