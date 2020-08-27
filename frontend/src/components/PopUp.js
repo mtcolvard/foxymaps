@@ -1,12 +1,8 @@
 import * as React from 'react'
 import {Component} from 'react'
 import {render} from 'react-dom'
-import MapGL, {
-  Popup,
-  NavigationControl,
-  FullscreenControl,
-  ScaleControl,
-  GeolocateControl
+import  {
+  Popup
 } from 'react-map-gl'
 
 import ControlPanel from './control-panel'
@@ -14,8 +10,6 @@ import Pins from './pins'
 import CityInfo from './city-info'
 
 import CITIES from '../../.data/cities.json'
-
-const TOKEN = '' // Set your mapbox token here
 
 const geolocateStyle = {
   position: 'absolute',
@@ -89,35 +83,9 @@ export default class App extends Component {
 
   render() {
     const {viewport} = this.state
-
     return (
-      <MapGL
-        {...viewport}
-        width="100%"
-        height="100%"
-        mapStyle="mapbox://styles/mapbox/dark-v9"
-        onViewportChange={this._updateViewport}
-        mapboxApiAccessToken={TOKEN}
-      >
         <Pins data={CITIES} onClick={this._onClickMarker} />
-
         {this._renderPopup()}
-
-        <div style={geolocateStyle}>
-          <GeolocateControl />
-        </div>
-        <div style={fullscreenControlStyle}>
-          <FullscreenControl />
-        </div>
-        <div style={navStyle}>
-          <NavigationControl />
-        </div>
-        <div style={scaleControlStyle}>
-          <ScaleControl />
-        </div>
-
-        <ControlPanel containerComponent={this.props.containerComponent} />
-      </MapGL>
     )
   }
 }
