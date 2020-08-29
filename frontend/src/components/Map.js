@@ -42,6 +42,7 @@ class Map extends React.Component {
 
     this.state = {
       ramblingTolerance: '1000',
+      angleFilter: '36',
       originFormData: '',
       destinationFormData: '',
       originData: '',
@@ -401,7 +402,7 @@ class Map extends React.Component {
   sendDestinationToBackend(origin, destination) {
     console.log('mapbox request sent')
     this.setState({isMapboxSearching:true})
-    axios.get(`api/parkswithinboundingbox/${origin}/${destination}/${this.state.ramblingTolerance}/${this.state.parkAccessFilter}/${this.state.sizeFormData}`)
+    axios.get(`api/parkswithinboundingbox/${origin}/${destination}/${this.state.ramblingTolerance}/${this.state.parkAccessFilter}/${this.state.sizeFormData}/${this.state.angleFilter}`)
       .then(res =>
         this.setState({
         routeLargestPark: res.data['largest_park'],
@@ -471,7 +472,7 @@ class Map extends React.Component {
 // onMouseUp={this.handleMouseUp}
 
   render () {
-    const {viewport, originFormData, destinationFormData, originData, destinationData, displayDirectionsSearchBar, displayOriginSearchOptions, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected, geolocateClick, loadingSpinner, isMapboxSearching, routePins, allParkPins, displayCommuteVsExplore, publicButton, publicPrivateButton, privateButton, parkAccessFilter, toggleExplore, toggleRecalculate, sizeFormData, ramblingTolerance} = this.state
+    const {viewport, originFormData, destinationFormData, originData, destinationData, displayDirectionsSearchBar, displayOriginSearchOptions, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected, geolocateClick, loadingSpinner, isMapboxSearching, routePins, allParkPins, displayCommuteVsExplore, publicButton, publicPrivateButton, privateButton, parkAccessFilter, toggleExplore, toggleRecalculate, sizeFormData, ramblingTolerance, angleFilter} = this.state
     const directionsLayer = {routeGeometry}
     return (
       <div>
@@ -567,12 +568,12 @@ class Map extends React.Component {
                 placeholder='Add destination to plan route'
                 name='destinationFormData'/>
             }
-            {displayDirectionsSearchBar &&
+            {originLonLat && destinationLonLat &&
               <CommuteVsExplore
                 onHandleToggleClick={this.handleToggleClick}
                 toggleExplore={toggleExplore}/>
             }
-            {toggleExplore &&
+            {displayDirectionsSearchBar && toggleExplore && originLonLat && destinationLonLat &&
               <ExploreOptions
                 onHandleExploreOptionsButtonClick={this.handleExploreOptionsButtonsClick}
                 onHandleChange={this.handleChange}
@@ -583,7 +584,9 @@ class Map extends React.Component {
                 sizeFormData={sizeFormData}
                 sizeName='sizeFormData'
                 ramblingTolerance={ramblingTolerance}
+                angleFilter={angleFilter}
                 ramblingName='ramblingTolerance'
+                angleFilterName='angleFilter'
                 />}
             {displayOriginSearchOptions &&
               <div className="locationbuttonfield">

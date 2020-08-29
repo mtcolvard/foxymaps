@@ -79,10 +79,25 @@ export default class ExploreOptions extends React.Component {
             </p>
           </div>
           <div className="panel-block">
+            <p className="panelLabels">
+              Angle Filter
+            </p>
+            <p className="control has-icons-left">
+              <input
+                className="input panelInput"
+                type="text"
+                onChange={this.handleChange}
+                placeholder={this.props.angleFilter}
+                value={this.props.angleFilter}
+                name={this.props.angleFilterName}
+                />
+            </p>
+          </div>
+          <div className="panel-block">
             <button
               className="button is-link is-outlined is-fullwidth"
               onClick={this.handleRecalculate}>
-              Recalculate
+              Recalculate Route
             </button>
           </div>
         </div>

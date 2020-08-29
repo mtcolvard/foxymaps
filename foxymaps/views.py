@@ -99,15 +99,15 @@ class ParksWithinBoundingBox(APIView):
     def __init__(self):
         self.query_all_parks = Location.objects.all()
 
-    def get(self, _request, origin, destination, ramblingTolerance, parkAccessFilter, minParkSize):
-        rambling_tolerance = int(ramblingTolerance)
+    def get(self, _request, origin, destination, ramblingTolerance, parkAccessFilter, minParkSize, angleFilter):
         origin_lon_lat = [float(x) for x in origin.split(',')]
         destination_lon_lat = [float(x) for x in destination.split(',')]
         access_filter = parkAccessFilter
     # parameters
+        rambling_tolerance = int(ramblingTolerance)
         size_in_hectares_filter = float(minParkSize)/100
-        angle_filter = math.pi/5
-        pi_divisor = 2.3
+        angle_filter_to_next_park = math.pi/(180/int(angleFilter))
+        angle_filter_bbox = math.pi/2.3
         bearing_towards_destination = True
         waypoint_exit_radius='45'
         platonic_width_factor = 1
@@ -138,52 +138,60 @@ class ParksWithinBoundingBox(APIView):
     # create a dictionary containing all the parks selected from the database
         all_parks = self.populate_all_parks_dict(queryset, origin_lon_lat, best_fit_origin_to_destination)
     # create a boundingbox by filtering out all parks not within the rectangle formed between the distance from origin to destination (length) and the rambling tolerance (width) (e.g. 1000 meters)
-        parks_within_perp_distance = self.calculate_parks_within_perp_distance(all_parks, origin_to_destination_distance, origin_to_destination_bearing, rambling_tolerance, size_in_hectares_filter, pi_divisor)
-        # print('parks_within_perp_distance length', len(parks_within_perp_distance))
-        # print('parks_within_perp_distance', parks_within_perp_distance)
+        parks_within_perp_distance = self.calculate_parks_within_perp_distance(all_parks, origin_to_destination_distance, origin_to_destination_bearing, rambling_tolerance, size_in_hectares_filter, angle_filter_bbox)
     # if no parks are within this bounding box return the direct route
         if len(parks_within_perp_distance) == 0:
             route_waypoints_lon_lat = [origin_lon_lat, destination_lon_lat]
             parks_within_perp_distance_lon_lat = []
-            # largest_park = {'name':'the most Direct Route (No convenient parks enroute)'}
             if access_filter == 'privateParks':
                 largest_park = 'the most Direct Route  (No private parks enroute)'
             else:
                 largest_park = 'the most Direct Route  (No convenient parks enroute)'
             compass_and_radius_routing_option_formatted = ';'
             waypoint_snap_to_road_grid_tolerance = 'unlimited;unlimited'
-    #
+    # else find the parks within the bounding box and calculate the best rout
         else:
-        # Mapbox has a limit of 25 waypoints including the origin and destination for calls to their Directions API
-            total_waypoints_dict = self.sort_parks_by_acreage(origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, parks_within_perp_distance)
-        # Run the route_calculations.homing_algo.py module to find route order of the most direct route
-            waypoint_route_order_and_graph = run_homing_algo(total_waypoints_dict, angle_filter, platonic_width_factor)
+            total_waypoints_dict = self.populate_total_waypoints_dict(origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, parks_within_perp_distance)
+        # Run the module route_calculations.homing_algo.py to find the route order of the most direct route
+            waypoint_route_order_and_graph = run_homing_algo(total_waypoints_dict, angle_filter_to_next_park, platonic_width_factor)
+
             waypoint_route_order = waypoint_route_order_and_graph[0]
             waypoint_graph = waypoint_route_order_and_graph[1]
+        # mapbox directions API limits get requests to 25 waypoint coordinates. this arbitrarily removes every other waypoint starting at waypoint 10
+            if len(waypoint_route_order) > 25:
+                waypoint_route_order_trimmed = waypoint_route_order
+                count = 10
+                while len(waypoint_route_order_trimmed) > 25:
+                    del waypoint_route_order_trimmed[count]
+                    count = count + 1
+                waypoint_route_order = waypoint_route_order_trimmed
+                print('waypoint route order trimmed',len(waypoint_route_order_trimmed))
+                print('waypoint route order',waypoint_route_order_trimmed)
+
         # compass_and_radius_routing_option is a optional parameter on the mapbox directions API which influences the direction a route starts from each waypoint.  it is useful for making sure routes continue traveling in their current direction
-        if bearing_towards_destination is True:
-            waypoints_bearing_towards_destination = {}
-            for x in waypoint_route_order:
-                waypoints_bearing_towards_destination[x] = waypoint_graph[x]['destination']['compass_bearing']
-            waypoints_bearing_list = list(waypoints_bearing_towards_destination.values())
-            compass_and_radius_routing_option = f',{waypoint_exit_radius};'.join(str(elem) for elem in waypoints_bearing_list)
-            compass_and_radius_routing_option_formatted = compass_and_radius_routing_option+f',{waypoint_exit_radius}'
-            print('waypoints_bearing_towards_destination', waypoints_bearing_towards_destination)
-        else:
-            waypoints_bearing_towards_next_waypoint = {}
-            count = 0
-            while count < (len(waypoint_route_order)-1):
+            if bearing_towards_destination is True:
+                waypoints_bearing_towards_destination = {}
                 for x in waypoint_route_order:
-                    if x == 'destination':
-                        waypoints_bearing_towards_next_waypoint['destination'] = 0
-                        break
-                    count += 1
-                    waypoint_target = waypoint_route_order[count]
-                    waypoints_bearing_towards_next_waypoint[x] = waypoint_graph[x][waypoint_target]['compass_bearing']
-            waypoints_bearing_list = list(waypoints_bearing_towards_next_waypoint.values())
-            compass_and_radius_routing_option = f',{waypoint_exit_radius};'.join(str(elem) for elem in waypoints_bearing_list)
-            compass_and_radius_routing_option_formatted = compass_and_radius_routing_option+f',{waypoint_exit_radius}'
-            print('waypoints_bearing_towards_next_waypoint', waypoints_bearing_towards_next_waypoint)
+                    waypoints_bearing_towards_destination[x] = waypoint_graph[x]['destination']['compass_bearing']
+                waypoints_bearing_list = list(waypoints_bearing_towards_destination.values())
+                compass_and_radius_routing_option = f',{waypoint_exit_radius};'.join(str(elem) for elem in waypoints_bearing_list)
+                compass_and_radius_routing_option_formatted = compass_and_radius_routing_option+f',{waypoint_exit_radius}'
+                print('waypoints_bearing_towards_destination', waypoints_bearing_towards_destination)
+            else:
+                waypoints_bearing_towards_next_waypoint = {}
+                count = 0
+                while count < (len(waypoint_route_order)-1):
+                    for x in waypoint_route_order:
+                        if x == 'destination':
+                            waypoints_bearing_towards_next_waypoint['destination'] = 0
+                            break
+                        count += 1
+                        waypoint_target = waypoint_route_order[count]
+                        waypoints_bearing_towards_next_waypoint[x] = waypoint_graph[x][waypoint_target]['compass_bearing']
+                waypoints_bearing_list = list(waypoints_bearing_towards_next_waypoint.values())
+                compass_and_radius_routing_option = f',{waypoint_exit_radius};'.join(str(elem) for elem in waypoints_bearing_list)
+                compass_and_radius_routing_option_formatted = compass_and_radius_routing_option+f',{waypoint_exit_radius}'
+                print('waypoints_bearing_towards_next_waypoint', waypoints_bearing_towards_next_waypoint)
 
     # waypoint_snap_to_road_grid_radius is an optional parameter on the mapbox directions API which sets a tolerance for how far mapbox is allowed to move the lon_lat waypoint coordinate is the coordinate is not directly on the road grid
         waypoint_snap_to_road_grid_tolerance = f'{snap_tolerance};'*(len(waypoint_route_order)-1)+f'{snap_tolerance}'
@@ -249,23 +257,15 @@ class ParksWithinBoundingBox(APIView):
 
     def sort_parks_by_acreage(self, origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, parks_within_perp_distance):
         # mapbox only allows 25 waypoints including origin and destination so we sort and then slice off the 23 largest parks.
-        # if len(parks_within_perp_distance) > 23:
-        #     waypoints_sorted_by_acreage = sorted(parks_within_perp_distance.keys(), key=lambda y: (parks_within_perp_distance[y]['size_in_hectares']))
-        #     # print('waypoints_sorted_by_acreage', waypoints_sorted_by_acreage)
-        #     waypoints_sliced_by_acreage = waypoints_sorted_by_acreage[-23:]
-        #     total_waypoints_sorted_by_acreage = {k:v for k, v in parks_within_perp_distance.items() if k in waypoints_sliced_by_acreage}
-        #     total_waypoints_dict = self.populate_total_waypoints_dict(origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, total_waypoints_sorted_by_acreage)
-        # else:
-        #     total_waypoints_dict = self.populate_total_waypoints_dict(origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, parks_within_perp_distance)
         total_waypoints_dict = self.populate_total_waypoints_dict(origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, parks_within_perp_distance)
         return total_waypoints_dict
 
-    def calculate_parks_within_perp_distance(self, all_parks, origin_to_destination_distance, origin_to_destination_bearing, rambling_tolerance, size_in_hectares_filter, pi_divisor):
+    def calculate_parks_within_perp_distance(self, all_parks, origin_to_destination_distance, origin_to_destination_bearing, rambling_tolerance, size_in_hectares_filter, angle_filter_bbox):
         parks_within_perp_distance = {
         k:v for (k, v) in all_parks.items() if
         # select only parks within ± 45 degrees of inital bearing towards destination
-            v['crowflys_distance_and_bearing'][1] < (origin_to_destination_bearing + math.pi/pi_divisor) and
-            v['crowflys_distance_and_bearing'][1] > (origin_to_destination_bearing - math.pi/pi_divisor) and
+            v['crowflys_distance_and_bearing'][1] < (origin_to_destination_bearing + angle_filter_bbox) and
+            v['crowflys_distance_and_bearing'][1] > (origin_to_destination_bearing - angle_filter_bbox) and
         # select only parks within the radius from origin to destination
             v['crowflys_distance_and_bearing'][0] < origin_to_destination_distance and
         # select parks within user's tolerance for rambling

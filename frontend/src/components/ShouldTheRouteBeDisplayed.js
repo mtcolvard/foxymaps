@@ -6,11 +6,11 @@ export default class ShouldTheRouteBeDisplayed extends React.PureComponent{
   }
   componentDidMount() {
     console.log('componentDidMount')
-    this.props.sendDestinationToBackend(this.props.originLonLat, this.props.destinationLonLat, this.props.parkAccessFilter, this.props.toggleRecalculate)
+    this.props.sendDestinationToBackend(this.props.originLonLat, this.props.destinationLonLat,  this.props.toggleRecalculate)
   }
   componentDidUpdate() {
     console.log('componentDidUpdate')
-    this.props.sendDestinationToBackend(this.props.originLonLat, this.props.destinationLonLat, this.props.parkAccessFilter, this.props.toggleRecalculate)
+    this.props.sendDestinationToBackend(this.props.originLonLat, this.props.destinationLonLat,  this.props.toggleRecalculate)
   }
 
   render() {
