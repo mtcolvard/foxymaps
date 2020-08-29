@@ -1,6 +1,7 @@
 import math
 import requests
 # from django.http import Http404
+from django.conf import settings
 from django.db.models import Avg
 from django.db.models import Q
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -51,7 +52,7 @@ class LocationFilterList(ListCreateAPIView):
     serializer_class = LocationUpdateSerializer
 class MapGeocoderView(APIView):
     def get(self, _request, searchQuery):
-        geocoder = Geocoder(name='mapbox.places', access_token='pk.eyJ1IjoibXRjb2x2YXJkIiwiYSI6ImNrZDIycDBuaTAyYjQyeG55azNwYzd0ZjMifQ.yYcTjTmpZ89j4vMWS8VdrA')
+        geocoder = Geocoder(name='mapbox.places', access_token=settings.MAPBOX_TOKEN)
         response = geocoder.forward(searchQuery, bbox=[-0.542935,51.255636,0.335605,51.726673])
         data = response.json()
         # print(data)
@@ -81,7 +82,8 @@ class QueryRouteGeometry(APIView):
         params = {
             'geometries': 'geojson',
             # 'continue_straight':'false',
-            'access_token': 'pk.eyJ1IjoibXRjb2x2YXJkIiwiYSI6ImNrMDgzYndkZjBoanUzb21jaTkzajZjNWEifQ.ocEzAm8Y7a6im_FVc92HjQ',
+            # 'access_token': 'pk.eyJ1IjoibXRjb2x2YXJkIiwiYSI6ImNrMDgzYndkZjBoanUzb21jaTkzajZjNWEifQ.ocEzAm8Y7a6im_FVc92HjQ',
+            'access_token': settings.MAPBOX_TOKEN,
             'walking_speed': walking_speed,
             'walkway_bias': walkway_bias,
             'alley_bias': alley_bias,
