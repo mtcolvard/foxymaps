@@ -10,6 +10,7 @@ import SearchBarDirections from './SearchBarDirections'
 import DropDownDisplay from './DropDownDisplay'
 import BottomDestinationDisplay from './BottomDestinationDisplay'
 import ShouldTheRouteBeDisplayed  from './ShouldTheRouteBeDisplayed'
+import ShouldTheParksDisplayUpdate from './ShouldTheParksDisplayUpdate'
 import CommuteVsExplore from './CommuteVsExplore'
 import ExploreOptions from './ExploreOptions'
 
@@ -106,6 +107,7 @@ class Map extends React.Component {
     this.handleToggleClick = this.handleToggleClick.bind(this)
     this.handleRecalculate = this.handleRecalculate.bind(this)
     this.queryBackendForRouteGeometry = this.queryBackendForRouteGeometry.bind(this)
+    this.updateParksFromExploreOptions = this.updateParksFromExploreOptions.bind(this)
     // this.handleMouseUp = this.handleMouseUp.bind(this)
     // this.handleMouseUpSubmit = this.handleMouseUpSubmit.bind(this)
 
@@ -216,7 +218,7 @@ class Map extends React.Component {
       .then(console.log('submit response geocoder', this.state[name]))
       .then(console.log('geocoder search response data', this.state.searchResponseData))
   }
-
+  
   handleClear(name) {
     this.setState({
       isSearchTriggered: false,
@@ -399,6 +401,14 @@ class Map extends React.Component {
     })
   }
 
+  updateParksFromExploreOptions() {
+    axios.get(`api/parkswithinboundingbox/${this.state.originLonLat}/${this.state.destinationLonLat}/${this.state.ramblingTolerance}/${this.state.parkAccessFilter}/${this.state.sizeFormData}/${this.state.angleFilter}`)
+    .then(res =>
+      this.setState({
+        allParkPins: res.data['all_waypoints_in_bbox_lon_lat']
+    }))
+  }
+
   sendDestinationToBackend(origin, destination) {
     console.log('mapbox request sent')
     this.setState({isMapboxSearching:true})
@@ -528,9 +538,16 @@ class Map extends React.Component {
             <ShouldTheRouteBeDisplayed
               originLonLat={originLonLat}
               destinationLonLat={destinationLonLat}
-              parkAccessFilter={parkAccessFilter}
               toggleRecalculate={toggleRecalculate}
               sendDestinationToBackend={this.sendDestinationToBackend}/>
+          }
+          {toggleExplore &&
+            <ShouldTheParksDisplayUpdate
+              ramblingTolerance={ramblingTolerance}
+              angleFilter={angleFilter}
+              sizeFormData={sizeFormData}
+              parkAccessFilter={parkAccessFilter}
+              updateParksFromExploreOptions={this.updateParksFromExploreOptions}/>
           }
           <div className="bodyContainer">
             <div>

@@ -1,9 +1,13 @@
-waypoint_route_order = ['origin', 907, 899, 901, 864, 1342, 1327, 'destination']
-mystring = '45;'*(len(waypoint_route_order)-1)+'45'
-print(mystring)
+# waypoint_route_order = ['origin', 907, 899, 901, 864, 1342, 1327, 'destination']
+# mystring = '45;'*(len(waypoint_route_order)-1)+'45'
+# print(mystring)
+#
+# waypoints_bearing_towards_destination {'origin': 283.16754177196884, 889: 278.8086586715406, 891: 280.08417957431504, 868: 272.30304463042944, 908: 265.22005254437863, 853: 271.55266891772715, 1330: 250.19969765660196, 'destination': 0.0}
 
-waypoints_bearing_towards_destination {'origin': 283.16754177196884, 889: 278.8086586715406, 891: 280.08417957431504, 868: 272.30304463042944, 908: 265.22005254437863, 853: 271.55266891772715, 1330: 250.19969765660196, 'destination': 0.0}
+route_waypoints_lon_lat = [-0.07089000000000001,51.518947499999996,-0.07810205040325,51.516487475579,-0.079117100058409,51.509489894392,-0.09067900000000001,51.5055055]
 
+route_waypoints_lon_lat_string = ';'.join([str(elem) for elem in route_waypoints_lon_lat])
+route_waypoints_lon_lat_formatted = route_waypoints_lon_lat_string.replace('[', '').replace(']', '').replace(' ', '')
 
 # waypoint_bearing_to_destination compass_bearing {'origin': 248.36276386302092, 467: 249.21737293989992, 473: 244.48833992707742, 504: 241.5393585322683, 457: 240.56854526970304, 496: 240.63853108323428, 475: 242.68546317888362, 476: 240.94900722866555, 2482: 241.66755246478527, 2385: 253.44213277975325, 'destination': 0.0}
 #
