@@ -3,8 +3,8 @@
 !/.yarn/plugins
 !/.yarn/sdks
 frontend/dist
+project/settings.py
 # Swap the comments on the following lines if you don't wish to use zero-installs
 # Documentation here: https://yarnpkg.com/features/zero-installs
 !/.yarn/cache
 #/.pnp.*
-project/settings.py
