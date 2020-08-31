@@ -137,6 +137,7 @@ class ParksWithinBoundingBox(APIView):
         parks_open_to_private_data = parks_open_to_private_serializer.data
     # select which queryset to use based on user's choice of public and/or private parks
         queryset = self.set_park_access_filter(access_filter, parks_all_data, parks_open_to_public_data, parks_open_to_private_data)
+        print('length of queryset', len(queryset))
     # create a dictionary containing all the parks selected from the database
         all_parks = self.populate_all_parks_dict(queryset, origin_lon_lat, best_fit_origin_to_destination)
     # create a boundingbox by filtering out all parks not within the rectangle formed between the distance from origin to destination (length) and the rambling tolerance (width) (e.g. 1000 meters)
@@ -144,14 +145,18 @@ class ParksWithinBoundingBox(APIView):
     # if no parks are within this bounding box return the direct route
         if len(parks_within_perp_distance) == 0:
             route_waypoints_lon_lat = [origin_lon_lat, destination_lon_lat]
-            parks_within_perp_distance_lon_lat = []
+            parks_within_perp_distance_lon_lat = [origin_lon_lat, destination_lon_lat]
+            total_waypoints_dict = {}
+            route_waypoints_lon_lat_string = ';'.join([str(elem) for elem in route_waypoints_lon_lat])
+            route_waypoints_lon_lat_formatted = route_waypoints_lon_lat_string.replace('[', '').replace(']', '').replace(' ', '')
+            compass_and_radius_routing_option_formatted = ';'
             if access_filter == 'privateParks':
                 largest_park = 'the most Direct Route  (No private parks enroute)'
             else:
                 largest_park = 'the most Direct Route  (No convenient parks enroute)'
-            compass_and_radius_routing_option_formatted = ';'
-            waypoint_snap_to_road_grid_tolerance = 'unlimited;unlimited'
-    # else find the parks within the bounding box and calculate the best rout
+
+            # waypoint_snap_to_road_grid_tolerance = 'unlimited;unlimited'
+    # else find the parks within the bounding box and calculate the best route
         else:
             total_waypoints_dict = self.populate_total_waypoints_dict(origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, parks_within_perp_distance)
         # Run the module route_calculations.homing_algo.py to find the route order of the most direct route
@@ -196,24 +201,25 @@ class ParksWithinBoundingBox(APIView):
                 print('waypoints_bearing_towards_next_waypoint', waypoints_bearing_towards_next_waypoint)
 
     # waypoint_snap_to_road_grid_radius is an optional parameter on the mapbox directions API which sets a tolerance for how far mapbox is allowed to move the lon_lat waypoint coordinate is the coordinate is not directly on the road grid
-        waypoint_snap_to_road_grid_tolerance = f'{snap_tolerance};'*(len(waypoint_route_order)-1)+f'{snap_tolerance}'
-        print(waypoint_snap_to_road_grid_tolerance)
+        # waypoint_snap_to_road_grid_tolerance = f'{snap_tolerance};'*(len(waypoint_route_order)-1)+f'{snap_tolerance}'
+        # print(waypoint_snap_to_road_grid_tolerance)
 
     # Determine the largest park to display in the frontend UI
-        waypoints_size_in_hectares = {k:v for k, v in total_waypoints_dict.items() if k in waypoint_route_order}
-        largest_park_order = sorted(waypoints_size_in_hectares, key=lambda v: waypoints_size_in_hectares[v]['size_in_hectares'])
-        if len(waypoint_route_order) == 3:
-            largest_park = waypoints_size_in_hectares[largest_park_order[-1]]['name']
-        else:
-            largest_park = waypoints_size_in_hectares[largest_park_order[-1]]['name']+' and '+waypoints_size_in_hectares[largest_park_order[-2]]['name']
+            waypoints_size_in_hectares = {k:v for k, v in total_waypoints_dict.items() if k in waypoint_route_order}
+            largest_park_order = sorted(waypoints_size_in_hectares, key=lambda v: waypoints_size_in_hectares[v]['size_in_hectares'])
+            if len(waypoint_route_order) == 3:
+                largest_park = waypoints_size_in_hectares[largest_park_order[-1]]['name']
+            else:
+                largest_park = waypoints_size_in_hectares[largest_park_order[-1]]['name']+' and '+waypoints_size_in_hectares[largest_park_order[-2]]['name']
 
-    # Coordinates for all parks within the user's rambling tolerance for displaying in Explore Mode
-        parks_within_perp_distance_lon_lat = list({k:v['lon_lat'] for k, v in parks_within_perp_distance.items()}.values())
-    # Coordinates for the parks enroute to destination as determined by the holming algorithm
-        route_waypoints_lon_lat = [total_waypoints_dict[x]['lon_lat'] for x in waypoint_route_order]
-    #  Formating for requesting the route directions directly from the Mapbox Directions API
-        route_waypoints_lon_lat_string = ';'.join([str(elem) for elem in route_waypoints_lon_lat])
-        route_waypoints_lon_lat_formatted = route_waypoints_lon_lat_string.replace('[', '').replace(']', '').replace(' ', '')
+        # Coordinates for all parks within the user's rambling tolerance for displaying in Explore Mode
+            parks_within_perp_distance_lon_lat = list({k:v['lon_lat'] for k, v in total_waypoints_dict.items()}.values())
+            print('parks within perp dist updates', parks_within_perp_distance)
+        # Coordinates for the parks enroute to destination as determined by the holming algorithm
+            route_waypoints_lon_lat = [total_waypoints_dict[x]['lon_lat'] for x in waypoint_route_order]
+        #  Formating for requesting the route directions directly from the Mapbox Directions API
+            route_waypoints_lon_lat_string = ';'.join([str(elem) for elem in route_waypoints_lon_lat])
+            route_waypoints_lon_lat_formatted = route_waypoints_lon_lat_string.replace('[', '').replace(']', '').replace(' ', '')
     # Calculate the midpoint between the origin and the destination
         midpoint = Distance_And_Bearing.calculate_midpoint(self, origin_lon_lat, destination_lon_lat)
 

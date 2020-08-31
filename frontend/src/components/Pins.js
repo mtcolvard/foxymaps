@@ -24,7 +24,18 @@ export default class Pins extends PureComponent {
 
   render() {
     const {originData, destinationData, parkPins} = this.props
-    let dataArray = parkPins
+    let dataArray = []
+    if(originData && !destinationData) {
+      dataArray = [originData.center]
+    } else if(!originData && destinationData) {
+      dataArray = [destinationData.center]
+    } else if(originData && destinationData) {
+      dataArray = parkPins
+    } else {
+      dataArray = []
+    }
+
+
     return dataArray.map((place, index) => (
       <Marker
         key={`marker-${index}`}

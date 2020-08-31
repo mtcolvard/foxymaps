@@ -3,8 +3,6 @@ import axios from 'axios'
 import ReactMapGl, {MapGl, BaseControl, NavigationControl, ScaleControl, GeolocateControl, LinearInterpolator, FlyToInterpolator, HTMLOverlay, Layer, Source, WebMercatorViewport} from 'react-map-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-// import MapboxGeocoder from 'mapbox-gl-geocoder'
-
 import SearchBar from './SearchBar'
 import SearchBarDirections from './SearchBarDirections'
 import DropDownDisplay from './DropDownDisplay'
@@ -13,8 +11,6 @@ import ShouldTheRouteBeDisplayed  from './ShouldTheRouteBeDisplayed'
 import ShouldTheParksDisplayUpdate from './ShouldTheParksDisplayUpdate'
 import CommuteVsExplore from './CommuteVsExplore'
 import ExploreOptions from './ExploreOptions'
-
-// import HookDropDownDisplay from './HookDropDownDisplay'
 import Pins from './Pins'
 
 const lngLat = [-0.097865,51.514014]
@@ -36,14 +32,13 @@ const searchReponseStateDefault = {
   attribution: null
 }
 
-
 class Map extends React.Component {
   constructor() {
     super()
 
     this.state = {
       ramblingTolerance: '1000',
-      angleFilter: '36',
+      angleFilter: '45',
       originFormData: '',
       destinationFormData: '',
       originData: '',
@@ -218,7 +213,7 @@ class Map extends React.Component {
       .then(console.log('submit response geocoder', this.state[name]))
       .then(console.log('geocoder search response data', this.state.searchResponseData))
   }
-  
+
   handleClear(name) {
     this.setState({
       isSearchTriggered: false,
@@ -234,6 +229,8 @@ class Map extends React.Component {
         originLonLat: '',
         originFormData: '',
         originData: '',
+        routePins: [],
+        allParkPins: [],
         isoriginFormDataSearchTriggered: false,
         displayOriginSearchOptions: true
       })
@@ -243,6 +240,8 @@ class Map extends React.Component {
         destinationLonLat: '',
         destinationFormData: '',
         destinationData: '',
+        routePins: [],
+        allParkPins: [],
         isdestinationFormDataSearchTriggered: false
       })
     }
@@ -401,8 +400,15 @@ class Map extends React.Component {
     })
   }
 
-  updateParksFromExploreOptions() {
-    axios.get(`api/parkswithinboundingbox/${this.state.originLonLat}/${this.state.destinationLonLat}/${this.state.ramblingTolerance}/${this.state.parkAccessFilter}/${this.state.sizeFormData}/${this.state.angleFilter}`)
+  // updateParksFromExploreOptions() {
+  //   axios.get(`api/parkswithinboundingbox/${this.state.originLonLat}/${this.state.destinationLonLat}/${this.state.ramblingTolerance}/${this.state.parkAccessFilter}/${this.state.sizeFormData}/${this.state.angleFilter}`)
+  //   .then(res =>
+  //     this.setState({
+  //       allParkPins: res.data['all_waypoints_in_bbox_lon_lat']
+  //   }))
+  // }
+  updateParksFromExploreOptions(ramblingTolerance, parkAccessFilter, sizeFormData, angleFilter) {
+    axios.get(`api/parkswithinboundingbox/${this.state.originLonLat}/${this.state.destinationLonLat}/${ramblingTolerance}/${parkAccessFilter}/${sizeFormData}/${angleFilter}`)
     .then(res =>
       this.setState({
         allParkPins: res.data['all_waypoints_in_bbox_lon_lat']

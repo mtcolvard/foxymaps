@@ -10,7 +10,7 @@ export default class ShouldTheParksDisplayUpdate extends React.PureComponent{
   // }
   componentDidUpdate() {
     console.log('componentDidUpdate')
-    this.props.updateParksFromExploreOptions(this.props.sizeFormData, this.props.ramblingTolerance,  this.props.angleFilter, this.props.parkAccessFilter)
+    this.props.updateParksFromExploreOptions(this.props.ramblingTolerance, this.props.parkAccessFilter, this.props.sizeFormData, this.props.angleFilter)
   }
 
   render() {
