@@ -6,7 +6,7 @@ import { faArrowLeft, faTimes, faDirections, faLocationArrow, faMapMarkerAlt, fa
 library.add(faArrowLeft, faTimes, faDirections, faLocationArrow, faMapMarkerAlt, faArrowsAltV)
 
 import './scss/style.scss'
-import Map from './components/Map' 
+import Map from './components/Map'
 
 class App extends React.Component {
 
@@ -25,3 +25,5 @@ ReactDOM.render(
   <App />,
   document.getElementById('root')
 )
+
+// # "serve:frontend": "webpack-dev-server --mode=development"
