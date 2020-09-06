@@ -80,7 +80,7 @@ class Map extends React.Component {
       toggleRecalculate: false,
       route_waypoints_lon_lat_formatted: '',
       compass_and_radius_routing_option_formatted: '',
-      sizeFormData: 28,
+      sizeFormData: 0.28,
     }
     this.handleViewportChange =this.handleViewportChange.bind(this)
     this.handleChange = this.handleChange.bind(this)
@@ -232,7 +232,8 @@ class Map extends React.Component {
         routePins: [],
         allParkPins: [],
         isoriginFormDataSearchTriggered: false,
-        displayOriginSearchOptions: true
+  // to display "Find my location" and "Click Location on Map" set displayOriginSearchOptions to true, and do likewise under displayOriginSearchMenu()
+        displayOriginSearchOptions: false
       })
     }
     else {
@@ -337,9 +338,10 @@ class Map extends React.Component {
       displayDirectionsSearchBar: false,
       displayDestinationSearchBar: false,
       displayOriginSearchBar: true,
-      displayOriginSearchOptions: true,
       displayBottomDestinationData: false,
-      isRouteSelected: false
+      isRouteSelected: false,
+      // to display "Find my location" and "Click Location on Map" set displayOriginSearchOptions to true, likewise under HandleClear()
+      displayOriginSearchOptions: false
     })
   }
 
@@ -372,7 +374,7 @@ class Map extends React.Component {
         displayDestinationSearchBar: false,
         displayOriginSearchBar: false,
         displayOriginSearchOptions: false,
-        displayBottomDestinationData: false })
+      })
     } else if(!this.state.originFormData) {
       this.setState({displayBottomDestinationData: true, isRouteSelected:false})
     }
@@ -421,10 +423,11 @@ class Map extends React.Component {
     axios.get(`api/parkswithinboundingbox/${origin}/${destination}/${this.state.ramblingTolerance}/${this.state.parkAccessFilter}/${this.state.sizeFormData}/${this.state.angleFilter}`)
       .then(res =>
         this.setState({
+        isRouteSelected: true,
+        displayBottomDestinationData: true,
         routeLargestPark: res.data['largest_park'],
         routePins: res.data['route_waypoints_lon_lat'],
         allParkPins: res.data['all_waypoints_in_bbox_lon_lat'],
-        displayBottomDestinationData: true,
         displayCommuteVsExplore: true,
         viewport: {
           ...this.state.viewport,
@@ -447,7 +450,6 @@ class Map extends React.Component {
         this.setState({
         routeGeometry: res.data['route_geometry'],
         isMapboxSearching:false,
-        isRouteSelected: true,
         }))
     }
 

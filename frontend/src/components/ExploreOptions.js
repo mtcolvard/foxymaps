@@ -48,49 +48,64 @@ export default class ExploreOptions extends React.Component {
               </a>
             </p>
           </div>
-          <div className="panel-block">
-            <p className="panelLabels">
+          <div className="panel-block panel-block-fix">
+            <p className="panelLabels panelLabelLeft">
               Park Size (min)
             </p>
-            <p className="control has-icons-left">
-              <input
-                className="input panelInput"
-                type="text"
-                onChange={this.handleChange}
-                placeholder={this.props.sizeFormData}
-                value={this.props.sizeFormData}
-                name={this.props.sizeName}
-                />
+            <div className="panelInputFrame">
+              <p className="control">
+                <input
+                  className="input panelInput"
+                  type="text"
+                  onChange={this.handleChange}
+                  placeholder={this.props.sizeFormData}
+                  value={this.props.sizeFormData}
+                  name={this.props.sizeName}
+                  />
+              </p>
+            </div>
+            <p className="panelLabels panelLabelRight">
+              hectares
             </p>
           </div>
-          <div className="panel-block">
-            <p className="panelLabels">
+          <div className="panel-block panel-block-fix">
+            <p className="panelLabels panelLabelLeft">
               Rambling Tolerance
             </p>
-            <p className="control has-icons-left">
-              <input
-                className="input panelInput"
-                type="text"
-                onChange={this.handleChange}
-                placeholder={this.props.ramblingTolerance}
-                value={this.props.ramblingTolerance}
-                name={this.props.ramblingName}
-                />
+            <div className="panelInputFrame">
+              <p className="control">
+                <input
+                  className="input panelInput"
+                  type="text"
+                  onChange={this.handleChange}
+                  placeholder={this.props.ramblingTolerance}
+                  value={this.props.ramblingTolerance}
+                  name={this.props.ramblingName}
+                  />
+              </p>
+            </div>
+            <p className="panelLabels panelLabelRight">
+              meters
             </p>
           </div>
-          <div className="panel-block">
-            <p className="panelLabels">
-              Angle Filter
+          <div className="panel-block panel-block-fix">
+            <p className="panelLabels panelLabelLeft">
+              Parks Along Route are within:
             </p>
-            <p className="control has-icons-left">
-              <input
-                className="input panelInput"
-                type="text"
-                onChange={this.handleChange}
-                placeholder={this.props.angleFilter}
-                value={this.props.angleFilter}
-                name={this.props.angleFilterName}
-                />
+            <div className="panelInputFrame">
+              <p className="control">
+                <input
+                  className="input panelInput"
+                  type="text"
+                  onChange={this.handleChange}
+                  placeholder={this.props.angleFilter}
+                  value={this.props.angleFilter}
+                  name={this.props.angleFilterName}
+                  />
+              </p>
+            </div>
+            <p className="panelLabels panelLabelRight">
+              degrees
             </p>
           </div>
           <div className="panel-block">

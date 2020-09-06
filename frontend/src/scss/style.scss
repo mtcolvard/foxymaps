@@ -153,7 +153,8 @@ input {
 }
 
 .panelInput {
-  padding: 0;
+  // margin: 1em;
+  max-width:70px;
 }
 
 .panel-tabs {
@@ -162,6 +163,32 @@ input {
 
 .panel-block {
   background-color: white;
+}
+
+// .panel-block-fix {
+//   color: #363636;
+//   display: flex;
+//   justify-content: flex-end;
+//   // padding: 0.5em 0.75em;
+//   padding: 0.5em 0.5em;
+// }
+
+.panelLabelLeft {
+  width: 160px;
+  // min-width: 130px;
+  // max-width: 300px;
+  // padding-right: 2em;
+  margin-right: 2em;
+}
+
+.panelInputFrame {
+  // margin: 0em 1em;
+  // padding: 0em 1em;
+  // width: 70px;
+}
+
+.panelLabelRight {
+  padding-left: 0.5em;
 }
 
 .title {

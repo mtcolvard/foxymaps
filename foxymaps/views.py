@@ -107,10 +107,11 @@ class ParksWithinBoundingBox(APIView):
         access_filter = parkAccessFilter
     # parameters
         rambling_tolerance = int(ramblingTolerance)
-        size_in_hectares_filter = float(minParkSize)/100
-        angle_filter_to_next_park = math.pi/(180/int(angleFilter))
+        size_in_hectares_filter = float(minParkSize)
+        # angle_filter_to_next_park = math.pi/(180/int(angleFilter))
+        angle_filter_to_next_park = int(angleFilter)*math.pi/(180)
         angle_filter_bbox = math.pi/2.3
-        bearing_towards_destination = True
+        bearing_towards_destination = False
         waypoint_exit_radius='45'
         platonic_width_factor = 1
 
@@ -214,7 +215,6 @@ class ParksWithinBoundingBox(APIView):
 
         # Coordinates for all parks within the user's rambling tolerance for displaying in Explore Mode
             parks_within_perp_distance_lon_lat = list({k:v['lon_lat'] for k, v in total_waypoints_dict.items()}.values())
-            print('parks within perp dist updates', parks_within_perp_distance)
         # Coordinates for the parks enroute to destination as determined by the holming algorithm
             route_waypoints_lon_lat = [total_waypoints_dict[x]['lon_lat'] for x in waypoint_route_order]
         #  Formating for requesting the route directions directly from the Mapbox Directions API
