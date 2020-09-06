@@ -99,7 +99,7 @@ class Map extends React.Component {
     this.chooseLocationOnMap = this.chooseLocationOnMap.bind(this)
     this.handleMapClick = this.handleMapClick.bind(this)
     this.handleExploreOptionsButtonsClick = this.handleExploreOptionsButtonsClick.bind(this)
-    this.handleToggleClick = this.handleToggleClick.bind(this)
+    this.handleToggleExploreClick = this.handleToggleExploreClick.bind(this)
     this.handleRecalculate = this.handleRecalculate.bind(this)
     this.queryBackendForRouteGeometry = this.queryBackendForRouteGeometry.bind(this)
     this.updateParksFromExploreOptions = this.updateParksFromExploreOptions.bind(this)
@@ -283,7 +283,7 @@ class Map extends React.Component {
     }
   }
 
-  handleToggleClick() {
+  handleToggleExploreClick() {
     this.setState({ toggleExplore: !this.state.toggleExplore })
     if(!this.state.toggleExplore && this.state.parkAccessFilter != 'publicParks') {
         this.setState({parkAccessFilter: 'publicParks'})}
@@ -595,24 +595,9 @@ class Map extends React.Component {
             }
             {originLonLat && destinationLonLat &&
               <CommuteVsExplore
-                onHandleToggleClick={this.handleToggleClick}
+                onHandleToggleClick={this.handleToggleExploreClick}
                 toggleExplore={toggleExplore}/>
             }
-            {displayDirectionsSearchBar && toggleExplore && originLonLat && destinationLonLat &&
-              <ExploreOptions
-                onHandleExploreOptionsButtonClick={this.handleExploreOptionsButtonsClick}
-                onHandleChange={this.handleChange}
-                onHandleRecalculate={this.handleRecalculate}
-                publicButton={publicButton}
-                publicPrivateButton={publicPrivateButton}
-                privateButton={privateButton}
-                sizeFormData={sizeFormData}
-                sizeName='sizeFormData'
-                ramblingTolerance={ramblingTolerance}
-                angleFilter={angleFilter}
-                ramblingName='ramblingTolerance'
-                angleFilterName='angleFilter'
-                />}
             {displayOriginSearchOptions &&
               <div className="locationbuttonfield">
               <div className="box locationbuttonbox">
@@ -660,7 +645,22 @@ class Map extends React.Component {
               </div>
             </div>
           </div>
-          {displayBottomDestinationData &&
+          {displayDirectionsSearchBar && toggleExplore && originLonLat && destinationLonLat &&
+            <ExploreOptions
+              onHandleExploreOptionsButtonClick={this.handleExploreOptionsButtonsClick}
+              onHandleChange={this.handleChange}
+              onHandleRecalculate={this.handleRecalculate}
+              publicButton={publicButton}
+              publicPrivateButton={publicPrivateButton}
+              privateButton={privateButton}
+              sizeFormData={sizeFormData}
+              sizeName='sizeFormData'
+              ramblingTolerance={ramblingTolerance}
+              angleFilter={angleFilter}
+              ramblingName='ramblingTolerance'
+              angleFilterName='angleFilter'
+              />}
+          {displayBottomDestinationData && !toggleExplore &&
             <BottomDestinationDisplay
               onHandleDirectionsButtonClick={this.handleDirectionsButtonClick}
               destinationData={destinationData}

@@ -152,6 +152,11 @@ input {
   border-radius:0.25em;
 }
 
+.panel-fix {
+  background-color: white;
+  padding: 0.25em 0em;
+}
+
 .panelInput {
   // margin: 1em;
   max-width:70px;
@@ -159,10 +164,19 @@ input {
 
 .panel-tabs {
   background-color: white;
+  border-radius: 0px;
+  padding-bottom: 0.25em;
+
+}
+.panel-buttons {
+  background-color: white;
+  border-radius: 0px;
 }
 
 .panel-block {
   background-color: white;
+    padding: 0em 0.5em;
+
 }
 
 // .panel-block-fix {

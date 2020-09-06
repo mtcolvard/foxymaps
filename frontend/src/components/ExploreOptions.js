@@ -27,23 +27,23 @@ export default class ExploreOptions extends React.Component {
   }
   render() {
     const {privateButton, publicPrivateButton, publicButton} = this.props
-
     return(
-      <div>
+      <div className="bottomFormContainer">
+        <div className="panel-fix">
         <div className="panel">
           <div className="panel-tabs">
             <p className="control">
-              <a className={publicButton ? "button is-info is-selected" : "button"} onClick={this.handlePublicButtonClick}>
+              <a className={publicButton ? "button panel-buttons is-info is-selected" : "button panel-buttons"} onClick={this.handlePublicButtonClick}>
                 <span>Public</span>
               </a>
             </p>
             <p className="control">
-              <a className={publicPrivateButton ? "button is-info is-selected" : "button"} onClick={this.handlePublicPrivateButtonClick}>
+              <a className={publicPrivateButton ? "button panel-buttons is-info is-selected" : "button panel-buttons"} onClick={this.handlePublicPrivateButtonClick}>
                 <span>Public & Private</span>
               </a>
             </p>
             <p className="control">
-              <a className={privateButton ? "button is-info is-selected" : "button"} onClick={this.handlePrivateButtonClick}>
+              <a className={privateButton ? "button panel-buttons is-info is-selected" : "button panel-buttons"} onClick={this.handlePrivateButtonClick}>
                 <span>Private</span>
               </a>
             </p>
@@ -115,6 +115,7 @@ export default class ExploreOptions extends React.Component {
               Recalculate Route
             </button>
           </div>
+        </div>
         </div>
       </div>
     )
