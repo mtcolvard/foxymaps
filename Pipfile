@@ -13,6 +13,7 @@ mapbox = "*"
 pyjwt = "*"
 psycopg2-binary = "*"
 django-heroku = "*"
+whitenoise = "*"
 
 [requires]
 python_version = "3.8"
