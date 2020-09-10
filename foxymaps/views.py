@@ -14,6 +14,7 @@ from .serializers import LocationSerializer, LocationUpdateSerializer, LocationS
 from .route_calculations.mapbox_directions_API import Mapbox_Directions_API
 from .route_calculations.distance_and_bearing import Distance_And_Bearing
 from .route_calculations.homing_algo import run_homing_algo
+
 class LocationList(ListCreateAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     queryset = Location.objects.all()
@@ -50,6 +51,7 @@ class LocationFilterList(ListCreateAPIView):
     """ Filter by the field needed.  Currently set to size_in_hectares_error """
     queryset = Location.objects.all().filter(size_in_hectares_error=True)
     serializer_class = LocationUpdateSerializer
+
 class MapGeocoderView(APIView):
     def get(self, _request, searchQuery):
         geocoder = Geocoder(name='mapbox.places', access_token=settings.MAPBOX_TOKEN)
