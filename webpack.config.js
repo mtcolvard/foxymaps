@@ -23,7 +23,7 @@ module.exports = {
     ]
   },
   devServer: {
-    contentBase: 'dist',
+    contentBase: 'src',
     hot: true,
     open: true,
     port: 8000,
