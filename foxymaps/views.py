@@ -2,15 +2,13 @@ import math
 import requests
 # from django.http import Http404
 from django.conf import settings
-from django.db.models import Avg
-from django.db.models import Q
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 from mapbox import Geocoder
 from .models import Location
-from .serializers import LocationSerializer, LocationUpdateSerializer, LocationSpeedSerializer, BoundingBoxSerializer
+from .serializers import LocationSerializer, LocationUpdateSerializer, LocationSpeedSerializer
 from .route_calculations.mapbox_directions_API import Mapbox_Directions_API
 from .route_calculations.distance_and_bearing import Distance_And_Bearing
 from .route_calculations.homing_algo import run_homing_algo
@@ -32,11 +30,11 @@ class LocationList(ListCreateAPIView):
     # print('greaterthan 0.834', len(queryset3))
 
 class LocationDetail(RetrieveUpdateDestroyAPIView):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    # permission_classes = (IsAuthenticatedOrReadOnly,)
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
 class LocationSpeedList(ListCreateAPIView):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    # permission_classes = (IsAuthenticatedOrReadOnly,)
     # queryset = Location.objects.filter(open_to_public="Yes").exclude(size_in_hectares__lt=0.15)
     queryset = Location.objects.filter(open_to_public="No")
     # .filter(type_of_site="Housing/Estate Landscaping")
@@ -47,7 +45,7 @@ class LocationSpeedList(ListCreateAPIView):
     # print('queryset', queryset)
     serializer_class = LocationSpeedSerializer
 class LocationFilterList(ListCreateAPIView):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    # permission_classes = (IsAuthenticatedOrReadOnly,)
     """ Filter by the field needed.  Currently set to size_in_hectares_error """
     queryset = Location.objects.all().filter(size_in_hectares_error=True)
     serializer_class = LocationUpdateSerializer
