@@ -7,10 +7,10 @@ const Dotenv = require('dotenv-webpack')
 
 module.exports = {
   entry: './src/app.js',
-  context: path.resolve(__dirname, './frontend'),
+  context: path.resolve(__dirname, 'frontend'),
   output: {
     filename: 'bundle.js',
-    path: path.resolve(__dirname, './frontend/dist')
+    path: path.resolve(__dirname, 'frontend/dist')
   },
   devtool: 'source-maps',
   module: {
