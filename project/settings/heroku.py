@@ -17,6 +17,7 @@ DEBUG = env('DEBUG')
 
 # Raises django's ImproperlyConfigured exception if SECRET_KEY not in os.environ
 SECRET_KEY = env('SECRET_KEY')
+MAPBOX_TOKEN = env('MAPBOX_TOKEN')
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 
