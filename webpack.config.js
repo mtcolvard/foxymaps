@@ -2,7 +2,7 @@
 const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const Dotenv = require('dotenv-webpack')
+// const Dotenv = require('dotenv-webpack')
 
 
 
@@ -34,10 +34,10 @@ module.exports = {
     }
   },
   plugins: [
-    new Dotenv({
-      path: path.resolve(__dirname, './.env'),
-      systemvars: true
-    }),
+    // new Dotenv({
+    //   path: path.resolve(__dirname, './.env'),
+    //   systemvars: true
+    // }),
     new webpack.HotModuleReplacementPlugin(),
     new HtmlWebpackPlugin({
       template: 'src/index.html',
