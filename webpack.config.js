@@ -24,7 +24,7 @@ module.exports = {
     ]
   },
   devServer: {
-    contentBase: 'src',
+    contentBase: path.join(__dirname, 'frontend/src'),
     hot: true,
     open: true,
     port: 8000,
