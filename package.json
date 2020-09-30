@@ -1,6 +1,10 @@
 {
   "name": "foxymaps",
   "version": "1.0.0",
+  "engines": {
+    "node": "14.x",
+    "yarn": "1.22.5"
+  },
   "scripts": {
     "build": "webpack -p",
     "serve:backend": "python manage.py runserver 4000",
