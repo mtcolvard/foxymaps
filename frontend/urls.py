@@ -4,6 +4,6 @@ from django.views.generic import TemplateView
 
 urlpatterns = [
     path('', Home.as_view(), name='home'),
-    # re_path(r'^(?P<filename>[\w\.]+)$', Assets.as_view(), name='assets', content_type='application/javascript'),
+    re_path(r'^(?P<filename>[\w\.]+)$', Assets.as_view(), name='assets'),
     re_path(r'^(?P<filename>[\w\.]+)$', TemplateView.as_view(content_type='application/javascript'), name='assets'),
 ]
