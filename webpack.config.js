@@ -2,6 +2,7 @@
 const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const LinkTypePlugin = require('html-webpack-link-type-plugin').HtmlWebpackLinkTypePlugin
 const Dotenv = require('dotenv-webpack')
 
 
@@ -11,7 +12,7 @@ module.exports = {
   context: path.resolve(__dirname, 'frontend'),
   output: {
     filename: 'bundle.js',
-    publicPath: path.resolve(__dirname, 'frontend/dist')
+    path: path.resolve(__dirname, 'frontend/dist')
   },
   devtool: 'source-maps',
   module: {
@@ -42,7 +43,14 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: 'src/index.html',
       filename: 'index.html',
-      inject: 'body'
-    })
+      inject: 'body',
+      minify: {
+        collapseWhitespace: true,
+        removeComments: true,
+        removeRedundantAttributes: true,
+        useShortDoctype: true
+      }
+    }),
+    new LinkTypePlugin()
   ]
 }
