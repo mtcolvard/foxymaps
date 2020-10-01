@@ -4,6 +4,12 @@ const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const LinkTypePlugin = require('html-webpack-link-type-plugin').HtmlWebpackLinkTypePlugin
 const Dotenv = require('dotenv-webpack')
+const minifyOptions = {
+                collapseWhitespace: true,
+                removeComments: true,
+                removeRedundantAttributes: true,
+                useShortDoctype: true
+            }
 
 
 
@@ -44,13 +50,8 @@ module.exports = {
       template: 'src/index.html',
       filename: 'index.html',
       inject: 'body',
-      minify: {
-        collapseWhitespace: true,
-        removeComments: true,
-        removeRedundantAttributes: true,
-        useShortDoctype: true
-      }
+      minify: minifyOptions
     }),
-    new LinkTypePlugin()
+    new LinkTypePlugin(minifyOptions)
   ]
 }
