@@ -4172,7 +4172,7 @@ __metadata:
     eslint: ^7.5.0
     eslint-plugin-react: ^7.20.3
     eslint-utils: ^2.1.0
-    html-webpack-link-type-plugin: ^1.0.3
+    html-webpack-link-type-plugin: ^1.0.2
     html-webpack-plugin: ^4.3.0
     node-sass: ^4.14.1
     react: ^16.13.1
@@ -4753,7 +4753,7 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
-"html-webpack-link-type-plugin@npm:^1.0.3":
+"html-webpack-link-type-plugin@npm:^1.0.2":
   version: 1.0.3
   resolution: "html-webpack-link-type-plugin@npm:1.0.3"
   dependencies:
