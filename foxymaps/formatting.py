@@ -1,3 +1,12 @@
+      # <script src="{% static "frontend/index.js" %}"></script>
+      # <link rel="stylesheet" href="{% static "frontend/index.css" %}">
+
+
+
+
+
+
+
 # waypoint_route_order = ['origin', 907, 899, 901, 864, 1342, 1327, 'destination']
 # mystring = '45;'*(len(waypoint_route_order)-1)+'45'
 # print(mystring)
