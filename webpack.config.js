@@ -52,6 +52,6 @@ module.exports = {
       inject: 'body',
       minify: minifyOptions
     }),
-    new LinkTypePlugin()
+    // new LinkTypePlugin()
   ]
 }
