@@ -47,10 +47,10 @@ module.exports = {
     }),
     new webpack.HotModuleReplacementPlugin(),
     new HtmlWebpackPlugin({
-      template: 'src/index.html',
+      template: 'index.template.ejs',
       filename: 'index.html',
       inject: 'body',
-      meta: {'Content-Type': {'http-equiv': 'Content-Type', 'content': 'application/javascript'}},
+      // meta: {'Content-Type': {'http-equiv': 'Content-Type', 'content': 'application/javascript'}},
       minify: minifyOptions
     }),
     // new LinkTypePlugin()
