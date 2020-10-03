@@ -2,7 +2,7 @@
 const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const LinkTypePlugin = require('html-webpack-link-type-plugin').HtmlWebpackLinkTypePlugin
+// const LinkTypePlugin = require('html-webpack-link-type-plugin').HtmlWebpackLinkTypePlugin
 const Dotenv = require('dotenv-webpack')
 const minifyOptions = {
                 collapseWhitespace: true,
@@ -50,6 +50,7 @@ module.exports = {
       template: 'src/index.html',
       filename: 'index.html',
       inject: 'body',
+      meta: {'Content-Type': {'http-equiv': 'Content-Type', 'content': 'application/javascript'}},
       minify: minifyOptions
     }),
     // new LinkTypePlugin()
