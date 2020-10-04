@@ -50,7 +50,7 @@ module.exports = {
       template: 'src/index.html',
       filename: 'index.html',
       inject: 'body',
-      meta: {'Content-Type': {'http-equiv': 'Content-Type', 'content': 'application/javascript'}},
+      meta: {'Content-Type': {'http-equiv': 'Content-Type', 'content': 'text/javascript'}},
       minify: minifyOptions
     }),
     // new LinkTypePlugin()
