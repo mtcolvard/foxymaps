@@ -32,6 +32,7 @@ MAPBOX_TOKEN = 'pk.eyJ1IjoibXRjb2x2YXJkIiwiYSI6ImNrZWZ5Y25ycTBiNmEycnRiNmR6ZGlsN
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+SECURE_CONTENT_TYPE_NOSNIFF = False
 
 
 # Application definition
