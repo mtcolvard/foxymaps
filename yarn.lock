@@ -4172,6 +4172,7 @@ __metadata:
     eslint: ^7.5.0
     eslint-plugin-react: ^7.20.3
     eslint-utils: ^2.1.0
+    html-webpack-link-type-plugin: ^1.0.3
     html-webpack-plugin: ^4.5.0
     node-sass: ^4.14.1
     react: ^16.13.1
@@ -4749,6 +4750,18 @@ fsevents@~2.1.2:
   bin:
     html-minifier-terser: cli.js
   checksum: d05dea891f5977a35691306b1fb40438cffd6620c2f5a69d7ecb67bfa836af1d36c24978edd1616dc6d27e230561bd756c5f11b3054e6ebf2f8448289e3ca73d
+  languageName: node
+  linkType: hard
+
+"html-webpack-link-type-plugin@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "html-webpack-link-type-plugin@npm:1.0.3"
+  dependencies:
+    minimatch: 3.0.4
+  peerDependencies:
+    html-webpack-plugin: ">=3.0.0 || 4.0.0-beta.1 || 4.0.0-beta.2 || 4.0.0-beta.4 || 4.0.0-beta.5"
+    webpack: ">=3.0.0"
+  checksum: 0628b955c78d89d5c7131c2f47d3fa80aed70cd1afe692d9bcc55bfdf53833c20f82e217469a9101e275295bf6b4788cc0b56a021b0ad10fe9760df08b670c7a
   languageName: node
   linkType: hard
 
@@ -5965,7 +5978,7 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
-"minimatch@npm:^3.0.4, minimatch@npm:~3.0.2":
+"minimatch@npm:3.0.4, minimatch@npm:^3.0.4, minimatch@npm:~3.0.2":
   version: 3.0.4
   resolution: "minimatch@npm:3.0.4"
   dependencies:
