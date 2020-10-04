@@ -8,7 +8,9 @@ const minifyOptions = {
                 collapseWhitespace: true,
                 removeComments: true,
                 removeRedundantAttributes: true,
-                useShortDoctype: true
+                useShortDoctype: true,
+                removeStyleLinkTypeAttributes: false,
+                removeScriptTypeAttributes: false
             }
 
 
