@@ -52,6 +52,7 @@ module.exports = {
       template: 'src/index.html',
       filename: 'index.html',
       inject: 'body',
+      scriptLoading: 'defer',
       meta: {'Content-Type': {'http-equiv': 'Content-Type', 'content': 'text/javascript'}},
       minify: minifyOptions
     }),
