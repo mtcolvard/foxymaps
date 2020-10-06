@@ -4,14 +4,14 @@ const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 // const LinkTypePlugin = require('html-webpack-link-type-plugin').HtmlWebpackLinkTypePlugin
 const Dotenv = require('dotenv-webpack')
-// const minifyOptions = {
-//                 collapseWhitespace: true,
-//                 removeComments: true,
-//                 removeRedundantAttributes: true,
-//                 useShortDoctype: true,
-//                 // removeStyleLinkTypeAttributes: false,
-//                 // removeScriptTypeAttributes: false
-//             }
+const minifyOptions = {
+                collapseWhitespace: true,
+                removeComments: true,
+                removeRedundantAttributes: true,
+                useShortDoctype: true,
+                // removeStyleLinkTypeAttributes: false,
+                // removeScriptTypeAttributes: false
+            }
 
 
 
@@ -62,7 +62,7 @@ module.exports = {
         // }
       ],
       meta: {'Content-Type': {'http-equiv': 'Content-Type', 'content': 'text/javascript'}},
-      // minify: minifyOptions
+      minify: minifyOptions
     }),
     // new LinkTypePlugin()
   ]
