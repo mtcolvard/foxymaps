@@ -9,8 +9,8 @@ const minifyOptions = {
                 removeComments: true,
                 removeRedundantAttributes: true,
                 useShortDoctype: true,
-                removeStyleLinkTypeAttributes: false,
-                removeScriptTypeAttributes: false
+                // removeStyleLinkTypeAttributes: false,
+                // removeScriptTypeAttributes: false
             }
 
 
@@ -61,7 +61,7 @@ module.exports = {
         //   type: 'module'
         // }
       ],
-      // meta: {'Content-Type': {'http-equiv': 'Content-Type', 'content': 'text/javascript'}},
+      meta: {'Content-Type': {'http-equiv': 'Content-Type', 'content': 'text/javascript'}},
       minify: minifyOptions
     }),
     new LinkTypePlugin()
