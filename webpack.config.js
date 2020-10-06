@@ -55,11 +55,11 @@ module.exports = {
       inject: false,
       template: require('html-webpack-template'),
       scripts: [
-        'https://foxy--maps.herokuapp.com/bundle.js',
-        {
-          src: 'dist/bundle.js',
-          type: 'module'
-        }
+        'bundle.js',
+        // {
+        //   src: 'bundle.js',
+        //   type: 'module'
+        // }
       ],
       // meta: {'Content-Type': {'http-equiv': 'Content-Type', 'content': 'text/javascript'}},
       minify: minifyOptions
