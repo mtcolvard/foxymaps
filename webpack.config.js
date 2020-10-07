@@ -19,8 +19,10 @@ module.exports = {
   entry: './src/app.js',
   context: path.resolve(__dirname, 'frontend'),
   output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, 'frontend/dist')
+    // filename: 'bundle.js',
+    filename: 'app.js',
+    // path: path.resolve(__dirname, 'frontend/dist')
+    path: path.resolve(__dirname, 'foxymaps/static')
   },
   devtool: 'source-maps',
   module: {
@@ -48,22 +50,22 @@ module.exports = {
       systemvars: true
     }),
     new webpack.HotModuleReplacementPlugin(),
-    new HtmlWebpackPlugin({
-      // template: 'src/index.html',
-      filename: 'index.html',
-      // inject: 'body',
-      inject: false,
-      template: require('html-webpack-template'),
-      scripts: [
-        'bundle.js',
-        // {
-        //   src: 'bundle.js',
-        //   type: 'module'
-        // }
-      ],
-      meta: {'Content-Type': {'http-equiv': 'Content-Type', 'content': 'text/javascript'}},
-      minify: minifyOptions
-    }),
+    // new HtmlWebpackPlugin({
+    //   // template: 'src/index.html',
+    //   filename: 'index.html',
+    //   // inject: 'body',
+    //   inject: false,
+    //   template: require('html-webpack-template'),
+    //   scripts: [
+    //     'bundle.js',
+    //     // {
+    //     //   src: 'bundle.js',
+    //     //   type: 'module'
+    //     // }
+    //   ],
+    //   meta: {'Content-Type': {'http-equiv': 'Content-Type', 'content': 'text/javascript'}},
+    //   minify: minifyOptions
+    // }),
     // new LinkTypePlugin()
   ]
 }

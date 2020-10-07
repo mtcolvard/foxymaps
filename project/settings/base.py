@@ -15,7 +15,6 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
@@ -32,7 +31,6 @@ MAPBOX_TOKEN = 'pk.eyJ1IjoibXRjb2x2YXJkIiwiYSI6ImNrZWZ5Y25ycTBiNmEycnRiNmR6ZGlsN
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-SECURE_CONTENT_TYPE_NOSNIFF = True
 
 
 # Application definition
@@ -129,7 +127,12 @@ USE_TZ = True
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'project', 'static')]
 
+
+# STATIC_ROOT = os.path.join(PROJECT_DIR, 'static_collected')
+
+# STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 # STATICFILES_DIRS = [
 #     os.path.join(BASE_DIR, 'static')
 # ]
