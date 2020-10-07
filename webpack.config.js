@@ -22,7 +22,7 @@ module.exports = {
     // filename: 'bundle.js',
     filename: 'app.js',
     // path: path.resolve(__dirname, 'frontend/dist')
-    path: path.resolve(__dirname, 'foxymaps/static'),
+    path: path.resolve(__dirname, 'project/static'),
     publicPath: "/static/", // Should match Django STATIC_URL
     filename: "[name].js", // No filename hashing, Django takes care of this
     chunkFilename: "[id]-[chunkhash].js", // DO have Webpack hash chunk filename, see below
