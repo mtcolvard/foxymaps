@@ -22,7 +22,10 @@ module.exports = {
     // filename: 'bundle.js',
     filename: 'app.js',
     // path: path.resolve(__dirname, 'frontend/dist')
-    path: path.resolve(__dirname, 'foxymaps/static')
+    path: path.resolve(__dirname, 'foxymaps/static'),
+    publicPath: "/static/", // Should match Django STATIC_URL
+    filename: "[name].js", // No filename hashing, Django takes care of this
+    chunkFilename: "[id]-[chunkhash].js", // DO have Webpack hash chunk filename, see below
   },
   devtool: 'source-maps',
   module: {
@@ -42,7 +45,7 @@ module.exports = {
     watchContentBase: true,
     proxy: {
       '/api': 'http://localhost:4000'
-    }
+    },
   },
   plugins: [
     new Dotenv({
