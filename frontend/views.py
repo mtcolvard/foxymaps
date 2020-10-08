@@ -1,16 +1,16 @@
-from django.shortcuts import render
-def index(request):
-    return render(request, 'src/index.html')
+# from django.shortcuts import render
+# def index(request):
+#     return render(request, 'src/index.html')
 
-# import os
-# from django.views.generic import View
-# from django.http import HttpResponse, HttpResponseNotFound
-#
-# class Home(View):
-#
-#     def get(self, _request):
-#         with open(os.path.join(os.path.dirname(__file__), 'dist', 'index.html')) as file:
-#             return HttpResponse(file.read())
+import os
+from django.views.generic import View
+from django.http import HttpResponse, HttpResponseNotFound
+
+class Home(View):
+
+    def get(self, _request):
+        with open(os.path.join(os.path.dirname(__file__), 'dist', 'index.html')) as file:
+            return HttpResponse(file.read())
 #
 #
 # class Assets(View):
