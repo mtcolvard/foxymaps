@@ -31,7 +31,7 @@ MAPBOX_TOKEN = 'pk.eyJ1IjoibXRjb2x2YXJkIiwiYSI6ImNrZWZ5Y25ycTBiNmEycnRiNmR6ZGlsN
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['foxy--maps.herokuapp.com/', '127.0.0.1', 'localhost']
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
 
@@ -65,7 +65,7 @@ ROOT_URLCONF = 'project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'frontend/dist')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -126,13 +126,12 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, 'static')
-# ]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'frontend/dist')
+]
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
