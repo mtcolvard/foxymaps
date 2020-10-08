@@ -30,7 +30,7 @@ module.exports = {
     watchContentBase: true,
     proxy: {
       '/api': 'http://localhost:4000'
-    }
+    },
   },
   plugins: [
     new Dotenv({
@@ -45,12 +45,6 @@ module.exports = {
     })
   ]
 }
-
-
-
-
-
-
 
 
 //
