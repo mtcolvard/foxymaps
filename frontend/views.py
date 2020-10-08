@@ -21,6 +21,6 @@ class Assets(View):
         if os.path.isfile(path):
             with open(path, 'rb') as file:
             # with open(path) as file:
-                return HttpResponse(file.read())
+                return HttpResponse(file.read(), content_type='application/javascript')
         else:
             return HttpResponseNotFound()
