@@ -18,23 +18,15 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = 'r1d$p=(vwc=!+e=2)io2^=b3y)t@ih!umrk38&1my@nki36=r5'
 SECRET_KEY = 'r1d$^p(wc=!+=2)io2^=b3)tuk2iHKJ(BQ(W(EN83hdiccgz+a'
-# SECRET_KEY = 'b53300e5-059a-44fe-8ecc-4f19ac7879f7'
 
 MAPBOX_TOKEN = 'pk.eyJ1IjoibXRjb2x2YXJkIiwiYSI6ImNrZWZ5Y25ycTBiNmEycnRiNmR6ZGlsNGEifQ.3qoFTDUO6GRr_mzyzHCYbw'
-
-
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ['foxy--maps.herokuapp.com/', '127.0.0.1', 'localhost']
 SECURE_CONTENT_TYPE_NOSNIFF = True
-
-
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -112,7 +104,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en-gb'
 
 TIME_ZONE = 'UTC'
 

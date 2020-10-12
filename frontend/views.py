@@ -1,7 +1,3 @@
-# from django.shortcuts import render
-# def index(request):
-#     return render(request, 'src/index.html')
-
 import os
 from django.views.generic import View
 from django.http import HttpResponse, HttpResponseNotFound
@@ -20,7 +16,6 @@ class Assets(View):
 
         if os.path.isfile(path):
             with open(path, 'rb') as file:
-            # with open(path) as file:
                 return HttpResponse(file.read(), content_type='application/javascript')
         else:
             return HttpResponseNotFound()
