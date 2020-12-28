@@ -286,7 +286,7 @@ class Map extends React.Component {
   handleToggleExploreClick() {
     this.setState({ toggleExplore: !this.state.toggleExplore })
     if(!this.state.toggleExplore && this.state.parkAccessFilter != 'publicParks') {
-        this.setState({parkAccessFilter: 'publicParks'})}
+      this.setState({parkAccessFilter: 'publicParks'})}
   }
 
   handleOriginSearchBarArrowLeft(name) {
@@ -411,10 +411,10 @@ class Map extends React.Component {
   // }
   updateParksFromExploreOptions(ramblingTolerance, parkAccessFilter, sizeFormData, angleFilter) {
     axios.get(`api/parkswithinboundingbox/${this.state.originLonLat}/${this.state.destinationLonLat}/${ramblingTolerance}/${parkAccessFilter}/${sizeFormData}/${angleFilter}`)
-    .then(res =>
-      this.setState({
-        allParkPins: res.data['all_waypoints_in_bbox_lon_lat']
-    }))
+      .then(res =>
+        this.setState({
+          allParkPins: res.data['all_waypoints_in_bbox_lon_lat']
+        }))
   }
 
   sendDestinationToBackend(origin, destination) {
@@ -423,24 +423,24 @@ class Map extends React.Component {
     axios.get(`api/parkswithinboundingbox/${origin}/${destination}/${this.state.ramblingTolerance}/${this.state.parkAccessFilter}/${this.state.sizeFormData}/${this.state.angleFilter}`)
       .then(res =>
         this.setState({
-        isRouteSelected: true,
-        displayBottomDestinationData: true,
-        routeLargestPark: res.data['largest_park'],
-        routePins: res.data['route_waypoints_lon_lat'],
-        allParkPins: res.data['all_waypoints_in_bbox_lon_lat'],
-        displayCommuteVsExplore: true,
-        viewport: {
-          ...this.state.viewport,
-          longitude: res.data['midpoint'][0],
-          latitude: res.data['midpoint'][1],
-          zoom: 12,
-          transitionInterpolator: new FlyToInterpolator({
-            curve: 2.4}),
-          transitionDuration: 1000
-        },
-        route_waypoints_lon_lat_formatted: res.data['route_waypoints_lon_lat_formatted'],
-        compass_and_radius_routing_option_formatted: res.data['compass_and_radius_routing_option_formatted']
-      }))
+          isRouteSelected: true,
+          displayBottomDestinationData: true,
+          routeLargestPark: res.data['largest_park'],
+          routePins: res.data['route_waypoints_lon_lat'],
+          allParkPins: res.data['all_waypoints_in_bbox_lon_lat'],
+          displayCommuteVsExplore: true,
+          viewport: {
+            ...this.state.viewport,
+            longitude: res.data['midpoint'][0],
+            latitude: res.data['midpoint'][1],
+            zoom: 12,
+            transitionInterpolator: new FlyToInterpolator({
+              curve: 2.4}),
+            transitionDuration: 1000
+          },
+          route_waypoints_lon_lat_formatted: res.data['route_waypoints_lon_lat_formatted'],
+          compass_and_radius_routing_option_formatted: res.data['compass_and_radius_routing_option_formatted']
+        }))
       .then(()=>this.queryBackendForRouteGeometry(this.state.route_waypoints_lon_lat_formatted, this.state.compass_and_radius_routing_option_formatted))
   }
 
@@ -448,10 +448,10 @@ class Map extends React.Component {
     axios.get(`api/queryroutegeometry/${route}/${compassBearing}`)
       .then(res =>
         this.setState({
-        routeGeometry: res.data['route_geometry'],
-        isMapboxSearching:false,
+          routeGeometry: res.data['route_geometry'],
+          isMapboxSearching:false,
         }))
-    }
+  }
 
 
 
@@ -600,18 +600,18 @@ class Map extends React.Component {
             }
             {displayOriginSearchOptions &&
               <div className="locationbuttonfield">
-              <div className="box locationbuttonbox">
-                <button className="button is-fullwidth has-text-left" onClick={this.handleFindMyLocation}>
-                  <span className="icon">
-                    <FontAwesomeIcon icon="location-arrow"/></span>
-                  <span>Find my location</span>
-                </button>
-                <button className="button is-fullwidth has-text-left" onClick={this.chooseLocationOnMap}>
-                  <span className="icon">
-                    <FontAwesomeIcon icon="map-marker-alt"/></span>
-                  <span>Choose on map</span>
-                </button>
-              </div>
+                <div className="box locationbuttonbox">
+                  <button className="button is-fullwidth has-text-left" onClick={this.handleFindMyLocation}>
+                    <span className="icon">
+                      <FontAwesomeIcon icon="location-arrow"/></span>
+                    <span>Find my location</span>
+                  </button>
+                  <button className="button is-fullwidth has-text-left" onClick={this.chooseLocationOnMap}>
+                    <span className="icon">
+                      <FontAwesomeIcon icon="map-marker-alt"/></span>
+                    <span>Choose on map</span>
+                  </button>
+                </div>
               </div>
             }
             <div className="dropdown">
@@ -659,7 +659,7 @@ class Map extends React.Component {
               angleFilter={angleFilter}
               ramblingName='ramblingTolerance'
               angleFilterName='angleFilter'
-              />}
+            />}
           {displayBottomDestinationData && !toggleExplore &&
             <BottomDestinationDisplay
               onHandleDirectionsButtonClick={this.handleDirectionsButtonClick}
