@@ -9,8 +9,8 @@ https://docs.djangoproject.com/en/3.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
-import django_heroku
 import os
+import django_heroku
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,7 +25,7 @@ MAPBOX_TOKEN = 'pk.eyJ1IjoibXRjb2x2YXJkIiwiYSI6ImNrZWZ5Y25ycTBiNmEycnRiNmR6ZGlsN
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['foxy--maps.herokuapp.com/', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['foxy--maps.herokuapp.com/', 'foxymaps.co.uk', '127.0.0.1', 'localhost']
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
 INSTALLED_APPS = [
@@ -77,8 +77,14 @@ WSGI_APPLICATION = 'project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        # 'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": "foxymapslocal",
+        "USER": "postgres",
+        "PASSWORD": "postgres",
+        "HOST": "localhost",
+        "PORT": "5432",
     }
 }
 

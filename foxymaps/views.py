@@ -50,6 +50,9 @@ class LocationFilterList(ListCreateAPIView):
     queryset = Location.objects.all().filter(size_in_hectares_error=True)
     serializer_class = LocationUpdateSerializer
 
+
+# this handles the request and response to the Mapbox-Geocoder-API
+# it the sends the user input from either the origin or the destination search fields to the Mapbox-Geocoder-API and returns a list of closest matches and their geojson data
 class MapGeocoderView(APIView):
     def get(self, _request, searchQuery):
         geocoder = Geocoder(name='mapbox.places', access_token=settings.MAPBOX_TOKEN)
@@ -58,6 +61,7 @@ class MapGeocoderView(APIView):
         # print(data)
         return Response(data)
 
+# this handles the request and response to the Mapbox-Directions-API
 class QueryRouteGeometry(APIView):
     def get(self, _request, route_waypoints_lon_lat_formatted, compass_and_radius_routing_option_formatted):
         bearing_towards_destination = True
@@ -72,12 +76,13 @@ class QueryRouteGeometry(APIView):
         route_coordinates = mapbox_directions_API_response['routes'][0]['geometry']['coordinates']
         route_distance = mapbox_directions_API_response['routes'][0]['distance']
         route_duration = mapbox_directions_API_response['routes'][0]['duration']
-        route_geometry = {'type': 'Feature', 'geometry': {'type': 'LineString', 'coordinates': route_coordinates}, 'properties':{'distance': route_distance, 'duration': route_duration}}
 
+    # this creates a dictionary in geojson format to return the coordinates, distance and duration of the Mapbox-Directions-API walking directions to the frontend
+        route_geometry = {'type': 'Feature', 'geometry': {'type': 'LineString', 'coordinates': route_coordinates}, 'properties':{'distance': route_distance, 'duration': route_duration}}
         route_response = {'route_geometry':route_geometry}
-        # print("waypoint_route_order_and_graph", waypoint_route_order_and_graph[1])
         return Response(route_response)
 
+    # this makes the actual request to the Mapbox-Directions-API and returns json containing the coordinates, distance, and duration of the walking directions
     def returnRouteGeometry(self, _request, waypoints, bearings, walking_speed, walkway_bias, alley_bias):
         params = {
             'geometries': 'geojson',
@@ -97,9 +102,11 @@ class QueryRouteGeometry(APIView):
         # print('response.json', data)
         return data
 
-
-# this is the first algorithm.
-# it creates a bounding box encompassing the Area (Length x Width) defined by the length (the distance from user's starting point to user's destination) and the width (set by the user's tolerance for going out of their way: "ramblingTolerance")
+# this is the first algorithm run after the user has entered their origin and destination
+# it makes a query to the database of parks
+# it then filters the query to only contain parks within a bounding box
+# it then determines the best route by running a modified Dijkstra "homing algorithm"
+# it returns this route information in the format required for the Mapbox-Directions-API call as well as information for frontend display (largest park, etc.)
 class ParksWithinBoundingBox(APIView):
     def __init__(self):
         self.query_all_parks = Location.objects.all()
@@ -107,19 +114,6 @@ class ParksWithinBoundingBox(APIView):
     def get(self, _request, origin, destination, ramblingTolerance, parkAccessFilter, minParkSize, angleFilter):
         origin_lon_lat = [float(x) for x in origin.split(',')]
         destination_lon_lat = [float(x) for x in destination.split(',')]
-
-    # LOCAL PARAMETERS
-    # access_filter: User-selected: Public Park vs Private Park vs both
-        access_filter = parkAccessFilter
-        rambling_tolerance = int(ramblingTolerance)
-        size_in_hectares_filter = float(minParkSize)
-    # angle_filter_to_next_park: Narrows the queryset by filtering out parks not within a given angle ("angleFilter") from a park towards the destination.
-        angle_filter_to_next_park = int(angleFilter)*math.pi/(180)
-        # angle_filter_to_next_park = math.pi/(180/int(angleFilter))
-    # angle_filter_bbox: Helps discard parks which are along the axis of the bounding box but in the wrong direction
-        angle_filter_bbox = math.pi/2.3
-    # platonic_width_factor: This factor is used to narrow or widen queries. It is multiplied by the platonic_width (the square root of a park's acreage). The platonic_width is a guesstimate of a parks' width. It is used for prioritizing large parks over little parks.
-        platonic_width_factor = 1
 
     # MAPBOX-ROUTING-API SPECTIFIC PARAMETERS
         bearing_towards_destination = False
@@ -129,6 +123,23 @@ class ParksWithinBoundingBox(APIView):
         walking_speed = 1.42
         snap_tolerance= 'unlimited'
 
+    # LOCAL PARAMETERS
+    # access_filter: User-selected: Public Park vs Private Park vs both
+        access_filter = parkAccessFilter
+        rambling_tolerance = int(ramblingTolerance)
+        size_in_hectares_filter = float(minParkSize)
+
+    # angle_filter_to_next_park: Narrows the queryset by filtering out parks not within a given angle ("angleFilter") from a park towards the destination.
+        angle_filter_to_next_park = int(angleFilter)*math.pi/(180)
+        # angle_filter_to_next_park = math.pi/(180/int(angleFilter))
+
+    # angle_filter_bbox: Helps discard parks which are along the axis of the bounding box but in the wrong direction
+        angle_filter_bbox = math.pi/2.3
+
+    # platonic_width_factor: This factor is used to narrow or widen queries. It is multiplied by the platonic_width (the square root of a park's acreage). The platonic_width is a guesstimate of a parks' width. It is used for prioritizing large parks over little parks.
+        platonic_width_factor = 1
+
+    # this module is the 2nd algorithm
     # calculate the distance and compass bearing from origin to destination
         best_fit_origin_to_destination = Distance_And_Bearing.crowflys_bearing(self, origin_lon_lat, destination_lon_lat)
         origin_to_destination_distance = best_fit_origin_to_destination[0]
@@ -149,9 +160,10 @@ class ParksWithinBoundingBox(APIView):
         queryset = self.set_park_access_filter(access_filter, parks_all_data, parks_open_to_public_data, parks_open_to_private_data)
         print('length of queryset', len(queryset))
 
-    # create a dictionary containing all the parks selected from the database
+    # create a dictionary containing all the parks selected from the database with their features and their distance and bearing from the user's origin
         all_parks = self.populate_all_parks_dict(queryset, origin_lon_lat, best_fit_origin_to_destination)
 
+    # this function is the 3rd algorithm
     # create a boundingbox by filtering out all parks not within the rectangle formed between the distance from origin to destination (length) and the rambling tolerance (width) (e.g. 1000 meters)
         parks_within_perp_distance = self.calculate_parks_within_perp_distance(all_parks, origin_to_destination_distance, origin_to_destination_bearing, rambling_tolerance, size_in_hectares_filter, angle_filter_bbox)
 
@@ -171,13 +183,17 @@ class ParksWithinBoundingBox(APIView):
 
     # else find the parks within the bounding box and calculate the best route
         else:
+    #create a dictionary of all parks within the bounding box
             total_waypoints_dict = self.populate_total_waypoints_dict(origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, parks_within_perp_distance)
 
+    # this module is the 4th algorithm
     # run the module route_calculations.homing_algo.py to find the route order of the most direct route
             waypoint_route_order_and_graph = run_homing_algo(total_waypoints_dict, angle_filter_to_next_park, platonic_width_factor)
             waypoint_route_order = waypoint_route_order_and_graph[0]
             waypoint_graph = waypoint_route_order_and_graph[1]
 
+# THIS IS PROBLEMATIC!!!!!!!!!!!!!!!!!!!!!
+# YOU USED TO SORT BY LARGEST ACREAGE BUT REMOVED THAT DO TO CITY OF LONDON PARK ACREAGE DATA BEING INACCURATE. RECONSIDER ?????????????????
     # mapbox directions API limits get requests to 25 waypoint coordinates. this arbitrarily removes every other waypoint starting at waypoint 10
             if len(waypoint_route_order) > 25:
                 waypoint_route_order_trimmed = waypoint_route_order
@@ -186,10 +202,11 @@ class ParksWithinBoundingBox(APIView):
                     del waypoint_route_order_trimmed[count]
                     count = count + 1
                 waypoint_route_order = waypoint_route_order_trimmed
-                print('waypoint route order trimmed',len(waypoint_route_order_trimmed))
-                print('waypoint route order',waypoint_route_order_trimmed)
+                print('waypoint route order trimmed', len(waypoint_route_order_trimmed))
+                print('waypoint route order', waypoint_route_order_trimmed)
 
-    # this it is useful for making a route continues in the same direction compass_and_radius_routing_option is a optional parameter on the mapbox directions API which influences the direction a route starts from each waypoint.
+    # this is useful for making a route continues in the same direction
+    # compass_and_radius_routing_option is a optional parameter on the mapbox directions API which influences the direction a route starts from each waypoint.
             if bearing_towards_destination is True:
                 waypoints_bearing_towards_destination = {}
                 for x in waypoint_route_order:
@@ -226,21 +243,26 @@ class ParksWithinBoundingBox(APIView):
             else:
                 largest_park = waypoints_size_in_hectares[largest_park_order[-1]]['name']+' and '+waypoints_size_in_hectares[largest_park_order[-2]]['name']
 
-    # coordinates for all parks within the user's rambling tolerance for displaying in Explore Mode
+    # create a list of the coordinates for all parks within the user's rambling tolerance for displaying in Explore Mode
             parks_within_perp_distance_lon_lat = list({k:v['lon_lat'] for k, v in total_waypoints_dict.items()}.values())
 
-    # coordinates for the parks enroute to destination as determined by the holming algorithm
+    # create a list of coordinates of the parks enroute to destination (as determined above by the holming algorithm) and format that list to request route directions from the Mapbox-Directions-API
             route_waypoints_lon_lat = [total_waypoints_dict[x]['lon_lat'] for x in waypoint_route_order]
-
-    #  formating for requesting the route directions directly from the Mapbox Directions API
             route_waypoints_lon_lat_string = ';'.join([str(elem) for elem in route_waypoints_lon_lat])
             route_waypoints_lon_lat_formatted = route_waypoints_lon_lat_string.replace('[', '').replace(']', '').replace(' ', '')
 
     # calculate the midpoint between the origin and the destination
         midpoint = Distance_And_Bearing.calculate_midpoint(self, origin_lon_lat, destination_lon_lat)
 
-    # return the response to the frontend Mapbox-Directions-API call
+    # return the refined and formatted route information from the database query:
+        # the largest park enroute,
+        # the route's midpoint,
+        # the coordinates of parks along the best route,
+        # the coordinates of all parks within the bounding box of the user's search,
+        # the formatted string of the coordinates of parks along the best route,
+        # the formatted string of compass and radius routing parameters
         route_response = {'largest_park': largest_park, 'midpoint': midpoint, 'route_waypoints_lon_lat': route_waypoints_lon_lat, 'all_waypoints_in_bbox_lon_lat': parks_within_perp_distance_lon_lat, 'route_waypoints_lon_lat_formatted': route_waypoints_lon_lat_formatted, 'compass_and_radius_routing_option_formatted': compass_and_radius_routing_option_formatted}
+        print('route waypoints', route_waypoints_lon_lat)
         return Response(route_response)
 
     def set_park_access_filter(self, access_filter, parks_all_data, parks_open_to_public_data, parks_open_to_private_data):
@@ -279,6 +301,7 @@ class ParksWithinBoundingBox(APIView):
         total_waypoints_dict = {'origin': {'lon_lat': origin_lon_lat, 'size_in_hectares': 0, 'crowflys_distance_and_bearing': (0, 0)}, **parks_within_perp_distance, 'destination': {'lon_lat': destination_lon_lat, 'size_in_hectares': 0, 'crowflys_distance_and_bearing': best_fit_origin_to_destination}}
         return total_waypoints_dict
 
+    # this has been altered and no longer has the logic for the sort
     def sort_parks_by_acreage(self, origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, parks_within_perp_distance):
         # mapbox only allows 25 waypoints including origin and destination so we sort and then slice off the 23 largest parks.
         total_waypoints_dict = self.populate_total_waypoints_dict(origin_lon_lat, destination_lon_lat, best_fit_origin_to_destination, parks_within_perp_distance)

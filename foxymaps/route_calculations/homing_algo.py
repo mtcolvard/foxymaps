@@ -15,6 +15,8 @@ def run_homing_algo(all_waypoints, angle_filter_to_next_park, platonic_width_fac
         waypoints_graph[waypoint_id] = {}
         for each_id in waypoint_ids:
         # from each park, calculate the distance-as-the-crowflys and the bearing to every other park.  also calculate the square root each park's area, to get a sortof ideal ("platonic") estimate of how tall or wide each park is.
+
+        # from each park, calculate the distance-as-the-crowflys to the nearest point in each parks geometry and the bearing to every other park.  also calculate the square root each park's area, to get a sortof ideal ("platonic") estimate of how tall or wide each park is.
             crowflys_distance_bearing_and_platonic_width = crowflys_distance_and_bearing(all_waypoints[waypoint_id]['lon_lat'], all_waypoints[each_id]['lon_lat'], (math.sqrt(all_waypoints[each_id]['size_in_hectares']*10000)*platonic_width_factor))
         # populate each node with the above distance-as-the-crowflys, bearing, estimate of the park's width, and a heuristic 'crowflys-distance minus the platonic-width'.
         # This heuristic guesses how important a park might be. At each point along the journey, instead of targeting the absolute next closest park, the algorithm considers how wide each park might be.
