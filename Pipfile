@@ -6,7 +6,7 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-djangorestframework = "==3.11.1"
+djangorestframework = "==3.11.2"
 beautifulsoup4 = "==4.9.1"
 mapbox = "==0.18.0"
 psycopg2-binary = "==2.8.5"
