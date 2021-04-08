@@ -36,7 +36,7 @@ urllib3 = "==1.25.10"
 gunicorn = "*"
 psycopg2 = "*"
 django-environ = "*"
-Django = "==3.1.1"
+Django = "==3.1.8"
 PyJWT = "==1.7.1"
 CacheControl = "==0.12.6"
 
