@@ -37,7 +37,6 @@
     "bulma": "^0.9.4",
     "html-webpack-link-type-plugin": "^1.1.1",
     "html-webpack-plugin": "^4.5.2",
-    "html-webpack-template": "^6.2.0",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "react-map-gl": "^5.3.19",

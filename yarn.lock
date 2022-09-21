@@ -4819,7 +4819,6 @@ __metadata:
     eslint-utils: ^2.1.0
     html-webpack-link-type-plugin: ^1.1.1
     html-webpack-plugin: ^4.5.2
-    html-webpack-template: ^6.2.0
     node-sass: ^4.14.1
     react: ^16.14.0
     react-dom: ^16.14.0
@@ -5508,15 +5507,6 @@ fsevents@^1.2.7:
   peerDependencies:
     webpack: ^4.0.0 || ^5.0.0
   checksum: 25ca0b341234501c64754ba8f9bb84f978e50f3f90affc199d18d04511cdc2c0c8ef8a975901a0fbcfe5bae32f80e8fd5ef52f1ce3672d3ff5307057ccb5a063
-  languageName: node
-  linkType: hard
-
-"html-webpack-template@npm:^6.2.0":
-  version: 6.2.0
-  resolution: "html-webpack-template@npm:6.2.0"
-  peerDependencies:
-    html-webpack-plugin: 2.x || ^3
-  checksum: f7142d806364f6754e0f0265653d55aadaffc59c5e380cb04a75a4b131a2aa9643d97ce539423d19a8479e6e4be621edfc28cab9aee9fff8fac94108167f46cb
   languageName: node
   linkType: hard
 
