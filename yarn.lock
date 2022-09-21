@@ -2555,12 +2555,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^0.19.2":
-  version: 0.19.2
-  resolution: "axios@npm:0.19.2"
+"axios@npm:^0.27.2":
+  version: 0.27.2
+  resolution: "axios@npm:0.27.2"
   dependencies:
-    follow-redirects: 1.5.10
-  checksum: dcace11a0a25fdf9b3b97fc9d011d23dd9c67cc13d91778080482ddddbbfe731f7410a090b11aa0bbbdf83686c5911ccb4289fd3683b7488c1b0c4d3c882380c
+    follow-redirects: ^1.14.9
+    form-data: ^4.0.0
+  checksum: 38cb7540465fe8c4102850c4368053c21683af85c5fdf0ea619f9628abbcb59415d1e22ebc8a6390d2bbc9b58a9806c874f139767389c862ec9b772235f06854
   languageName: node
   linkType: hard
 
@@ -2982,7 +2983,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"combined-stream@npm:^1.0.6, combined-stream@npm:~1.0.6":
+"combined-stream@npm:^1.0.6, combined-stream@npm:^1.0.8, combined-stream@npm:~1.0.6":
   version: 1.0.8
   resolution: "combined-stream@npm:1.0.8"
   dependencies:
@@ -3142,23 +3143,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"css-loader@npm:5.2.7":
-  version: 5.2.7
-  resolution: "css-loader@npm:5.2.7"
+"css-loader@npm:6.7.1":
+  version: 6.7.1
+  resolution: "css-loader@npm:6.7.1"
   dependencies:
     icss-utils: ^5.1.0
-    loader-utils: ^2.0.0
-    postcss: ^8.2.15
+    postcss: ^8.4.7
     postcss-modules-extract-imports: ^3.0.0
     postcss-modules-local-by-default: ^4.0.0
     postcss-modules-scope: ^3.0.0
     postcss-modules-values: ^4.0.0
-    postcss-value-parser: ^4.1.0
-    schema-utils: ^3.0.0
+    postcss-value-parser: ^4.2.0
     semver: ^7.3.5
   peerDependencies:
-    webpack: ^4.27.0 || ^5.0.0
-  checksum: fb0742b30ac0919f94b99a323bdefe6d48ae46d66c7d966aae59031350532f368f8bba5951fcd268f2e053c5e6e4655551076268e9073ccb58e453f98ae58f8e
+    webpack: ^5.0.0
+  checksum: 170fdbc630a05a43679ef60fa97694766b568dbde37adccc0faafa964fc675f08b976bc68837bb73b61d60240e8d2cbcbf51540fe94ebc9dafc56e7c46ba5527
   languageName: node
   linkType: hard
 
@@ -3213,15 +3212,6 @@ __metadata:
   dependencies:
     ms: 2.0.0
   checksum: d2f51589ca66df60bf36e1fa6e4386b318c3f1e06772280eea5b1ae9fd3d05e9c2b7fd8a7d862457d00853c75b00451aa2d7459b924629ee385287a650f58fe6
-  languageName: node
-  linkType: hard
-
-"debug@npm:=3.1.0":
-  version: 3.1.0
-  resolution: "debug@npm:3.1.0"
-  dependencies:
-    ms: 2.0.0
-  checksum: 0b52718ab957254a5b3ca07fc34543bc778f358620c206a08452251eb7fc193c3ea3505072acbf4350219c14e2d71ceb7bdaa0d3370aa630b50da790458d08b3
   languageName: node
   linkType: hard
 
@@ -3436,7 +3426,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dotenv-defaults@npm:^2.0.1":
+"dotenv-defaults@npm:^2.0.2":
   version: 2.0.2
   resolution: "dotenv-defaults@npm:2.0.2"
   dependencies:
@@ -3445,14 +3435,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dotenv-webpack@npm:6.0.4":
-  version: 6.0.4
-  resolution: "dotenv-webpack@npm:6.0.4"
+"dotenv-webpack@npm:8.0.1":
+  version: 8.0.1
+  resolution: "dotenv-webpack@npm:8.0.1"
   dependencies:
-    dotenv-defaults: ^2.0.1
+    dotenv-defaults: ^2.0.2
   peerDependencies:
-    webpack: ^1 || ^2 || ^3 || ^4 || ^5
-  checksum: 8334ecf9ef808b60617e1a84d37d09510cd1582978d4125a751f8f92b035cdfa48ff71473c739814b9b6fd6dba09582ca88b446901905af92535f1f7139574ff
+    webpack: ^4 || ^5
+  checksum: ee73eda78df90bcf7446763dfe5e518a2054ed6222783856912d2c6a255fdfc041854e125e036ff2603b06fb44f5234713fad5feecb1e66a54fe78a35a98fb87
   languageName: node
   linkType: hard
 
@@ -4041,15 +4031,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:1.5.10":
-  version: 1.5.10
-  resolution: "follow-redirects@npm:1.5.10"
-  dependencies:
-    debug: =3.1.0
-  checksum: 0edc4b74e37e7b88ee716188a8f2a790238877c1d954f00c7b78d560f3bef40061c130536d13bee8e47b4e8e71edf1175a2de2729e51ab8206e4646b2370e484
-  languageName: node
-  linkType: hard
-
 "follow-redirects@npm:^1.0.0":
   version: 1.12.1
   resolution: "follow-redirects@npm:1.12.1"
@@ -4057,10 +4038,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"follow-redirects@npm:^1.14.9":
+  version: 1.15.2
+  resolution: "follow-redirects@npm:1.15.2"
+  peerDependenciesMeta:
+    debug:
+      optional: true
+  checksum: faa66059b66358ba65c234c2f2a37fcec029dc22775f35d9ad6abac56003268baf41e55f9ee645957b32c7d9f62baf1f0b906e68267276f54ec4b4c597c2b190
+  languageName: node
+  linkType: hard
+
 "forever-agent@npm:~0.6.1":
   version: 0.6.1
   resolution: "forever-agent@npm:0.6.1"
   checksum: 766ae6e220f5fe23676bb4c6a99387cec5b7b62ceb99e10923376e27bfea72f3c3aeec2ba5f45f3f7ba65d6616965aa7c20b15002b6860833bb6e394dea546a8
+  languageName: node
+  linkType: hard
+
+"form-data@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "form-data@npm:4.0.0"
+  dependencies:
+    asynckit: ^0.4.0
+    combined-stream: ^1.0.8
+    mime-types: ^2.1.12
+  checksum: 01135bf8675f9d5c61ff18e2e2932f719ca4de964e3be90ef4c36aacfc7b9cb2fceb5eca0b7e0190e3383fe51c5b37f4cb80b62ca06a99aaabfcfd6ac7c9328c
   languageName: node
   linkType: hard
 
@@ -4092,12 +4094,12 @@ __metadata:
     "@fortawesome/fontawesome-svg-core": ^1.2.36
     "@fortawesome/free-solid-svg-icons": ^5.15.4
     "@fortawesome/react-fontawesome": ^0.1.19
-    axios: ^0.19.2
+    axios: ^0.27.2
     babel-eslint: ^10.1.0
     babel-loader: ^8.2.5
     bulma: ^0.9.4
-    css-loader: 5.2.7
-    dotenv-webpack: 6.0.4
+    css-loader: 6.7.1
+    dotenv-webpack: 8.0.1
     eslint: ^7.32.0
     eslint-plugin-react: ^7.31.8
     eslint-utils: ^2.1.0
@@ -4108,8 +4110,8 @@ __metadata:
     react-dom: ^16.14.0
     react-map-gl: ^5.3.19
     react-router-dom: ^5.3.3
-    sass-loader: 10.3.1
-    style-loader: 2.0.0
+    sass-loader: 13.0.2
+    style-loader: 3.3.1
     webpack: latest
     webpack-cli: 4.10.0
     webpack-dev-server: ^4.11.1
@@ -6421,7 +6423,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss@npm:^8.2.15":
+"postcss-value-parser@npm:^4.2.0":
+  version: 4.2.0
+  resolution: "postcss-value-parser@npm:4.2.0"
+  checksum: 819ffab0c9d51cf0acbabf8996dffbfafbafa57afc0e4c98db88b67f2094cb44488758f06e5da95d7036f19556a4a732525e84289a425f4f6fd8e412a9d7442f
+  languageName: node
+  linkType: hard
+
+"postcss@npm:^8.4.7":
   version: 8.4.16
   resolution: "postcss@npm:8.4.16"
   dependencies:
@@ -7138,20 +7147,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sass-loader@npm:10.3.1":
-  version: 10.3.1
-  resolution: "sass-loader@npm:10.3.1"
+"sass-loader@npm:13.0.2":
+  version: 13.0.2
+  resolution: "sass-loader@npm:13.0.2"
   dependencies:
     klona: ^2.0.4
-    loader-utils: ^2.0.0
     neo-async: ^2.6.2
-    schema-utils: ^3.0.0
-    semver: ^7.3.2
   peerDependencies:
     fibers: ">= 3.1.0"
     node-sass: ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0
     sass: ^1.3.0
-    webpack: ^4.36.0 || ^5.0.0
+    sass-embedded: "*"
+    webpack: ^5.0.0
   peerDependenciesMeta:
     fibers:
       optional: true
@@ -7159,7 +7166,9 @@ __metadata:
       optional: true
     sass:
       optional: true
-  checksum: ab73a41a8aae1a8b4ae607b3ab661e23e12629ea2d05904727625b201e238083e37d7686f613ddd459a1f243a1146b93cd10c9a339a4f6d11871e70c914965c4
+    sass-embedded:
+      optional: true
+  checksum: 6306712cc75bd4b4260ce67178778c92110089485f358b5956b6b12aba15a55e5c7287154daaf8b32678891df915b7bcda7356991afe8bf08ca7356ed30eb448
   languageName: node
   linkType: hard
 
@@ -7184,7 +7193,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"schema-utils@npm:^3.0.0, schema-utils@npm:^3.1.0, schema-utils@npm:^3.1.1":
+"schema-utils@npm:^3.1.0, schema-utils@npm:^3.1.1":
   version: 3.1.1
   resolution: "schema-utils@npm:3.1.1"
   dependencies:
@@ -7721,15 +7730,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"style-loader@npm:2.0.0":
-  version: 2.0.0
-  resolution: "style-loader@npm:2.0.0"
-  dependencies:
-    loader-utils: ^2.0.0
-    schema-utils: ^3.0.0
+"style-loader@npm:3.3.1":
+  version: 3.3.1
+  resolution: "style-loader@npm:3.3.1"
   peerDependencies:
-    webpack: ^4.0.0 || ^5.0.0
-  checksum: 21425246a5a8f14d1625a657a3a56f8a323193fa341a71af818a2ed2a429efa2385a328b4381cf2f12c2d0e6380801eb9e0427ed9c3a10ff95c86e383184d632
+    webpack: ^5.0.0
+  checksum: 470feef680f59e2fce4d6601b5c55b88c01ad8d1dd693c528ffd591ff5fd7c01a4eff3bdbe62f26f847d6bd2430c9ab594be23307cfe7a3446ab236683f0d066
   languageName: node
   linkType: hard
 
