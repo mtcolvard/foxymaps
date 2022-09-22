@@ -6,28 +6,47 @@ const Dotenv = require('dotenv-webpack')
 
 module.exports = {
   // Tells the webpack that the front end is coming from the src folder in the front end
+  mode: 'development',
   entry: './src/app.js',
   context: path.resolve(__dirname, 'frontend'),
   output: {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'frontend/dist')
   },
-  devtool: 'source-maps',
+  devtool: 'source-map',
+  // resolve: {
+  //   extensions: ['.js', '.jsx', '.json', '.mjs', '.ts', '.tsx']
+  // },
+  // resolveLoader: {
+  //   modules: ['node_modules'],
+  //   extensions: ['.js', '.jsx', '.json', '.mjs', '.ts', '.tsx'],
+  //   mainFields: ['babel-loader', 'main'],
+  // },
   module: {
     rules: [
-      { test: /\.js$/, loader: 'babel-loader', exclude: /node_modules/ },
-      { test: /\.css$/, loader: ['style-loader', 'css-loader'] },
-      { test: /\.s(a|c)ss$/, loader: ['style-loader', 'css-loader', 'sass-loader'] },
-      { test: /\.woff2?$/, loader: 'file-loader' },
-      { test: /\.(jpg|png|gif)$/, loader: 'file-loader' }
+      { test: /\.m?js$/,
+        resolve: {
+          fullySpecified: false,
+          extensions: ['.js', '.jsx', '.json', '.mjs', '.ts', '.tsx', '...']
+        },
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+        }
+      },
+      { test: /\.css$/, use: [{loader: 'style-loader'}, {loader: 'css-loader'}] },
+      { test: /\.s(a|c)ss$/, use: [{loader: 'style-loader'}, {loader: 'css-loader'}, {loader: 'sass-loader'}] },
+      { test: /\.woff2?$/, type: 'asset/resource' },
+      { test: /\.(jpg|png|gif)$/, type: 'asset/resource' }
     ]
   },
   devServer: {
-    contentBase: path.join(__dirname, 'frontend/src'),
+    static: {
+      directory: path.join(__dirname, 'frontend/src'),
+    },
     hot: true,
     open: true,
     port: 8000,
-    watchContentBase: true,
     proxy: {
       '/api': 'http://localhost:4000'
     },
@@ -45,6 +64,30 @@ module.exports = {
     })
   ]
 }
+
+
+// webpack 4 devserver config
+// devServer: {
+//   contentBase: path.join(__dirname, 'frontend/src'),
+//   hot: true,
+//   open: true,
+//   port: 8000,
+//   watchContentBase: true,
+//   proxy: {
+//     '/api': 'http://localhost:4000'
+//   },
+// webpack 4 modules config
+// module: {
+//   rules: [
+//     { test: /\.(js)$/, exclude: /node_modules/, use: {loader: 'babel-loader'}, resolve: {fullySpecified: false}
+//     },
+//     { test: /\.css$/, use: [{loader: 'style-loader'}, {loader: 'css-loader'}] },
+//     { test: /\.s(a|c)ss$/, use: [{loader: 'style-loader'}, {loader: 'css-loader'}, {loader: 'sass-loader'}] },
+//     { test: /\.woff2?$/, loader: 'file-loader' },
+//     { test: /\.(jpg|png|gif)$/, loader: 'file-loader' }
+//   ]
+// },
+
 
 
 //
