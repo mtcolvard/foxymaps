@@ -55,6 +55,9 @@ module.exports = {
     new Dotenv({
       path: path.resolve(__dirname, './.env'),
       systemvars: true
+      // ,
+      // ignoreStub: true,
+      // prefix: 'process.env.'
     }),
     new webpack.HotModuleReplacementPlugin(),
     new HtmlWebpackPlugin({

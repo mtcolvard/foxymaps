@@ -50,8 +50,8 @@ class Map extends React.Component {
       viewport: {
         longitude: -0.097865,
         latitude: 51.514014,
-        zoom: 11,
-        altitude: 0},
+        zoom: 11
+      },
       geolocateClick: false,
       searchResponseData: {
         type: null,
@@ -116,9 +116,9 @@ class Map extends React.Component {
       longitude: lngLat[0],
       latitude: lngLat[1],
       zoom: 12,
-      transitionDuration: 1000,
+      transitionDuration: 500,
       transitionInterpolator: new FlyToInterpolator({
-        curve: 2.4})
+        curve: 1.414})
     }})
   }
 
@@ -129,7 +129,7 @@ class Map extends React.Component {
         longitude: data.center[0],
         latitude: data.center[1],
         transitionInterpolator: new LinearInterpolator(),
-        transitionDuration: 1000
+        transitionDuration: 500
       }
     })
   }
@@ -435,8 +435,8 @@ class Map extends React.Component {
             latitude: res.data['midpoint'][1],
             zoom: 12,
             transitionInterpolator: new FlyToInterpolator({
-              curve: 2.4}),
-            transitionDuration: 1000
+              curve: 1.414}),
+            transitionDuration: 500
           },
           route_waypoints_lon_lat_formatted: res.data['route_waypoints_lon_lat_formatted'],
           compass_and_radius_routing_option_formatted: res.data['compass_and_radius_routing_option_formatted']

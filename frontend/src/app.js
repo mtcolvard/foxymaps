@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import {HashRouter, Route, Switch} from 'react-router-dom'
+import {BrowserRouter, Routes, Route} from 'react-router-dom'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faArrowLeft, faTimes, faDirections, faLocationArrow, faMapMarkerAlt, faArrowsAltV } from '@fortawesome/free-solid-svg-icons'
 library.add(faArrowLeft, faTimes, faDirections, faLocationArrow, faMapMarkerAlt, faArrowsAltV)
@@ -12,11 +12,11 @@ class App extends React.Component {
 
   render () {
     return(
-      <HashRouter>
-        <Switch>
-          <Route path="/" component={Map} />
-        </Switch>
-      </HashRouter>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Map />} />
+        </Routes>
+      </BrowserRouter>
     )
   }
 }
@@ -26,4 +26,14 @@ ReactDOM.render(
   document.getElementById('root')
 )
 
-// # "serve:frontend": "webpack-dev-server --mode=development"
+// react-router-5 config
+// render () {
+//   return(
+//     <HashRouter>
+//       <Switch>
+//         <Route path="/" component={Map} />
+//       </Switch>
+//     </HashRouter>
+//   )
+// }
+// }
