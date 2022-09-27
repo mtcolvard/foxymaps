@@ -558,8 +558,13 @@ class Map extends React.Component {
               updateParksFromExploreOptions={this.updateParksFromExploreOptions}/>
           }
           <div className="bodyContainer">
-            <div>
-              <h1 className="title">FoxyMaps</h1>
+            <div className="titleHeader">
+              <div>
+                <h1 className="title">FoxyMaps</h1>
+              </div>
+              <div>
+                <h3 className="tagline">The most pleasant route to your destination</h3>
+              </div>
             </div>
             {displayDirectionsSearchBar &&
               <SearchBarDirections
@@ -590,7 +595,7 @@ class Map extends React.Component {
                 onHandleSubmit={this.handleSubmit}
                 loadingSpinner={loadingSpinner}
                 searchFormData={destinationFormData}
-                placeholder='Add destination to plan route'
+                placeholder='Search here'
                 name='destinationFormData'/>
             }
             {originLonLat && destinationLonLat &&

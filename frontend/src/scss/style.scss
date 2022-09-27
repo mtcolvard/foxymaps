@@ -205,17 +205,32 @@ input {
   padding-left: 0.5em;
 }
 
+.titleHeader {
+  background-image: linear-gradient(rgba(160, 212, 142, .5), rgba(160, 212, 142, .9));
+  // background-color: rgba(160, 212, 142, .7);
+  border-radius:0.15em;
+}
 .title {
   padding:1px;
-  padding: 6px 16px 7px;
+  padding: 6px 16px 0px;
   // background-color: rgba(229, 221, 186, .5);
   // background-color: rgba(121, 207, 238, 1);
   // background-color: rgba(183, 228, 161, .6);
-  background-color: rgba(160, 212, 142, .5);
-  border-radius:0.15em;
+
   font-family: 'Montserrat', sans-serif;
   font-style: italic;
   font-weight: 400;
+}
+
+.tagline {
+  padding:1px;
+  padding: 0px 0px 7px 16px;
+  // background-color: rgba(229, 221, 186, .5);
+  // background-color: rgba(121, 207, 238, 1);
+  // background-color: rgba(183, 228, 161, .6);
+  font-family: 'Montserrat', sans-serif;
+  // font-style: italic;
+  font-weight: 500;
 }
 
 .mapcontainer {
