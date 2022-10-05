@@ -200,6 +200,7 @@ class Map extends React.Component {
     console.log('handleChange', this.state[name])
   }
 
+//CONSIDER USING A DEBOUNCE FUNCTION TO USE MAPBOX/GEOCODER'S AUTOMATIC SEARCH COMPLETION. THIS WAY YOU COULD ADD THE FEATURE BUT WITH LESS EXPENSE
   handleSubmit(name) {
     const searchName = `is${name}SearchTriggered`
     this.setState({loadingSpinner: true, displayOriginSearchOptions: false})
@@ -324,12 +325,12 @@ class Map extends React.Component {
     const tempOriginFormData = this.state.originFormData
     const tempOriginData = this.state.originData
     this.setState({
-    originLonLat: this.state.destinationLonLat,
-    originFormData: this.state.destinationFormData,
-    originData: this.state.destinationData,
-    destinationLonLat: tempOriginLonLat,
-    destinationFormData: tempOriginFormData,
-    destinationData: tempOriginData,
+      originLonLat: this.state.destinationLonLat,
+      originFormData: this.state.destinationFormData,
+      originData: this.state.destinationData,
+      destinationLonLat: tempOriginLonLat,
+      destinationFormData: tempOriginFormData,
+      destinationData: tempOriginData,
     })
   }
 
@@ -531,14 +532,18 @@ class Map extends React.Component {
                 auto={geolocateClick}
               />
             </div>
-            <div
-              style={ {position: 'absolute', right: 0, bottom: 200, margin: 10} }>
+            <div>
               <NavigationControl
-                visualizePitch={true}/>
+                visualizePitch={true}
+                style={ {position: 'absolute', right: 0, bottom: 200, margin: 10} }
+              />
             </div>
-            <div
-              style={ {position: 'absolute', bottom: 35, left: 10} }>
-              <ScaleControl maxWidth={100} unit={'metric'}/>
+            <div>
+              <ScaleControl
+                maxWidth={100}
+                unit={'metric'}
+                style={ {position: 'absolute', bottom: 35, left: 10} }
+              />
             </div>
           </ReactMapGl>
 
@@ -563,7 +568,7 @@ class Map extends React.Component {
                 <h1 className="title">FoxyMaps</h1>
               </div>
               <div>
-                <h3 className="tagline">The most pleasant route to your destination</h3>
+                <h3 className="tagline">Walking directions, naturally</h3>
               </div>
             </div>
             {displayDirectionsSearchBar &&
