@@ -12,14 +12,15 @@ module.exports = {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'frontend/dist')
   },
-  devtool: 'source-maps',
+  devtool: 'source-map',
   module: {
     rules: [
-      { test: /\.js$/, loader: 'babel-loader', exclude: /node_modules/ },
-      { test: /\.css$/, loader: ['style-loader', 'css-loader'] },
-      { test: /\.s(a|c)ss$/, loader: ['style-loader', 'css-loader', 'sass-loader'] },
-      { test: /\.woff2?$/, loader: 'file-loader' },
-      { test: /\.(jpg|png|gif)$/, loader: 'file-loader' }
+    //loader: in webpack4 has been changed to use: in webpack5
+      { test: /\.js$/, use: 'babel-loader', exclude: /node_modules/ },
+      { test: /\.css$/, use: ['style-loader', 'css-loader'] },
+      { test: /\.s(a|c)ss$/, use: ['style-loader', 'css-loader', 'sass-loader'] },
+      { test: /\.woff2?$/, use: 'file-loader' },
+      { test: /\.(jpg|png|gif)$/, use: 'file-loader' }
     ]
   },
   devServer: {
