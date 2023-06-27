@@ -1,4 +1,6 @@
-/.yarn/*
+.pnp.*
+.yarn/*
+!/.yarn/patches
 !/.yarn/releases
 !/.yarn/plugins
 !/.yarn/sdks
@@ -8,8 +10,7 @@ staticfiles
 db.sqlite3
 # Swap the comments on the following lines if you don't wish to use zero-installs
 # Documentation here: https://yarnpkg.com/features/zero-installs
-!/.yarn/cache
-#/.pnp.*
+# !/.yarn/cache
 
 foxymaps/static/
 project/setting/base.py
