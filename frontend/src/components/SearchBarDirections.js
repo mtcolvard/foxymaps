@@ -49,7 +49,7 @@ export default class SearchBarDirections extends React.Component {
                     readOnly
                     className="input is-radiusless"
                     type="text"
-                    placeholder="Choose starting point"
+                    placeholder="Enter starting point"
                     value={origin}
                     onClick={this.triggerOriginSearchMenu}
                   />
@@ -59,7 +59,7 @@ export default class SearchBarDirections extends React.Component {
                     readOnly
                     className="input is-radiusless"
                     type="text"
-                    placeholder="Choose destination"
+                    placeholder="Enter destination"
                     value={destination}
                     onClick={this.triggerDestinationSearchMenu}
                   />

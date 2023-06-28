@@ -53,7 +53,7 @@ class Map extends React.Component {
         longitude: -0.097865,
         latitude: 51.514014,
         zoom: 11,
-        altitude: 0,
+        altitude: 0.75,
       },
       geolocateClick: false,
       searchResponseData: {
@@ -114,6 +114,7 @@ class Map extends React.Component {
     // this.getWalkingRoute = this.getWalkingRoute.bind(this)
   }
 
+  
   handleMapClick({lngLat}) {
     this.setState({viewport: {
       longitude: lngLat[0],
@@ -494,7 +495,8 @@ class Map extends React.Component {
 
   render () {
     const {viewport, originFormData, destinationFormData, originData, destinationData, displayDirectionsSearchBar, displayOriginSearchOptions, displayOriginSearchBar, displayDestinationSearchBar, displayBottomDestinationData, searchResponseData, isSearchTriggered, isdestinationFormDataSearchTriggered, isoriginFormDataSearchTriggered, routeGeometry, originLonLat, destinationLonLat, routeLargestPark, isRouteSelected, geolocateClick, loadingSpinner, isMapboxSearching, routePins, allParkPins, displayCommuteVsExplore, publicButton, publicPrivateButton, privateButton, parkAccessFilter, toggleExplore, toggleRecalculate, sizeFormData, ramblingTolerance, angleFilter} = this.state
-    const directionsLayer = {routeGeometry}
+    const directionsLayer = { routeGeometry }
+    console.log(viewport)
     return (
       <div>
         <div className="mapcontainer">
@@ -524,7 +526,7 @@ class Map extends React.Component {
             }
             <div>
               <GeolocateControl
-                style={ {position: 'absolute', bottom: 300, right: 30, margin: 10} }
+                style={ {position: 'absolute', bottom: 300, right: 0, margin: 10} }
                 positionOptions={{enableHighAccuracy: true, timeout: 6000}}
                 trackUserLocation={true}
                 showAccuracyCircle={true}
@@ -535,7 +537,7 @@ class Map extends React.Component {
               />
             </div>
             <div
-              style={ {position: 'absolute', right: 30, bottom: 200, margin: 10} }>
+              style={ {position: 'absolute', right: 0, bottom: 200, margin: 10} }>
               <NavigationControl
                 visualizePitch={true}/>
             </div>
@@ -582,7 +584,7 @@ class Map extends React.Component {
                 onHandleSubmit={this.handleSubmit}
                 loadingSpinner={loadingSpinner}
                 searchFormData={originFormData}
-                placeholder='Search'
+                placeholder='Enter starting point'
                 name='originFormData'/>
             }
             {displayDestinationSearchBar &&
@@ -593,7 +595,7 @@ class Map extends React.Component {
                 onHandleSubmit={this.handleSubmit}
                 loadingSpinner={loadingSpinner}
                 searchFormData={destinationFormData}
-                placeholder='Add destination to plan route'
+                placeholder='Find the scenic route to your destination'
                 name='destinationFormData'/>
             }
             {originLonLat && destinationLonLat &&

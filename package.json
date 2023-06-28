@@ -36,10 +36,10 @@
     "bulma": "^0.9.4",
     "html-webpack-link-type-plugin": "^1.1.1",
     "html-webpack-plugin": "^4.5.2",
-    "react": "16.13.1",
-    "react-dom": "16.13.1",
-    "react-map-gl": "5.3.21",
-    "react-router-dom": "^5.3.4",
-    "sass": "^1.63.4"
+    "react": "16.14.0",
+    "react-dom": "16.14.0",
+    "react-map-gl": "5.2.12",
+    "react-router-dom": "5.2.1",
+    "sass": "^1.63.6"
   }
 }
